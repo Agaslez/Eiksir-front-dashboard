@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform } from "framer-motion";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { COCKTAILS, GALLERY_IMAGES, OFFERS } from "./lib/content";
 
 const fadeInUp = {
@@ -72,7 +72,7 @@ function Navigation() {
       animate={{ y: 0 }}
       transition={{ duration: 0.8 }}
     >
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between">
           <a href="#" className="group flex items-center">
             <LogoSVG />
@@ -217,11 +217,7 @@ function Stats() {
           viewport={{ once: true }}
         >
           {stats.map((stat, idx) => (
-            <motion.div
-              key={idx}
-              className="text-center"
-              variants={fadeInUp}
-            >
+            <motion.div key={idx} className="text-center" variants={fadeInUp}>
               <div className="font-playfair text-4xl md:text-5xl font-bold bg-gradient-to-r from-amber-200 to-yellow-400 bg-clip-text text-transparent mb-2">
                 {stat.value}
               </div>
@@ -340,13 +336,13 @@ function Menu() {
 
 function Pricing() {
   return (
-    <section id="oferta" className="py-32 bg-black relative overflow-hidden">
+    <section id="oferta" className="pt-40 pb-32 bg-black relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-900/10 via-transparent to-transparent" />
 
-      <div className="container mx-auto px-6 relative">
+      <div className="relative container mx-auto px-4 md:px-6">
         <motion.div
-          className="text-center mb-20"
+          className="text-center mb-12 md:mb-16"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -354,18 +350,23 @@ function Pricing() {
           <p className="text-amber-400 uppercase tracking-[0.3em] text-sm mb-4">
             Pakiety
           </p>
-          <h2 className="font-playfair text-5xl md:text-6xl font-bold text-white mb-6">
+          <h2 className="font-playfair text-5xl md:text-6xl font-bold text-white mb-4 md:mb-6">
             Wybierz swój pakiet
           </h2>
-          <div className="w-20 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto" />
+          <p className="text-white/50 text-sm md:text-base max-w-2xl mx-auto">
+            Od kameralnych przyjęć po duże wesela i eventy firmowe – wybierz
+            pakiet najbliższy Twojej imprezie, a szczegóły dopracujemy
+            indywidualnie.
+          </p>
+          <div className="w-20 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto mt-6" />
         </motion.div>
 
-        <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8 md:gap-10 mt-10">
           {Object.values(OFFERS).map((offer, idx) => (
             <motion.div
               key={offer.id}
               className={`relative group ${
-                offer.popular ? "lg:-mt-4 lg:mb-4" : ""
+                offer.popular ? "lg:-mt-2 lg:mb-2" : ""
               }`}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -373,8 +374,8 @@ function Pricing() {
               transition={{ delay: idx * 0.15 }}
             >
               {offer.popular && (
-                <div className="absolute -top-4 left-0 right-0 flex justify-center">
-                  <span className="px-6 py-2 bg-gradient-to-r from-amber-400 to-yellow-500 text-black text-xs font-bold uppercase tracking-wider">
+                <div className="absolute -top-3 left-0 right-0 flex justify-center pointer-events-none">
+                  <span className="px-6 py-2 bg-gradient-to-r from-amber-400 to-yellow-500 text-black text-xs font-bold uppercase tracking-wider shadow-md">
                     Najpopularniejszy
                   </span>
                 </div>
@@ -387,7 +388,7 @@ function Pricing() {
                     : "border-white/5 hover:border-white/20"
                 }`}
               >
-                <div className="p-8 md:p-10">
+                <div className="p-8 md:p-10 pt-10 md:pt-12">
                   <h3 className="font-playfair text-2xl font-bold text-white mb-3">
                     {offer.name}
                   </h3>
@@ -447,129 +448,163 @@ function Pricing() {
   );
 }
 
-/* === CALCULATOR – NOWA SEKCJA === */
+/* === CALCULATOR – SEKCJA WYLICZEŃ === */
 function Calculator() {
-  const offersArray = Object.values(OFFERS);
+  const [selectedOfferId, setSelectedOfferId] =
+    useState<keyof typeof OFFERS>("family"); // start np. od Family & Seniors
+  const [guests, setGuests] = useState(50);
+  const [addons, setAddons] = useState({
+    fountain: false,
+    keg: false,
+    lemonade: false,
+  });
 
-  // 👉 TUTAJ BĘDĄ TWOJE „PRAWDZIWE” ZAŁOŻENIA BIZNESOWE
-  const DEFAULT_BASE_GUESTS = 60;          // referencyjna liczba gości
-  const DEFAULT_BASE_HOURS = 6;            // referencyjna liczba godzin
-  const DEFAULT_DRINKS_PER_PERSON = 4;     // ile koktajli na osobę
-  const DEFAULT_SHOTS_PER_PERSON_BASIC = 0.5;
-  const DEFAULT_SHOTS_PER_PERSON_PREMIUM = 1.5;
+  const offer = OFFERS[selectedOfferId];
+  const promoDiscount = 0.2; // -20%
 
-  const [selectedOfferId, setSelectedOfferId] = useState(
-    offersArray[0]?.id,
+  const isKidsPackage = selectedOfferId === "kids";
+
+  // Jeśli przełączymy na Kids Party – wyłącz KEG piwa
+  useEffect(() => {
+    if (isKidsPackage && addons.keg) {
+      setAddons((prev) => ({ ...prev, keg: false }));
+    }
+  }, [isKidsPackage, addons.keg]);
+
+  // --- ADD-ONY ZALEŻNE OD LICZBY GOŚCI ---
+
+  const fountainCost = addons.fountain
+    ? (() => {
+        const perGuest = 10;
+        const min = 600;
+        const max = 1200;
+        const value = guests * perGuest;
+        return Math.min(max, Math.max(min, value));
+      })()
+    : 0;
+
+  const kegCost = addons.keg
+    ? (() => {
+        const pricePerKeg = 550;
+        const guestsPerKeg = 50;
+        const kegs = Math.max(1, Math.ceil(guests / guestsPerKeg));
+        return pricePerKeg * kegs;
+      })()
+    : 0;
+
+  const lemonadeCost = addons.lemonade
+    ? (() => {
+        const base = 250;
+        const blockGuests = 60;
+        const blocks = Math.max(1, Math.ceil(guests / blockGuests));
+        return base * blocks;
+      })()
+    : 0;
+
+  const addonsPrice = fountainCost + kegCost + lemonadeCost;
+
+  // --- CENA PAKIETU ---
+
+  const baseServicePrice = offer.price;
+  const totalBeforeDiscount = baseServicePrice + addonsPrice;
+  const totalAfterDiscount = Math.round(
+    totalBeforeDiscount * (1 - promoDiscount)
   );
-  const [guests, setGuests] = useState(60);
-  const [hours, setHours] = useState(6);
-  const [extras, setExtras] = useState<string[]>([]);
 
-  const EXTRAS = [
-    { id: "choco_fountain", label: "Fontanna czekolady", price: 600 },
-    { id: "beer_keg", label: "KEG piwa 30L z podajnikiem", price: 550 },
-    { id: "lemonade_dispenser", label: "Dystrybutor lemoniady 2×8L", price: 250 },
-  ];
+  const pricePerGuest = guests
+    ? Math.round((totalAfterDiscount / guests) * 100) / 100
+    : 0;
 
-  const selectedOffer =
-    offersArray.find((o) => o.id === selectedOfferId) ?? offersArray[0];
+  const pricePerHour = offer.hours
+    ? Math.round((totalAfterDiscount / offer.hours) * 100) / 100
+    : 0;
 
-  // --- OBLICZENIA CENY ---
-  const baseGuests = DEFAULT_BASE_GUESTS;
-  const baseHours = DEFAULT_BASE_HOURS;
+  // --- SZACOWANA LICZBA PORCJI ---
 
-  const hoursFactor = hours / baseHours;
-  const guestsFactor = guests / baseGuests;
+  const estimatedCocktails = Math.round(guests * offer.drinksPerGuest);
+  const estimatedShots = isKidsPackage
+    ? 0
+    : Math.round(guests * (offer.shotsPerGuest ?? 0.5));
 
-  const packageBasePrice = selectedOffer?.price ?? 0;
-  const packagePrice = packageBasePrice * guestsFactor * hoursFactor;
+  // --- LISTA ZAKUPÓW (skalowana z wzorca dla 50 osób) ---
 
-  const extrasTotal = EXTRAS.filter((e) => extras.includes(e.id)).reduce(
-    (sum, e) => sum + e.price,
-    0,
-  );
+  const scale50 = guests / 50;
 
-  const totalPrice = Math.round(packagePrice + extrasTotal);
-  const pricePerGuest = guests > 0 ? Math.round(totalPrice / guests) : 0;
-  const pricePerHour = hours > 0 ? Math.round(totalPrice / hours) : 0;
+  const vodkaRumGinBottles = Math.max(1, Math.ceil(5 * scale50));
+  const liqueurBottles = Math.max(1, Math.ceil(2 * scale50));
+  const aperolBottles = Math.max(1, Math.ceil(2 * scale50));
+  const proseccoBottles = Math.max(1, Math.ceil(5 * scale50));
+  const syrupsLiters = Math.max(1, Math.ceil(12 * scale50));
+  const iceKg = Math.max(4, Math.ceil(8 * scale50));
 
-  // --- ILOŚĆ PORCJI / LISTA ZAKUPÓW ---
-  const drinksPerPerson = DEFAULT_DRINKS_PER_PERSON;
-  const shotsPerPerson =
-    selectedOffer?.id === "premium" || selectedOffer?.id === "exclusive"
-      ? DEFAULT_SHOTS_PER_PERSON_PREMIUM
-      : DEFAULT_SHOTS_PER_PERSON_BASIC;
-
-  const totalDrinks = Math.ceil(guests * drinksPerPerson);
-  const totalShots = Math.ceil(guests * shotsPerPerson);
-
-  // Założenie: z 0.7L ~12 drinków
-  const bottlesSpirit = Math.ceil((totalDrinks * 0.7) / 12);
-  const litersMixers = Math.ceil(totalDrinks * 0.15);
-  const iceKg = Math.ceil(totalDrinks * 0.1);
+  // wariant bezalkoholowy – owoce / dodatki do fontanny
+  const fruitsKg = Math.max(2, Math.ceil(4 * scale50)); // owoce do dekoracji / fontanny
+  const snacksKg = Math.max(1, Math.ceil(2 * scale50)); // pianki, biszkopty itd.
 
   return (
     <section
       id="kalkulator"
-      className="py-32 bg-gradient-to-b from-neutral-950 to-black"
+      className="bg-black py-24 border-t border-white/10"
     >
-      <div className="container mx-auto px-6">
-        <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="mb-12 text-center">
           <p className="text-amber-400 uppercase tracking-[0.3em] text-sm mb-4">
-            Kalkulator
+            Szybka wycena & lista zakupów
           </p>
-          <h2 className="font-playfair text-5xl md:text-6xl font-bold text-white mb-6">
-            Szybka wycena &amp; lista zakupów
+          <h2 className="font-playfair text-4xl md:text-5xl font-bold text-white mb-3">
+            Wybierz pakiet, liczbę gości i dodatki
           </h2>
-          <div className="w-20 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto" />
-          <p className="mt-4 text-sm text-white/60 max-w-2xl mx-auto">
-            Wybierz pakiet, liczbę gości i dodatki – zobacz orientacyjną cenę oraz
-            bezpieczną listę zakupów. Później dopracujemy parametry dokładnie
-            pod Twoje stawki.
+          <p className="text-white/60 text-sm md:text-base">
+            Zobacz orientacyjną cenę oraz bezpieczną listę zakupów. Później
+            dopracujemy parametry dokładnie pod Twoje stawki.
           </p>
-        </motion.div>
+        </div>
 
-        <div className="grid lg:grid-cols-2 gap-10 max-w-6xl mx-auto">
-          {/* FORMULARZ */}
-          <div className="bg-gradient-to-b from-neutral-900 to-neutral-950 border border-white/5 p-8 md:p-10">
-            {/* Pakiet */}
-            <div className="mb-8">
-              <p className="text-white/40 text-xs uppercase tracking-wider mb-3">
+        <div className="grid lg:grid-cols-2 gap-10 items-start">
+          {/* LEWA KOLUMNA – wybór pakietu, gości, dodatków */}
+          <div className="bg-neutral-950 border border-white/10 p-6 md:p-8">
+            {/* Pakiety */}
+            <div className="mb-6">
+              <p className="text-white/60 text-xs uppercase tracking-wider mb-3">
                 Pakiet
               </p>
-              <div className="grid md:grid-cols-3 gap-3">
-                {offersArray.map((offer) => (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {Object.values(OFFERS).map((o) => (
                   <button
-                    key={offer.id}
+                    key={o.id}
                     type="button"
-                    onClick={() => setSelectedOfferId(offer.id)}
-                    className={`text-left border px-4 py-3 text-sm transition-all ${
-                      selectedOfferId === offer.id
-                        ? "border-amber-400 bg-amber-400/10 text-white"
-                        : "border-white/15 text-white/70 hover:border-white/40"
+                    onClick={() =>
+                      setSelectedOfferId(o.id as keyof typeof OFFERS)
+                    }
+                    className={`text-left border px-3 py-3 text-xs md:text-sm uppercase tracking-wider ${
+                      selectedOfferId === o.id
+                        ? "border-amber-400 bg-amber-400/10 text-amber-200"
+                        : "border-white/20 text-white/70 hover:border-amber-400/60"
                     }`}
                   >
-                    <div className="font-semibold">{offer.name}</div>
-                    <div className="text-xs text-white/50">
-                      od {offer.price.toLocaleString("pl-PL")} zł
+                    <div className="font-semibold">{o.name}</div>
+                    <div className="text-[0.7rem] text-white/50">
+                      od {o.price.toLocaleString("pl-PL")} zł
                     </div>
                   </button>
                 ))}
               </div>
+              <p className="mt-2 text-[0.7rem] text-white/40">
+                Zakres rekomendowany dla wybranego pakietu:{" "}
+                <span className="font-semibold">
+                  {offer.minGuests}–{offer.maxGuests} osób
+                </span>
+                .
+              </p>
             </div>
 
             {/* Liczba gości */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-white/40 text-xs uppercase tracking-wider">
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-white/60 text-xs uppercase tracking-wider">
                   Liczba gości
                 </p>
-                <span className="text-white text-sm font-medium">
+                <span className="text-white text-sm font-semibold">
                   {guests} osób
                 </span>
               </div>
@@ -577,145 +612,265 @@ function Calculator() {
                 type="range"
                 min={20}
                 max={150}
-                step={5}
                 value={guests}
                 onChange={(e) => setGuests(Number(e.target.value))}
-                className="w-full accent-amber-400"
+                className="w-full"
               />
               <div className="flex justify-between text-[0.7rem] text-white/40 mt-1">
                 <span>20</span>
                 <span>80</span>
                 <span>150</span>
               </div>
+              {guests < offer.minGuests && (
+                <p className="mt-2 text-[0.7rem] text-amber-300">
+                  Dla takiej liczby osób obowiązuje nadal{" "}
+                  <b>minimalna cena pakietu</b>{" "}
+                  ({offer.price.toLocaleString("pl-PL")} zł).
+                </p>
+              )}
             </div>
 
-            {/* Godziny */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-white/40 text-xs uppercase tracking-wider">
-                  Godziny pracy baru
-                </p>
-                <span className="text-white text-sm font-medium">
-                  {hours} h
-                </span>
-              </div>
-              <select
-                value={hours}
-                onChange={(e) => setHours(Number(e.target.value))}
-                className="w-full bg-neutral-900 border border-white/20 text-white text-sm px-3 py-2 focus:outline-none focus:border-amber-400"
-              >
-                <option value={4}>4 godziny</option>
-                <option value={6}>6 godzin</option>
-                <option value={8}>8 godzin</option>
-              </select>
+            {/* Godziny pracy baru */}
+            <div className="mb-6">
+              <p className="text-white/60 text-xs uppercase tracking-wider mb-1">
+                Godziny pracy baru
+              </p>
+              <p className="text-white text-sm">
+                {offer.hours} godz. (dla tego pakietu)
+              </p>
             </div>
 
             {/* Dodatki */}
             <div>
-              <p className="text-white/40 text-xs uppercase tracking-wider mb-3">
+              <p className="text-white/60 text-xs uppercase tracking-wider mb-3">
                 Dodatki
               </p>
-              <div className="space-y-3">
-                {EXTRAS.map((extra) => {
-                  const checked = extras.includes(extra.id);
-                  return (
-                    <label
-                      key={extra.id}
-                      className="flex items-center justify-between gap-3 text-sm cursor-pointer"
-                    >
-                      <span className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => {
-                            setExtras((prev) =>
-                              checked
-                                ? prev.filter((id) => id !== extra.id)
-                                : [...prev, extra.id],
-                            );
-                          }}
-                          className="accent-amber-400"
-                        />
-                        <span className="text-white/80">{extra.label}</span>
+              <div className="space-y-2 text-sm text-white/80">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={addons.fountain}
+                    onChange={(e) =>
+                      setAddons((prev) => ({
+                        ...prev,
+                        fountain: e.target.checked,
+                      }))
+                    }
+                  />
+                  <span>
+                    Fontanna czekolady{" "}
+                    {addons.fountain && (
+                      <span className="text-amber-300">
+                        (+{fountainCost.toLocaleString("pl-PL")} zł)
                       </span>
-                      <span className="text-white/50 text-xs">
-                        + {extra.price.toLocaleString("pl-PL")} zł
+                    )}
+                  </span>
+                </label>
+
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={addons.keg}
+                    disabled={isKidsPackage}
+                    onChange={(e) =>
+                      setAddons((prev) => ({
+                        ...prev,
+                        keg: e.target.checked,
+                      }))
+                    }
+                  />
+                  <span className={isKidsPackage ? "text-white/40" : ""}>
+                    KEG piwa 30L z podajnikiem{" "}
+                    {isKidsPackage && (
+                      <span className="ml-1 text-[0.7rem] text-amber-300">
+                        (niedostępne w pakiecie Kids Party 0%)
                       </span>
-                    </label>
-                  );
-                })}
+                    )}
+                    {!isKidsPackage && addons.keg && (
+                      <span className="text-amber-300 ml-1">
+                        (+{kegCost.toLocaleString("pl-PL")} zł)
+                      </span>
+                    )}
+                  </span>
+                </label>
+
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={addons.lemonade}
+                    onChange={(e) =>
+                      setAddons((prev) => ({
+                        ...prev,
+                        lemonade: e.target.checked,
+                      }))
+                    }
+                  />
+                  <span>
+                    Dystrybutor lemoniady 2×12L, różne smaki{" "}
+                    {addons.lemonade && (
+                      <span className="text-amber-300">
+                        (+{lemonadeCost.toLocaleString("pl-PL")} zł)
+                      </span>
+                    )}
+                  </span>
+                </label>
               </div>
             </div>
           </div>
 
-          {/* PODSUMOWANIE */}
-          <div className="bg-gradient-to-b from-neutral-900 to-neutral-950 border border-amber-400/40 p-8 md:p-10">
-            <h3 className="font-playfair text-2xl font-bold text-white mb-6">
+          {/* PRAWA KOLUMNA – podsumowanie + lista zakupów */}
+          <div className="bg-neutral-950 border border-amber-400/40 p-6 md:p-8">
+            <h3 className="font-playfair text-2xl font-bold text-amber-200 mb-4">
               Podsumowanie wyceny
             </h3>
 
-            <div className="mb-6">
-              <p className="text-white/50 text-xs uppercase tracking-wider mb-2">
-                Szacunkowa cena pakietu + dodatki
+            <div className="mb-4">
+              <p className="text-xs text-white/60 mb-1 uppercase tracking-wider">
+                Szacunkowa cena pakietu + dodatki (z rabatem −20%)
               </p>
-              <div className="flex flex-wrap items-baseline gap-4">
-                <div className="flex items-baseline gap-3">
-                  <span className="font-playfair text-5xl font-bold bg-gradient-to-r from-amber-200 to-yellow-400 bg-clip-text text-transparent">
-                    {totalPrice.toLocaleString("pl-PL")}
-                  </span>
-                  <span className="text-white/50 text-sm">PLN brutto*</span>
-                </div>
-                <div className="flex flex-col text-xs text-white/60 gap-1">
-                  <span>ok. {pricePerGuest.toLocaleString("pl-PL")} zł / osobę</span>
-                  <span>ok. {pricePerHour.toLocaleString("pl-PL")} zł / godzinę baru</span>
-                </div>
+              <div className="flex items-baseline gap-2">
+                <span className="font-playfair text-5xl font-bold text-amber-300">
+                  {totalAfterDiscount.toLocaleString("pl-PL")}
+                </span>
+                <span className="text-white/60 text-sm">PLN brutto*</span>
               </div>
-              <p className="text-white/40 text-xs mt-2">
+              <p className="text-[0.75rem] text-white/50 mt-1">
                 *Kwota orientacyjna – dokładną wycenę potwierdzimy po kontakcie
                 i doprecyzowaniu szczegółów.
               </p>
             </div>
 
-            <div className="mb-6 border-t border-white/10 pt-6">
-              <p className="text-white/50 text-xs uppercase tracking-wider mb-3">
+            {/* SZACOWANE PORCJE */}
+            <div className="border-t border-white/10 pt-4 mt-4 text-sm text-white/80 space-y-3">
+              <p className="font-semibold uppercase text-xs tracking-wider text-white/60">
                 Szacowana liczba serwowanych pozycji
               </p>
-              <ul className="space-y-1 text-sm text-white/80">
-                <li>• Koktajle: ok. {totalDrinks} porcji</li>
-                <li>• Shoty: ok. {totalShots} porcji</li>
-              </ul>
-              <p className="text-white/40 text-xs mt-2">
-                Założenie kalkulacji: {drinksPerPerson} koktajle / osobę,
-                {` `}
-                {shotsPerPerson.toString().replace(".", ",")} shotu / osobę
-                (dla tego pakietu).
-              </p>
+
+              {isKidsPackage ? (
+                <>
+                  <p>
+                    • Mocktaile / lemoniady: ok.{" "}
+                    <span className="font-semibold">
+                      {estimatedCocktails} porcji
+                    </span>
+                  </p>
+                  <p>
+                    • Shoty:{" "}
+                    <span className="font-semibold">0 porcji</span>
+                  </p>
+                  <p className="text-[0.75rem] text-white/50">
+                    Założenie kalkulacji: napoje bezalkoholowe (mocktaile,
+                    lemoniady, napoje bąbelkowe).{" "}
+                    <b>Brak alkoholu w pakiecie Kids Party 0%.</b>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>
+                    • Koktajle: ok.{" "}
+                    <span className="font-semibold">
+                      {estimatedCocktails} porcji
+                    </span>
+                  </p>
+                  <p>
+                    • Shoty: ok.{" "}
+                    <span className="font-semibold">
+                      {estimatedShots} porcji
+                    </span>
+                  </p>
+                  <p className="text-[0.75rem] text-white/50">
+                    Założenie kalkulacji: {offer.drinksPerGuest} koktajlu /
+                    osobę oraz {offer.shotsPerGuest ?? 0.5} shota / osobę (dla
+                    tego pakietu).
+                  </p>
+                </>
+              )}
             </div>
 
-            <div className="border-t border-white/10 pt-6">
-              <p className="text-white/50 text-xs uppercase tracking-wider mb-3">
-                Lista zakupów (alkohol &amp; dodatki)
+            {/* LISTA ZAKUPÓW */}
+            <div className="border-t border-white/10 pt-4 mt-4 text-sm text-white/80 space-y-2">
+              <p className="font-semibold uppercase text-xs tracking-wider text-white/60">
+                Lista zakupów (alkohol + dodatki) – orientacyjnie
               </p>
-              <ul className="space-y-1 text-sm text-white/80">
-                <li>• Wódka / rum / gin: ok. {bottlesSpirit} × 0,7 L</li>
-                <li>• Soki / mixery / syropy: ok. {litersMixers} L łącznie</li>
-                <li>• Lód kostkowany / kruszony: ok. {iceKg} kg</li>
-                {extras.includes("beer_keg") && (
-                  <li>• KEG piwa 30 L + sprzęt do nalewania</li>
-                )}
-                {extras.includes("choco_fountain") && (
-                  <li>• Czekolada kuwertura + owoce / przekąski do fontanny</li>
-                )}
-                {extras.includes("lemonade_dispenser") && (
-                  <li>• Woda, cytrusy, mięta, cukier / syrop do lemoniady</li>
-                )}
-              </ul>
-            </div>
 
-            <p className="mt-6 text-white/40 text-xs">
-              Po wysłaniu formularza kontaktowego możemy przesłać Ci tę listę
-              w formie PDF – gotową do wydruku lub wysłania do hurtowni.
-            </p>
+              {isKidsPackage ? (
+                <>
+                  <p>
+                    • Soki / miksery / syropy:{" "}
+                    <span className="font-semibold">
+                      ok. {syrupsLiters} L łącznie
+                    </span>
+                  </p>
+                  <p>
+                    • Owoce do dekoracji / fontanny:{" "}
+                    <span className="font-semibold">
+                      ok. {fruitsKg} kg
+                    </span>
+                  </p>
+                  <p>
+                    • Dodatki do fontanny (pianki, biszkopty itp.):{" "}
+                    <span className="font-semibold">
+                      ok. {snacksKg} kg
+                    </span>
+                  </p>
+                  <p>
+                    • Lód kostkowany / kruszony:{" "}
+                    <span className="font-semibold">
+                      ok. {iceKg} kg
+                    </span>
+                  </p>
+                  <p className="text-[0.75rem] text-white/50 mt-2">
+                    Zestaw wyliczony dla imprezy bez alkoholu – idealny na
+                    przyjęcia dziecięce. Po kontakcie dopasujemy smaki i
+                    dokładny zestaw produktów.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>
+                    • Wódka / rum / gin:{" "}
+                    <span className="font-semibold">
+                      ok. {vodkaRumGinBottles}× 0,7 L
+                    </span>
+                  </p>
+                  <p>
+                    • Likier (brzoskwinia / inne):{" "}
+                    <span className="font-semibold">
+                      ok. {liqueurBottles}× 0,7 L
+                    </span>
+                  </p>
+                  <p>
+                    • Aperol:{" "}
+                    <span className="font-semibold">
+                      ok. {aperolBottles}× 0,7 L
+                    </span>
+                  </p>
+                  <p>
+                    • Prosecco:{" "}
+                    <span className="font-semibold">
+                      ok. {proseccoBottles}× 0,75 L
+                    </span>
+                  </p>
+                  <p>
+                    • Soki / miksery / syropy:{" "}
+                      <span className="font-semibold">
+                      ok. {syrupsLiters} L łącznie
+                    </span>
+                  </p>
+                  <p>
+                    • Lód kostkowany / kruszony:{" "}
+                    <span className="font-semibold">
+                      ok. {iceKg} kg
+                    </span>
+                  </p>
+                  <p className="text-[0.75rem] text-white/50 mt-2">
+                    Po wysłaniu formularza kontaktowego możemy przesłać Ci tę
+                    listę w formie PDF – gotową do wydruku lub wysłania do
+                    hurtowni.
+                  </p>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -895,7 +1050,11 @@ function Contact() {
             </p>
 
             <div className="space-y-6">
-              <a href="tel:+48517616618" className="flex items-center gap-4 group">
+              {/* TELEFONY */}
+              <a
+                href="tel:+48517616618"
+                className="flex items-center gap-4 group"
+              >
                 <div className="w-14 h-14 border border-amber-400/30 flex items-center justify-center group-hover:bg-amber-400/10 transition-colors">
                   <svg
                     className="w-6 h-6 text-amber-400"
@@ -918,9 +1077,13 @@ function Contact() {
                   <p className="text-white text-lg group-hover:text-amber-300 transition-colors">
                     +48 517 616 618
                   </p>
+                  <p className="text-white/60 text-sm group-hover:text-amber-200 transition-colors">
+                    +48 781 024 701
+                  </p>
                 </div>
               </a>
 
+              {/* EMAILE */}
               <a
                 href="mailto:kontakt@stefanogroup.club"
                 className="flex items-center gap-4 group"
@@ -946,6 +1109,9 @@ function Contact() {
                   </p>
                   <p className="text-white text-lg group-hover:text-amber-300 transition-colors">
                     kontakt@stefanogroup.club
+                  </p>
+                  <p className="text-white/60 text-sm group-hover:text-amber-200 transition-colors">
+                    kontakt@eliksir-bar.pl
                   </p>
                 </div>
               </a>

@@ -1,4 +1,34 @@
-import '@testing-library/jest-dom';
+require('@testing-library/jest-dom');
+
+// Polyfill dla TextEncoder/TextDecoder
+if (typeof TextEncoder === 'undefined') {
+  const { TextEncoder, TextDecoder } = require('util');
+  global.TextEncoder = TextEncoder;
+  global.TextDecoder = TextDecoder;
+}
+
+// Mock dla IntersectionObserver (potrzebny dla Framer Motion)
+class MockIntersectionObserver {
+  constructor(callback) {
+    this.callback = callback;
+  }
+  observe = jest.fn();
+  unobserve = jest.fn();
+  disconnect = jest.fn();
+  takeRecords = jest.fn(() => []);
+}
+
+Object.defineProperty(window, 'IntersectionObserver', {
+  writable: true,
+  configurable: true,
+  value: MockIntersectionObserver
+});
+
+Object.defineProperty(global, 'IntersectionObserver', {
+  writable: true,
+  configurable: true,
+  value: MockIntersectionObserver
+});
 
 // Mock dla fetch API
 global.fetch = jest.fn();

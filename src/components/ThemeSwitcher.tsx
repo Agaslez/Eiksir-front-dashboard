@@ -1,34 +1,35 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { themes, type ThemeName } from '../lib/theme';
 
 export function ThemeSwitcher() {
   const [currentTheme, setCurrentTheme] = useState<ThemeName>('eliksir');
   const [isVisible, setIsVisible] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
   
-  // Sprawdź czy jesteśmy w development lub debug mode
   const isDev = process.env.NODE_ENV === 'development';
-  const showDebug = typeof window !== 'undefined' && window.location.search.includes('debug');
-  
-  // Ukryj w produkcji jeśli nie ma debug flag
-  if (!isDev && !showDebug) return null;
-  
-  // Załaduj zapisany motyw przy starcie
+
+  // 1. Hooki muszą być ZAWSZE na górze (przed return)
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as ThemeName;
-    if (savedTheme && themes[savedTheme]) {
-      setCurrentTheme(savedTheme);
+    // Bezpieczne sprawdzenie window wewnątrz efektu
+    if (typeof window !== 'undefined') {
+        setShowDebug(window.location.search.includes('debug'));
+        
+        const savedTheme = localStorage.getItem('theme') as ThemeName;
+        if (savedTheme && themes[savedTheme]) {
+            setCurrentTheme(savedTheme);
+        }
     }
   }, []);
-  
-  // Zmień motyw
+
   const handleThemeChange = (theme: ThemeName) => {
     setCurrentTheme(theme);
     localStorage.setItem('theme', theme);
-    // W prawdziwej aplikacji tutaj użyłbyś Context/Redux do zmiany motywu
-    // Na razie tylko zapisujemy do localStorage
     console.log(`Theme changed to: ${theme}`);
   };
-  
+
+  // 2. Dopiero TERAZ możemy przerwać renderowanie
+  if (!isDev && !showDebug) return null;
+
   return (
     <div className="fixed bottom-6 right-6 z-[9999] group">
       <div 

@@ -1,19 +1,44 @@
-import { useState } from "react";
-import { OFFERS } from "../lib/content";
+import { useEffect, useState } from 'react';
+import { OFFERS } from '../lib/content';
+import { Container } from './layout/Container';
+import { Section } from './layout/Section';
 
-function Calculator() {
+// Dodajemy eksportowany typ
+export type CalculatorSnapshot = {
+  offerName: string;
+  guests: number;
+  totalAfterDiscount: number;
+  pricePerGuest: number;
+  estimatedCocktails: number;
+  estimatedShots: number;
+  addons: {
+    fountain: boolean;
+    keg: boolean;
+    lemonade: boolean;
+    hockery: boolean;
+    ledLighting: boolean;
+  };
+};
+
+type CalculatorProps = {
+  onCalculate?: (snapshot: CalculatorSnapshot) => void;
+};
+
+function Calculator({ onCalculate }: CalculatorProps) {
   const [selectedOfferId, setSelectedOfferId] =
-    useState<keyof typeof OFFERS>("family"); // start np. od Family & Seniors
+    useState<keyof typeof OFFERS>('family'); // start np. od Family & Seniors
   const [guests, setGuests] = useState(50);
   const [addons, setAddons] = useState({
     fountain: false,
     keg: false,
     lemonade: false,
+    hockery: false,
+    ledLighting: false,
   });
 
   const offer = OFFERS[selectedOfferId];
   const promoDiscount = 0.2; // -20%
-  const isKidsOffer = offer.id === "kids"; // zakładam, że pakiet Kids ma id "kids"
+  const isKidsOffer = offer.id === 'kids'; // zakładam, że pakiet Kids ma id "kids"
 
   // --- ADD-ONY ZALEŻNE OD LICZBY GOŚCI ---
 
@@ -48,11 +73,54 @@ function Calculator() {
       })()
     : 0;
 
-  const addonsPrice = fountainCost + kegCost + lemonadeCost;
+  // Nowe dodatki
+  const hockeryCost = addons.hockery ? 200 : 0; // Stała cena 200 zł
+  const ledLightingCost = addons.ledLighting ? 500 : 0; // Stała cena 500 zł
 
-  // --- CENA PAKIETU ---
+  const addonsPrice =
+    fountainCost + kegCost + lemonadeCost + hockeryCost + ledLightingCost;
 
-  const baseServicePrice = offer.price;
+  // --- CENA PAKIETU (SKALOWANA Z LICZBĄ GOŚCI) ---
+
+  // Cena minimalna pakietu (z lib/content)
+  const basePackagePrice = offer.price;
+
+  // Cena za dodatkowego gościa (przykładowe wartości - można dostosować)
+  const pricePerExtraGuest = (() => {
+    switch (offer.id) {
+      case 'basic':
+        return 40; // +40 zł za gościa ponad minimum
+      case 'premium':
+        return 50; // +50 zł za gościa ponad minimum
+      case 'exclusive':
+        return 60; // +60 zł za gościa ponad minimum
+      case 'kids':
+        return 30; // +30 zł za gościa ponad minimum
+      case 'family':
+        return 35; // +35 zł za gościa ponad minimum
+      case 'business':
+        return 45; // +45 zł za gościa ponad minimum
+      default:
+        return 40;
+    }
+  })();
+
+  // Oblicz skalowaną cenę pakietu
+  const scaledPackagePrice = (() => {
+    // Jeśli liczba gości jest poniżej minimum, zachowaj cenę minimalną
+    if (guests <= offer.minGuests) {
+      return basePackagePrice;
+    }
+
+    // Oblicz cenę za gości ponad minimum
+    const extraGuests = guests - offer.minGuests;
+    const extraCost = extraGuests * pricePerExtraGuest;
+
+    // Zwróć cenę minimalną + koszt dodatkowych gości
+    return basePackagePrice + extraCost;
+  })();
+
+  const baseServicePrice = scaledPackagePrice;
 
   const totalBeforeDiscount = baseServicePrice + addonsPrice;
   const totalAfterDiscount = Math.round(
@@ -70,9 +138,7 @@ function Calculator() {
   // --- SZACOWANA LICZBA PORCJI ---
 
   const estimatedCocktails = Math.round(guests * offer.drinksPerGuest);
-  const estimatedShots = Math.round(
-    guests * (offer.shotsPerGuest ?? 0.5)
-  );
+  const estimatedShots = Math.round(guests * (offer.shotsPerGuest ?? 0.5));
 
   // --- LISTA ZAKUPÓW (skalowana z wzorca dla 50 osób) ---
 
@@ -81,24 +147,39 @@ function Calculator() {
   const vodkaRumGinBottles = isKidsOffer
     ? 0
     : Math.max(1, Math.ceil(5 * scale50)); // 5 but. 0.7L dla 50 os.
-  const liqueurBottles = isKidsOffer
-    ? 0
-    : Math.max(1, Math.ceil(2 * scale50));
-  const aperolBottles = isKidsOffer
-    ? 0
-    : Math.max(1, Math.ceil(2 * scale50));
-  const proseccoBottles = isKidsOffer
-    ? 0
-    : Math.max(1, Math.ceil(5 * scale50));
+  const liqueurBottles = isKidsOffer ? 0 : Math.max(1, Math.ceil(2 * scale50));
+  const aperolBottles = isKidsOffer ? 0 : Math.max(1, Math.ceil(2 * scale50));
+  const proseccoBottles = isKidsOffer ? 0 : Math.max(1, Math.ceil(5 * scale50));
   const syrupsLiters = Math.max(1, Math.ceil(12 * scale50));
   const iceKg = Math.max(4, Math.ceil(8 * scale50));
 
+  // Wywołaj callback z danymi kalkulacji przy każdej zmianie
+  useEffect(() => {
+    if (onCalculate) {
+      const snapshot: CalculatorSnapshot = {
+        offerName: offer.name,
+        guests,
+        totalAfterDiscount,
+        pricePerGuest,
+        estimatedCocktails,
+        estimatedShots,
+        addons,
+      };
+      onCalculate(snapshot);
+    }
+  }, [
+    offer.name,
+    guests,
+    totalAfterDiscount,
+    pricePerGuest,
+    estimatedCocktails,
+    estimatedShots,
+    addons,
+  ]);
+
   return (
-    <section
-      id="kalkulator"
-      className="bg-black py-24 border-t border-white/10"
-    >
-      <div className="max-w-6xl mx-auto px-6">
+    <Section id="kalkulator" className="bg-black border-t border-white/10">
+      <Container>
         <div className="mb-12 text-center">
           <p className="text-amber-400 uppercase tracking-[0.3em] text-sm mb-4">
             Szybka wycena & lista zakupów
@@ -130,19 +211,19 @@ function Calculator() {
                     }
                     className={`text-left border px-3 py-3 text-xs md:text-sm uppercase tracking-wider ${
                       selectedOfferId === o.id
-                        ? "border-amber-400 bg-amber-400/10 text-amber-200"
-                        : "border-white/20 text-white/70 hover:border-amber-400/60"
+                        ? 'border-amber-400 bg-amber-400/10 text-amber-200'
+                        : 'border-white/20 text-white/70 hover:border-amber-400/60'
                     }`}
                   >
                     <div className="font-semibold">{o.name}</div>
                     <div className="text-[0.7rem] text-white/50">
-                      od {o.price.toLocaleString("pl-PL")} zł
+                      od {o.price.toLocaleString('pl-PL')} zł
                     </div>
                   </button>
                 ))}
               </div>
               <p className="mt-2 text-[0.7rem] text-white/40">
-                Zakres rekomendowany dla wybranego pakietu:{" "}
+                Zakres rekomendowany dla wybranego pakietu:{' '}
                 <span className="font-semibold">
                   {offer.minGuests}–{offer.maxGuests} osób
                 </span>
@@ -175,9 +256,9 @@ function Calculator() {
               </div>
               {guests < offer.minGuests && (
                 <p className="mt-2 text-[0.7rem] text-amber-300">
-                  Dla takiej liczby osób obowiązuje nadal{" "}
+                  Dla takiej liczby osób obowiązuje nadal{' '}
                   <b>minimalna cena pakietu</b> (
-                  {offer.price.toLocaleString("pl-PL")} zł).
+                  {offer.price.toLocaleString('pl-PL')} zł).
                 </p>
               )}
             </div>
@@ -210,10 +291,10 @@ function Calculator() {
                     }
                   />
                   <span>
-                    Fontanna czekolady{" "}
+                    Fontanna czekolady{' '}
                     {addons.fountain && (
                       <span className="text-amber-300">
-                        (+{fountainCost.toLocaleString("pl-PL")} zł)
+                        (+{fountainCost.toLocaleString('pl-PL')} zł)
                       </span>
                     )}
                   </span>
@@ -233,10 +314,10 @@ function Calculator() {
                       }
                     />
                     <span>
-                      KEG piwa 30L z podajnikiem{" "}
+                      KEG piwa 30L z podajnikiem{' '}
                       {kegSelected && (
                         <span className="text-amber-300">
-                          (+{kegCost.toLocaleString("pl-PL")} zł)
+                          (+{kegCost.toLocaleString('pl-PL')} zł)
                         </span>
                       )}
                     </span>
@@ -262,10 +343,53 @@ function Calculator() {
                     }
                   />
                   <span>
-                    Dystrybutor lemoniady 2×12L{" "}
+                    Dystrybutor lemoniady 2×12L{' '}
                     {addons.lemonade && (
                       <span className="text-amber-300">
-                        (+{lemonadeCost.toLocaleString("pl-PL")} zł)
+                        (+{lemonadeCost.toLocaleString('pl-PL')} zł)
+                      </span>
+                    )}
+                  </span>
+                </label>
+
+                {/* Nowe dodatki */}
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={addons.hockery}
+                    onChange={(e) =>
+                      setAddons((prev) => ({
+                        ...prev,
+                        hockery: e.target.checked,
+                      }))
+                    }
+                  />
+                  <span>
+                    Hockery 6 szt. (eleganckie stołki barowe){' '}
+                    {addons.hockery && (
+                      <span className="text-amber-300">
+                        (+{hockeryCost.toLocaleString('pl-PL')} zł)
+                      </span>
+                    )}
+                  </span>
+                </label>
+
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={addons.ledLighting}
+                    onChange={(e) =>
+                      setAddons((prev) => ({
+                        ...prev,
+                        ledLighting: e.target.checked,
+                      }))
+                    }
+                  />
+                  <span>
+                    Oświetlenie LED z personalizacją{' '}
+                    {addons.ledLighting && (
+                      <span className="text-amber-300">
+                        (+{ledLightingCost.toLocaleString('pl-PL')} zł)
                       </span>
                     )}
                   </span>
@@ -286,7 +410,7 @@ function Calculator() {
               </p>
               <div className="flex items-baseline gap-2">
                 <span className="font-playfair text-5xl font-bold text-amber-300">
-                  {totalAfterDiscount.toLocaleString("pl-PL")}
+                  {totalAfterDiscount.toLocaleString('pl-PL')}
                 </span>
                 <span className="text-white/60 text-sm">PLN brutto*</span>
               </div>
@@ -298,17 +422,17 @@ function Calculator() {
 
             <div className="grid grid-cols-2 gap-4 text-sm mb-6">
               <div className="text-white/70">
-                ok.{" "}
+                ok.{' '}
                 <span className="font-semibold">
                   {pricePerGuest.toFixed(2)} zł
-                </span>{" "}
+                </span>{' '}
                 / osobę
               </div>
               <div className="text-white/70">
-                ok.{" "}
+                ok.{' '}
                 <span className="font-semibold">
                   {pricePerHour.toFixed(2)} zł
-                </span>{" "}
+                </span>{' '}
                 / godzinę baru
               </div>
             </div>
@@ -318,16 +442,14 @@ function Calculator() {
                 Szacowana liczba serwowanych pozycji
               </p>
               <p>
-                • Koktajle: ok.{" "}
+                • Koktajle: ok.{' '}
                 <span className="font-semibold">
                   {estimatedCocktails} porcji
                 </span>
               </p>
               <p>
-                • Shoty: ok.{" "}
-                <span className="font-semibold">
-                  {estimatedShots} porcji
-                </span>
+                • Shoty: ok.{' '}
+                <span className="font-semibold">{estimatedShots} porcji</span>
               </p>
               <p className="text-[0.75rem] text-white/50">
                 Założenie kalkulacji: {offer.drinksPerGuest} koktajlu / osobę
@@ -348,55 +470,51 @@ function Calculator() {
                     bezalkoholowe.
                   </p>
                   <p>
-                    • Soki / miksery / syropy:{" "}
+                    • Soki / miksery / syropy:{' '}
                     <span className="font-semibold">
                       ok. {syrupsLiters} L łącznie
                     </span>
                   </p>
                   <p>
-                    • Lód kostkowany / kruszony:{" "}
-                    <span className="font-semibold">
-                      ok. {iceKg} kg
-                    </span>
+                    • Lód kostkowany / kruszony:{' '}
+                    <span className="font-semibold">ok. {iceKg} kg</span>
                   </p>
                 </>
               ) : (
                 <>
                   <p>
-                    • Wódka / rum / gin:{" "}
+                    • Wódka / rum / gin:{' '}
                     <span className="font-semibold">
                       ok. {vodkaRumGinBottles}× 0,7 L
                     </span>
                   </p>
                   <p>
-                    • Likier (brzoskwinia / inne):{" "}
+                    • Likier (brzoskwinia / inne):{' '}
                     <span className="font-semibold">
                       ok. {liqueurBottles}× 0,7 L
                     </span>
                   </p>
                   <p>
-                    • Aperol:{" "}
+                    • Aperol:{' '}
                     <span className="font-semibold">
                       ok. {aperolBottles}× 0,7 L
                     </span>
                   </p>
                   <p>
-                    • Prosecco:{" "}
+                    • Prosecco:{' '}
                     <span className="font-semibold">
                       ok. {proseccoBottles}× 0,75 L
                     </span>
                   </p>
                   <p>
-                    • Soki / miksery / syropy:{" "}
+                    • Soki / miksery / syropy:{' '}
                     <span className="font-semibold">
                       ok. {syrupsLiters} L łącznie
                     </span>
                   </p>
                   <p>
-                    • Lód kostkowany / kruszony:{" "}
-                    <span className="font-semibold">
-                      ok. {iceKg} kg
-                    </span>
+                    • Lód kostkowany / kruszony:{' '}
+                    <span className="font-semibold">ok. {iceKg} kg</span>
                   </p>
                 </>
               )}
@@ -408,8 +526,8 @@ function Calculator() {
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }
 

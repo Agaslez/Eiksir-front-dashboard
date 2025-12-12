@@ -1,96 +1,167 @@
 // src/components/Contact.tsx
-import { motion } from "framer-motion";
-import { useState, type FormEvent } from "react";
-import type { CalculatorSnapshot } from "./Calculator";
+import { motion } from 'framer-motion';
+import { useState, type FormEvent } from 'react';
+import type { CalculatorSnapshot } from './Calculator';
+import { Container } from './layout/Container';
+import { Section } from './layout/Section';
 
 type ContactProps = {
-  calculatorSnapshot: CalculatorSnapshot | null;
+  calculatorSnapshot?: CalculatorSnapshot | null; // Zmieniamy na opcjonalne
 };
 
 export default function Contact({ calculatorSnapshot }: ContactProps) {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    date: "",
-    guests: "",
-    message: "",
+    name: '',
+    email: '',
+    phone: '',
+    date: '',
+    guests: '',
+    message: '',
   });
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // Funkcje walidacyjne
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone: string): boolean => {
+    if (!phone) return true; // telefon opcjonalny
+    const phoneRegex = /^[+]?[\d\s\-\(\)]{9,}$/;
+    return phoneRegex.test(phone.replace(/\s/g, ''));
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Imię i nazwisko jest wymagane';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email jest wymagany';
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Podaj poprawny adres email';
+    }
+
+    if (formData.phone && !validatePhone(formData.phone)) {
+      newErrors.phone = 'Podaj poprawny numer telefonu';
+    }
+
+    if (formData.guests) {
+      const guestsNum = parseInt(formData.guests);
+      if (isNaN(guestsNum) || guestsNum < 10 || guestsNum > 400) {
+        newErrors.guests = 'Liczba gości musi być między 10 a 400';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (!agreedToTerms) {
+      alert('Proszę wyrazić zgodę na przetwarzanie danych osobowych.');
+      return;
+    }
+
+    if (!validateForm()) {
+      alert('Proszę poprawić błędy w formularzu.');
+      return;
+    }
+
     const lines: string[] = [
       `Imię i nazwisko: ${formData.name}`,
       `Email: ${formData.email}`,
-      `Telefon: ${formData.phone || "-"}`,
-      `Data imprezy: ${formData.date || "-"}`,
-      `Liczba gości (z formularza): ${formData.guests || "-"}`,
-      "",
-      "Wiadomość:",
-      formData.message || "-",
+      `Telefon: ${formData.phone || '-'}`,
+      `Data imprezy: ${formData.date || '-'}`,
+      `Liczba gości (z formularza): ${formData.guests || '-'}`,
+      '',
+      'Wiadomość:',
+      formData.message || '-',
+      '',
+      '--- ZGODY ---',
+      '☑️ Wyrażam zgodę na przetwarzanie moich danych osobowych',
     ];
 
     if (calculatorSnapshot) {
       lines.push(
-        "",
-        "------------------------",
-        "Dane z kalkulatora:",
+        '',
+        '------------------------',
+        'Dane z kalkulatora:',
         `Pakiet: ${calculatorSnapshot.offerName}`,
         `Liczba gości (kalkulator): ${calculatorSnapshot.guests}`,
-        `Szacunkowa cena: ${calculatorSnapshot.totalAfterDiscount.toLocaleString("pl-PL")} PLN`,
+        `Szacunkowa cena: ${calculatorSnapshot.totalAfterDiscount.toLocaleString('pl-PL')} PLN`,
         `Cena za osobę: ~${calculatorSnapshot.pricePerGuest.toFixed(2)} PLN`,
         `Szacowana liczba koktajli: ${calculatorSnapshot.estimatedCocktails}`,
         `Szacowana liczba shotów: ${calculatorSnapshot.estimatedShots}`,
-        "Dodatki:",
-        `- Fontanna / dry bar: ${
-          calculatorSnapshot.addons.fountain ? "TAK" : "NIE"
+        'Dodatki:',
+        `- Fontanna czekolady: ${
+          calculatorSnapshot.addons.fountain ? 'TAK' : 'NIE'
         }`,
-        `- Lemonady & napoje: ${
-          calculatorSnapshot.addons.lemonade ? "TAK" : "NIE"
+        `- Dystrybutor lemoniady: ${
+          calculatorSnapshot.addons.lemonade ? 'TAK' : 'NIE'
         }`,
-        `- Keg / piwo lane: ${calculatorSnapshot.addons.keg ? "TAK" : "NIE"}`
+        `- KEG piwa: ${calculatorSnapshot.addons.keg ? 'TAK' : 'NIE'}`,
+        `- Hockery 6 szt.: ${calculatorSnapshot.addons.hockery ? 'TAK' : 'NIE'}`,
+        `- Oświetlenie LED: ${calculatorSnapshot.addons.ledLighting ? 'TAK' : 'NIE'}`
       );
     }
 
-    const subject = `Zapytanie ELIKSIR - ${formData.name || "bez imienia"}`;
-    const body = lines.join("\n");
+    const subject = `Zapytanie ELIKSIR - ${formData.name || 'bez imienia'}`;
+    const body = lines.join('\n');
 
     const mailtoLink = `mailto:st.pitek@gmail.com?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
 
+    setIsSubmitted(true);
+
+    // Reset form after 3 seconds
+    setTimeout(() => {
+      setIsSubmitted(false);
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        date: '',
+        guests: '',
+        message: '',
+      });
+      setAgreedToTerms(false);
+      setErrors({});
+    }, 3000);
+
     window.location.href = mailtoLink;
   };
 
   return (
-    <section
+    <Section
       id="kontakt"
-      className="pt-40 pb-40 bg-neutral-950 relative overflow-hidden"
+      className="bg-black border-t border-white/10 relative overflow-hidden"
     >
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-amber-900/10 via-transparent to-transparent" />
 
-      {/* tu jak w Testimonials: samo container, bez max-w-6xl */}
-      <div className="container mx-auto px-6 relative">
-        {/* NAGŁÓWEK */}
-        <motion.div
-          className="text-center mb-20"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <p className="text-amber-400 uppercase tracking-[0.3em] text-xs md:text-sm mb-3">
+      {/* KONTENER */}
+      <Container className="relative">
+        {/* NAGŁÓWEK - IDENTYCZNY JAK KALKULATOR */}
+        <div className="mb-12 text-center">
+          <p className="text-amber-400 uppercase tracking-[0.3em] text-sm mb-4">
             Kontakt
           </p>
-          <h2 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-5">
+          <h2 className="font-playfair text-4xl md:text-5xl font-bold text-white mb-3">
             Zamów wycenę
           </h2>
-          <p className="text-white/55 text-sm md:text-base max-w-2xl mx-auto">
-            Wyślij nam kilka podstawowych informacji. Odezwiemy się z
-            dopasowaną wyceną i potwierdzeniem dostępności terminu.
+          <p className="text-white/60 text-sm md:text-base">
+            Wyślij nam kilka podstawowych informacji. Odezwiemy się z dopasowaną
+            wyceną i potwierdzeniem dostępności terminu.
           </p>
-          <div className="w-20 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto mt-7" />
-        </motion.div>
+        </div>
 
         {/* jak w Testimonials – sama siatka ma max-w-6xl mx-auto */}
         <div className="grid gap-14 lg:grid-cols-2 items-start max-w-6xl mx-auto">
@@ -100,10 +171,10 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <h3 className="font-playfair text-2xl md:text-3xl text-white mb-6">
+            <h3 className="font-playfair text-2xl md:text-3xl text-white mb-6 text-center">
               Porozmawiajmy o Twojej imprezie
             </h3>
-            <p className="text-white/60 text-sm md:text-base mb-10 leading-relaxed">
+            <p className="text-white/60 text-sm md:text-base mb-10 leading-relaxed text-center">
               Najlepiej, gdy w wiadomości podasz typ wydarzenia, lokalizację,
               przybliżoną liczbę gości i godziny trwania imprezy. To pozwoli nam
               szybko przygotować konkretną propozycję.
@@ -206,12 +277,12 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
                     Dane z kalkulatora zostaną dołączone do maila.
                   </p>
                   <p className="leading-relaxed">
-                    Pakiet: <strong>{calculatorSnapshot.offerName}</strong> ·{" "}
-                    Goście: <strong>{calculatorSnapshot.guests}</strong> · Cena:{" "}
+                    Pakiet: <strong>{calculatorSnapshot.offerName}</strong> ·{' '}
+                    Goście: <strong>{calculatorSnapshot.guests}</strong> · Cena:{' '}
                     <strong>
                       {calculatorSnapshot.totalAfterDiscount.toLocaleString(
-                        "pl-PL"
-                      )}{" "}
+                        'pl-PL'
+                      )}{' '}
                       PLN
                     </strong>
                   </p>
@@ -221,117 +292,230 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
           </motion.div>
 
           {/* PRAWA STRONA – formularz */}
-          <motion.form
-            onSubmit={handleSubmit}
+          <motion.div
             className="bg-gradient-to-b from-neutral-900 to-neutral-950 border border-white/10 p-6 md:p-8 lg:p-10"
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <div className="space-y-7 text-sm">
-              <div>
-                <label className="text-white/45 text-xs uppercase tracking-[0.2em] block mb-2">
-                  Imię i nazwisko
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData((f) => ({ ...f, name: e.target.value }))
-                  }
-                  className="w-full bg-transparent border-b border-white/25 py-2 text-white text-sm focus:border-amber-400 focus:outline-none mt-1"
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="text-white/45 text-xs uppercase tracking-[0.2em] block mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData((f) => ({ ...f, email: e.target.value }))
-                    }
-                    className="w-full bg-transparent border-b border-white/25 py-2 text-white text-sm focus:border-amber-400 focus:outline-none mt-1"
-                  />
+            {isSubmitted ? (
+              <div className="text-center py-12">
+                <div className="w-20 h-20 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg
+                    className="w-10 h-10 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
                 </div>
-                <div>
-                  <label className="text-white/45 text-xs uppercase tracking-[0.2em] block mb-2">
-                    Telefon
-                  </label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData((f) => ({ ...f, phone: e.target.value }))
-                    }
-                    className="w-full bg-transparent border-b border-white/25 py-2 text-white text-sm focus:border-amber-400 focus:outline-none mt-1"
-                  />
+                <h3 className="text-2xl font-bold text-white mb-3 text-center">
+                  Wiadomość wysłana! ✨
+                </h3>
+                <p className="text-white/60 mb-6 text-center">
+                  Dziękujemy za kontakt! Otworzyliśmy dla Ciebie okno maila.
+                  <br />
+                  Wypełnij wiadomość i wyślij do nas.
+                </p>
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4 mb-6">
+                  <p className="text-emerald-300 text-sm text-center">
+                    <strong>Uwaga:</strong> Jeśli okno maila się nie otworzyło,
+                    sprawdź swoją skrzynkę pocztową
+                    <br />
+                    lub wyślij maila ręcznie na adres:{' '}
+                    <strong>st.pitek@gmail.com</strong>
+                  </p>
                 </div>
+                <p className="text-white/40 text-sm text-center">
+                  Formularz zostanie zresetowany za chwilę...
+                </p>
               </div>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <div className="space-y-7 text-sm">
+                  <div>
+                    <label className="text-white/45 text-xs uppercase tracking-[0.2em] block mb-2">
+                      Imię i nazwisko
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) => {
+                        setFormData((f) => ({ ...f, name: e.target.value }));
+                        if (errors.name)
+                          setErrors((prev) => ({ ...prev, name: '' }));
+                      }}
+                      className={`w-full bg-transparent border-b py-2 text-white text-sm focus:outline-none mt-1 ${
+                        errors.name
+                          ? 'border-red-500'
+                          : 'border-white/25 focus:border-amber-400'
+                      }`}
+                    />
+                    {errors.name && (
+                      <p className="text-red-400 text-xs mt-1">{errors.name}</p>
+                    )}
+                  </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="text-white/45 text-xs uppercase tracking-[0.2em] block mb-2">
-                    Data imprezy
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) =>
-                      setFormData((f) => ({ ...f, date: e.target.value }))
-                    }
-                    className="w-full bg-transparent border-b border-white/25 py-2 text-white text-sm focus:border-amber-400 focus:outline-none mt-1"
-                  />
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-white/45 text-xs uppercase tracking-[0.2em] block mb-2">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={(e) => {
+                          setFormData((f) => ({ ...f, email: e.target.value }));
+                          if (errors.email)
+                            setErrors((prev) => ({ ...prev, email: '' }));
+                        }}
+                        className={`w-full bg-transparent border-b py-2 text-white text-sm focus:outline-none mt-1 ${
+                          errors.email
+                            ? 'border-red-500'
+                            : 'border-white/25 focus:border-amber-400'
+                        }`}
+                      />
+                      {errors.email && (
+                        <p className="text-red-400 text-xs mt-1">
+                          {errors.email}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-white/45 text-xs uppercase tracking-[0.2em] block mb-2">
+                        Telefon
+                      </label>
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => {
+                          setFormData((f) => ({ ...f, phone: e.target.value }));
+                          if (errors.phone)
+                            setErrors((prev) => ({ ...prev, phone: '' }));
+                        }}
+                        placeholder="+48 123 456 789"
+                        className={`w-full bg-transparent border-b py-2 text-white text-sm focus:outline-none mt-1 ${
+                          errors.phone
+                            ? 'border-red-500'
+                            : 'border-white/25 focus:border-amber-400'
+                        }`}
+                      />
+                      {errors.phone && (
+                        <p className="text-red-400 text-xs mt-1">
+                          {errors.phone}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-white/45 text-xs uppercase tracking-[0.2em] block mb-2">
+                        Data imprezy
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.date}
+                        onChange={(e) =>
+                          setFormData((f) => ({ ...f, date: e.target.value }))
+                        }
+                        className="w-full bg-transparent border-b border-white/25 py-2 text-white text-sm focus:border-amber-400 focus:outline-none mt-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-white/45 text-xs uppercase tracking-[0.2em] block mb-2">
+                        Liczba gości
+                      </label>
+                      <input
+                        type="number"
+                        min={10}
+                        max={400}
+                        value={formData.guests}
+                        onChange={(e) => {
+                          setFormData((f) => ({
+                            ...f,
+                            guests: e.target.value,
+                          }));
+                          if (errors.guests)
+                            setErrors((prev) => ({ ...prev, guests: '' }));
+                        }}
+                        className={`w-full bg-transparent border-b py-2 text-white text-sm focus:outline-none mt-1 ${
+                          errors.guests
+                            ? 'border-red-500'
+                            : 'border-white/25 focus:border-amber-400'
+                        }`}
+                      />
+                      {errors.guests && (
+                        <p className="text-red-400 text-xs mt-1">
+                          {errors.guests}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-white/45 text-xs uppercase tracking-[0.2em] block mb-2">
+                      Wiadomość
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={formData.message}
+                      onChange={(e) =>
+                        setFormData((f) => ({ ...f, message: e.target.value }))
+                      }
+                      className="w-full bg-transparent border-b border-white/25 py-2 text-white text-sm focus:border-amber-400 focus:outline-none resize-none"
+                      placeholder="Np. wesele 120 osób, plener, chcemy bar z pokazem flair i pakietem premium..."
+                    />
+                  </div>
+
+                  <div className="pt-4 border-t border-white/10">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={agreedToTerms}
+                        onChange={(e) => setAgreedToTerms(e.target.checked)}
+                        className="mt-1 w-4 h-4 text-amber-500 bg-transparent border border-amber-400/50 rounded focus:ring-amber-500 focus:ring-2"
+                        required
+                      />
+                      <span className="text-white/70 text-xs leading-relaxed">
+                        Wyrażam zgodę na przetwarzanie moich danych osobowych
+                        przez ELIKSIR Bar Mobilny w celu przygotowania oferty i
+                        kontaktu w sprawie wydarzenia. Zgodnie z art. 6 ust. 1
+                        lit. a RODO. Administratorem danych jest ELIKSIR Bar
+                        Mobilny. Dane będą przetwarzane do czasu wycofania
+                        zgody. Przysługuje mi prawo dostępu, sprostowania,
+                        usunięcia danych, ograniczenia przetwarzania, wniesienia
+                        sprzeciwu oraz wniesienia skargi do Prezesa Urzędu
+                        Ochrony Danych Osobowych.
+                      </span>
+                    </label>
+                  </div>
+
+                  <motion.button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-semibold py-3.5 text-xs md:text-sm uppercase tracking-[0.2em] mt-4 hover:from-amber-300 hover:to-yellow-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    disabled={!agreedToTerms}
+                  >
+                    {agreedToTerms
+                      ? 'Wyślij zapytanie'
+                      : 'Zaznacz zgodę aby wysłać'}
+                  </motion.button>
                 </div>
-                <div>
-                  <label className="text-white/45 text-xs uppercase tracking-[0.2em] block mb-2">
-                    Liczba gości
-                  </label>
-                  <input
-                    type="number"
-                    min={10}
-                    max={400}
-                    value={formData.guests}
-                    onChange={(e) =>
-                      setFormData((f) => ({ ...f, guests: e.target.value }))
-                    }
-                    className="w-full bg-transparent border-b border-white/25 py-2 text-white text-sm focus:border-amber-400 focus:outline-none mt-1"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-white/45 text-xs uppercase tracking-[0.2em] block mb-2">
-                  Wiadomość
-                </label>
-                <textarea
-                  rows={4}
-                  value={formData.message}
-                  onChange={(e) =>
-                    setFormData((f) => ({ ...f, message: e.target.value }))
-                  }
-                  className="w-full bg-transparent border-b border-white/25 py-2 text-white text-sm focus:border-amber-400 focus:outline-none resize-none"
-                  placeholder="Np. wesele 120 osób, plener, chcemy bar z pokazem flair i pakietem premium..."
-                />
-              </div>
-
-              <motion.button
-                type="submit"
-                className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-semibold py-3.5 text-xs md:text-sm uppercase tracking-[0.2em] mt-4 hover:from-amber-300 hover:to-yellow-400 transition-all"
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-              >
-                Wyślij zapytanie
-              </motion.button>
-            </div>
-          </motion.form>
+              </form>
+            )}
+          </motion.div>
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

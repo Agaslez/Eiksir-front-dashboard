@@ -1,0 +1,174 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Database
+*.db
+*.sqlite
+migrations/
+
+# Logs
+logs/
+*.log
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary folders
+tmp/
+temp/
+
+# AI service cache
+.anthropic-cache/
+# ─────────────────────────────
+# Node / JavaScript / TypeScript
+# ─────────────────────────────
+node_modules/
+**/node_modules/
+
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# ─────────────────────────────
+# Build artefacts (frontend & backend)
+# ─────────────────────────────
+dist/
+**/dist/
+build/
+**/build/
+.out/
+.next/
+.vercel/
+.cache/
+.vite/
+.storybook-out/
+coverage/
+.nyc_output/
+
+# ─────────────────────────────
+# Env & sekrety
+# ─────────────────────────────
+.env
+.env.*
+!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Local DB / secrets files
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+pgdata/
+redis-data/
+mongo-data/
+
+# ─────────────────────────────
+# Continue / LLM tooling
+# ─────────────────────────────
+# lokalna konfiguracja z kluczami, sesje itd.
+.continue/config.json
+.continue/sessions/
+.continue/cache/
+.continue/history/
+.continue/logs/
+
+# Jeżeli chcesz trzymać w repo tylko reguły i opis agentów,
+# odkomentuj poniższe i przenieś klucze do "secrets":
+# .continue/*
+# !.continue/agents/
+# !.continue/rules/
+
+# ─────────────────────────────
+# Logi / runtime
+# ─────────────────────────────
+logs/
+*.log
+*.pid
+*.seed
+*.pid.lock
+pids/
+tmp/
+temp/
+*.tmp
+
+# PM2 / nodemon / misc
+pids/
+pids/*
+*.pid
+*.seed
+*.pid.lock
+
+# ─────────────────────────────
+# Editor / OS junk
+# ─────────────────────────────
+.vscode/
+.idea/
+*.iml
+
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# Vim / JetBrains / itp.
+*~
+*.swp
+*.swo
+*.bak
+
+# ─────────────────────────────
+# Docker / infra
+# ─────────────────────────────
+.docker/
+docker-data/
+**/docker-data/

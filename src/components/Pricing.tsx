@@ -1,20 +1,23 @@
 // src/components/Pricing.tsx
-import { motion } from "framer-motion";
-import { OFFERS } from "../lib/content";
+import { motion } from 'framer-motion';
+import { OFFERS } from '../lib/content';
 
 type PricingProps = {
   selectedOfferId: string;
   onSelectOffer: (id: string) => void;
 };
 
-export default function Pricing({ selectedOfferId, onSelectOffer }: PricingProps) {
+export default function Pricing({
+  selectedOfferId,
+  onSelectOffer,
+}: PricingProps) {
   const offersArray = Object.values(OFFERS);
 
   const handleClick = (offerId: string) => {
     onSelectOffer(offerId);
-    const el = document.getElementById("kalkulator");
+    const el = document.getElementById('kalkulator');
     if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -36,7 +39,8 @@ export default function Pricing({ selectedOfferId, onSelectOffer }: PricingProps
             Wybierz swój pakiet
           </h2>
           <p className="text-white/50 text-sm md:text-base max-w-2xl mx-auto">
-            Pakiety dopasowane do wesel, eventów firmowych oraz imprez prywatnych.
+            Pakiety dopasowane do wesel, eventów firmowych oraz imprez
+            prywatnych.
           </p>
           <div className="w-20 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto mt-6" />
         </motion.div>
@@ -64,10 +68,10 @@ export default function Pricing({ selectedOfferId, onSelectOffer }: PricingProps
                 <div
                   className={`flex flex-col h-full bg-gradient-to-b from-neutral-900 to-neutral-950 border transition-all duration-300 ${
                     isActive
-                      ? "border-amber-400/70 shadow-2xl shadow-amber-500/15 scale-[1.01]"
+                      ? 'border-amber-400/70 shadow-2xl shadow-amber-500/15 scale-[1.01]'
                       : offer.popular
-                      ? "border-amber-400/40"
-                      : "border-white/5 hover:border-white/25"
+                        ? 'border-amber-400/40'
+                        : 'border-white/5 hover:border-white/25'
                   }`}
                 >
                   <div className="h-1 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400" />
@@ -83,7 +87,7 @@ export default function Pricing({ selectedOfferId, onSelectOffer }: PricingProps
                     <div className="mb-6">
                       <div className="flex items-baseline gap-2">
                         <span className="font-playfair text-4xl md:text-5xl font-bold bg-gradient-to-r from-amber-200 to-yellow-400 bg-clip-text text-transparent">
-                          {offer.price.toLocaleString("pl-PL")}
+                          {offer.price.toLocaleString('pl-PL')}
                         </span>
                         <span className="text-white/50 text-sm">PLN</span>
                       </div>
@@ -114,7 +118,7 @@ export default function Pricing({ selectedOfferId, onSelectOffer }: PricingProps
                           <span>{feature}</span>
                         </li>
                       ))}
-                      {offer.id === "kids" && (
+                      {offer.id === 'kids' && (
                         <li className="text-xs text-emerald-300/80 mt-1">
                           0% alkoholu – pakiet dedykowany dzieciom i młodzieży.
                         </li>
@@ -126,8 +130,8 @@ export default function Pricing({ selectedOfferId, onSelectOffer }: PricingProps
                       onClick={() => handleClick(offer.id)}
                       className={`mt-auto block w-full text-center py-3.5 text-xs md:text-sm font-semibold uppercase tracking-[0.2em] ${
                         isActive
-                          ? "bg-gradient-to-r from-amber-400 to-yellow-500 text-black hover:from-amber-300 hover:to-yellow-400"
-                          : "border border-white/25 text-white hover:bg-white/5 hover:border-white/50"
+                          ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-black hover:from-amber-300 hover:to-yellow-400'
+                          : 'border border-white/25 text-white hover:bg-white/5 hover:border-white/50'
                       }`}
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}

@@ -10,71 +10,73 @@ export default function LoginForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  
+
   // W produkcji to będzie z backendu
   const VALID_CREDENTIALS = [
     { email: 'admin@eliksir-bar.pl', password: 'Admin123!', role: 'admin' },
     { email: 'editor@eliksir-bar.pl', password: 'Editor123!', role: 'editor' },
     { email: 'viewer@eliksir-bar.pl', password: 'Viewer123!', role: 'viewer' },
   ];
-  
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
+
     try {
       // Symulacja opóźnienia sieci
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
       const user = VALID_CREDENTIALS.find(
-        cred => cred.email === email && cred.password === password
+        (cred) => cred.email === email && cred.password === password
       );
-      
+
       if (!user) {
         throw new Error('Nieprawidłowy email lub hasło');
       }
-      
+
       // W produkcji: fetch do backendu
       // const response = await fetch('/api/admin/login', {
       //   method: 'POST',
       //   body: JSON.stringify({ email, password })
       // });
-      
+
       // Tworzenie tokenu JWT
       const token = await createAuthToken({
         id: '1', // W produkcji z backendu
         email: user.email,
-        role: user.role as 'admin' | 'editor' | 'viewer'
+        role: user.role as 'admin' | 'editor' | 'viewer',
       });
-      
+
       // Zapis w localStorage
       localStorage.setItem('auth_token', token);
-      localStorage.setItem('user_data', JSON.stringify({
-        email: user.email,
-        role: user.role,
-        name: user.email.split('@')[0]
-      }));
-      
+      localStorage.setItem(
+        'user_data',
+        JSON.stringify({
+          email: user.email,
+          role: user.role,
+          name: user.email.split('@')[0],
+        })
+      );
+
       // Przekierowanie do dashboardu
-      navigate('/admin/dashboard');
-      
+      navigate('/admin');
     } catch (err: any) {
       setError(err.message || 'Wystąpił błąd podczas logowania');
-      
+
       // Logowanie błędu (w produkcji do Sentry)
       console.error('Login error:', err);
-      
+
       // Rate limiting simulation
-      localStorage.setItem('login_attempts', 
+      localStorage.setItem(
+        'login_attempts',
         (parseInt(localStorage.getItem('login_attempts') || '0') + 1).toString()
       );
-      
     } finally {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-900 via-black to-amber-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -85,7 +87,7 @@ export default function LoginForm() {
           <h1 className="text-3xl font-bold text-white mb-2">Panel Admina</h1>
           <p className="text-amber-200/70">Eliksir Bar Mobilny</p>
         </div>
-        
+
         <div className="bg-black/50 backdrop-blur-sm border border-amber-500/30 rounded-xl p-8 shadow-2xl">
           <form onSubmit={handleLogin} className="space-y-6">
             {error && (
@@ -94,7 +96,7 @@ export default function LoginForm() {
                 <span className="text-sm">{error}</span>
               </div>
             )}
-            
+
             <div>
               <label className="block text-sm font-medium text-amber-200 mb-2">
                 <Mail className="inline w-4 h-4 mr-2" />
@@ -110,7 +112,7 @@ export default function LoginForm() {
                 disabled={loading}
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-amber-200 mb-2">
                 <Lock className="inline w-4 h-4 mr-2" />
@@ -118,7 +120,7 @@ export default function LoginForm() {
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-black/50 border border-amber-500/30 rounded-lg px-4 py-3 text-white placeholder-amber-200/50 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all pr-12"
@@ -144,7 +146,7 @@ export default function LoginForm() {
                 Min. 8 znaków, wielka litera, cyfra, znak specjalny
               </p>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <label className="flex items-center">
                 <input
@@ -152,9 +154,11 @@ export default function LoginForm() {
                   className="rounded border-amber-500/50 bg-black/50 text-amber-500 focus:ring-amber-500"
                   disabled={loading}
                 />
-                <span className="ml-2 text-sm text-amber-200/70">Zapamiętaj mnie</span>
+                <span className="ml-2 text-sm text-amber-200/70">
+                  Zapamiętaj mnie
+                </span>
               </label>
-              
+
               <button
                 type="button"
                 className="text-sm text-amber-400 hover:text-amber-300 transition-colors"
@@ -163,7 +167,7 @@ export default function LoginForm() {
                 Zapomniałeś hasła?
               </button>
             </div>
-            
+
             <button
               type="submit"
               disabled={loading}
@@ -178,38 +182,45 @@ export default function LoginForm() {
                 'Zaloguj się'
               )}
             </button>
-            
+
             <div className="text-center pt-4 border-t border-amber-500/20">
-              <p className="text-sm text-amber-200/50">
-                Demo konta:
-              </p>
+              <p className="text-sm text-amber-200/50">Demo konta:</p>
               <div className="grid grid-cols-3 gap-2 mt-2 text-xs">
                 <div className="bg-black/30 p-2 rounded">
                   <div className="font-medium text-amber-300">Admin</div>
-                  <div className="text-amber-200/70 truncate">admin@eliksir-bar.pl</div>
+                  <div className="text-amber-200/70 truncate">
+                    admin@eliksir-bar.pl
+                  </div>
                   <div className="text-amber-200/50">Admin123!</div>
                 </div>
                 <div className="bg-black/30 p-2 rounded">
                   <div className="font-medium text-amber-300">Editor</div>
-                  <div className="text-amber-200/70 truncate">editor@eliksir-bar.pl</div>
+                  <div className="text-amber-200/70 truncate">
+                    editor@eliksir-bar.pl
+                  </div>
                   <div className="text-amber-200/50">Editor123!</div>
                 </div>
                 <div className="bg-black/30 p-2 rounded">
                   <div className="font-medium text-amber-300">Viewer</div>
-                  <div className="text-amber-200/70 truncate">viewer@eliksir-bar.pl</div>
+                  <div className="text-amber-200/70 truncate">
+                    viewer@eliksir-bar.pl
+                  </div>
                   <div className="text-amber-200/50">Viewer123!</div>
                 </div>
               </div>
             </div>
           </form>
         </div>
-        
+
         <div className="mt-6 text-center">
           <p className="text-sm text-amber-200/50">
             ⚠️ W produkcji zmień domyślne hasła!
           </p>
           <p className="text-xs text-amber-200/30 mt-2">
-            Wersja: {process.env.NODE_ENV === 'production' ? 'Production' : 'Development'}
+            Wersja:{' '}
+            {process.env.NODE_ENV === 'production'
+              ? 'Production'
+              : 'Development'}
           </p>
         </div>
       </div>

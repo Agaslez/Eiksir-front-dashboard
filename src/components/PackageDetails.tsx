@@ -1,266 +1,247 @@
-// src/components/PackageDetails.tsx
-import { motion } from "framer-motion";
-import { OFFERS } from "../lib/content";
+// src/components/PackageDetails.tsx - UPROSZCZONA WERSJA
+import { motion } from 'framer-motion';
+import { Briefcase, Cake, Crown, Sparkles, Users, Wine } from 'lucide-react';
+import { OFFERS } from '../lib/content';
+import { Container } from './layout/Container';
+import { Section } from './layout/Section';
 
-const sectionVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
+const PACKAGE_ICONS = {
+  basic: Wine,
+  premium: Sparkles,
+  exclusive: Crown,
+  kids: Cake,
+  family: Users,
+  business: Briefcase,
 };
 
-const PACKAGE_DETAILS: Record<
-  string,
-  {
-    subtitle: string;
-    idealFor: string[];
-    includes: string[];
-    notes?: string[];
-  }
-> = {
-  kids: {
-    subtitle: "Kids Party 0% – bez alkoholu, maksimum zabawy",
-    idealFor: [
-      "urodziny dzieci",
-      "komunie, chrzciny",
-      "festyny szkolne, pikniki rodzinne",
+const PACKAGE_DETAILS = {
+  basic: {
+    subtitle: 'Podstawowy pakiet dla kameralnych imprez',
+    highlights: [
+      '20-50 osób',
+      '5 godzin',
+      '3 koktajle/osobę',
+      '6 signature drinków',
     ],
-    includes: [
-      "Kolorowe koktajle bezalkoholowe serwowane w kubkach z owocami i parasolkami",
-      "Minimum 3 smaki lemoniady 0% (np. cytrusowa, malinowa, ogórkowa) w dystrybutorach",
-      "Woda z owocami / miętą dostępna przez cały czas trwania imprezy",
-      "Dekoracje barowe dostosowane do dzieci (kolorowe słomki, owoce, żelki)",
-    ],
-    notes: [
-      "W tym pakiecie nie serwujemy żadnego alkoholu – 0% to 0%.",
-      "Opcjonalnie można dodać „mini flair show” dla dzieci (bez ognia i bez alkoholu).",
-    ],
-  },
-  family: {
-    subtitle: "Family & Seniors – elegancko, ale spokojnie",
-    idealFor: [
-      "imprezy rodzinne 40–80 osób",
-      "urodziny, rocznice, małe wesela",
-      "eventy, gdzie ważni są również kierowcy i seniorzy",
-    ],
-    includes: [
-      "Zbalansowana karta: 50% koktajle alkoholowe, 50% bezalkoholowe",
-      "Klasyki w lekkiej wersji (np. Aperol Spritz, Hugo, lekkie sours)",
-      "Mocny nacisk na estetykę szkła i dekoracji – „instagramowy” wygląd drinków",
-      "Stały dostęp do wody i lemoniady 0% dla kierowców i dzieci",
-    ],
-    notes: [
-      "Idealny, gdy chcesz „coś ekstra”, ale bez ostrego lania.",
-      "Można spokojnie połączyć z serwisem wina/sali weselnej.",
-    ],
-  },
-  standard: {
-    subtitle: "Classic Wedding / Event – złoty środek",
-    idealFor: [
-      "wesela 70–150 osób",
-      "eventy firmowe, bankiety",
-      "imprezy, gdzie bar ma być mocnym punktem wieczoru",
-    ],
-    includes: [
-      "Pełna karta koktajli klasycznych + kilka autorskich propozycji Eliksir",
-      "Shot bar na bazie wódki / likierów (np. „kamikaze”, „wściekły pies” itp.)",
-      "Dopasowanie alkoholi do preferencji (np. więcej rumu przy klimacie tropical)",
-      "Wersje bezalkoholowe wybranych klasyków dla kierowców i kobiet w ciąży",
-    ],
-    notes: [
-      "Ten pakiet zwykle dobrze „niesie” imprezę 6–8 godzin.",
-      "Można dołożyć KEG, jeśli sala nie zapewnia piwa lane-go.",
-    ],
+    idealFor: ['Kameralne przyjęcia', 'Mniejsze wesela', 'Urodziny'],
   },
   premium: {
-    subtitle: "Premium & Flair – efekt WOW",
-    idealFor: [
-      "większe wesela z naciskiem na show",
-      "eventy premium, gale, VIP room",
-      "marki, które chcą zbudować wizerunek poprzez bar",
+    subtitle: 'Najpopularniejszy wybór na wesela',
+    highlights: ['50-80 osób', '6 godzin', '3.5 koktajle/osobę', 'Shot bar'],
+    idealFor: ['Wesela', 'Duże imprezy', 'Eventy z pokazami'],
+    popular: true,
+  },
+  exclusive: {
+    subtitle: 'Ekskluzywny pakiet z efektem WOW',
+    highlights: [
+      '80-120 osób',
+      '7 godzin',
+      '4 koktajle/osobę',
+      'Personalizacja baru',
     ],
-    includes: [
-      "Rozszerzona karta koktajli premium (np. tequila, gin premium, whisky)",
-      "Pokazy flair (żonglowanie butelkami) w ustalonych blokach czasowych",
-      "Własne syropy / infuzje, dekoracje premium, złożone koktajle signature",
-      "Możliwość brandingu baru (logo firmy/pary młodej na froncie)",
+    idealFor: ['Luksusowe wesela', 'Gale', 'VIP eventy'],
+  },
+  kids: {
+    subtitle: 'Bezalkoholowe przyjęcia dla dzieci',
+    highlights: ['15-40 dzieci', '3 godziny', 'Mocktaile', 'Stacja lemoniad'],
+    idealFor: ['Urodziny dzieci', 'Komunie', 'Festyny szkolne'],
+  },
+  family: {
+    subtitle: 'Łagodne miksy dla rodzin i seniorów',
+    highlights: ['25-60 osób', '4 godziny', '2.5 koktajle/osobę', 'Więcej 0%'],
+    idealFor: ['Rocznice', 'Komunie', 'Imprezy rodzinne'],
+  },
+  business: {
+    subtitle: 'Profesjonalny serwis dla firm',
+    highlights: [
+      '30-100 osób',
+      '4 godziny',
+      '2.5 koktajle/osobę',
+      'Dopasowanie karty',
     ],
-    notes: [
-      "Wymaga trochę większego budżetu, ale robi ogromną robotę w social media.",
-      "Idealny, gdy chcesz, żeby goście mówili „to było coś innego niż zwykłe wesele”.",
-    ],
+    idealFor: ['Eventy firmowe', 'Targi', 'Konferencje', 'Gale'],
   },
 };
-
-const ADDON_DETAILS = [
-  {
-    id: "fountain",
-    name: "Fontanna czekolady",
-    bullets: [
-      "Fontanna o wysokości ok. 60–70 cm (na ok. 50–80 osób)",
-      "Belgijska czekolada mleczna lub deserowa (min. 4 kg na start)",
-      "Zestaw dodatków: owoce (truskawki / winogrona / banany), pianki, wafle",
-      "Jednorazowe patyczki i talerzyki w cenie",
-    ],
-    note: "Przy większej liczbie gości dokładamy kolejne porcje czekolady i owoców – ilości skalujemy razem z kalkulatorem.",
-  },
-  {
-    id: "lemonade",
-    name: "Stacja lemoniad & napojów",
-    bullets: [
-      "Dystrybutory 2×12 L (łącznie 24 L na 50 osób jako punkt wyjścia)",
-      "Minimum 2–3 smaki (np. cytryna–mięta, malina, ogórek–bazylia)",
-      "Możliwość pełnego brandingu (tabliczki z nazwami, karta smaków)",
-      "Idealne uzupełnienie pakietu Kids lub Family & Seniors",
-    ],
-    note: "Przy imprezach plenerowych i w upałach warto mocniej podbić ilość – kalkulator uwzględnia skalowanie wg liczby gości.",
-  },
-  {
-    id: "keg",
-    name: "KEG piwa 30 L z podajnikiem",
-    bullets: [
-      "Standardowy KEG 30 L – ok. 100 piw 0,3 L",
-      "Chłodzenie, reduktor, nalewak – w komplecie obsługa barmańska",
-      "Dobór marki piwa do budżetu / preferencji",
-    ],
-    note: "KEG dostępny wyłącznie w pakietach z alkoholem – kalkulator automatycznie blokuje tę opcję przy Kids Party 0%.",
-  },
-];
 
 export default function PackageDetails() {
   return (
-    <section
-      id="pakiety-szczegoly"
-      className="py-24 md:py-28 bg-black border-t border-white/5"
-    >
-      <div className="container mx-auto px-6 max-w-6xl">
-        {/* nagłówek sekcji */}
+    <Section className="bg-gradient-to-b from-black to-neutral-950">
+      {/* TYTUŁ W KONTENERZE */}
+      <Container>
         <motion.div
           className="text-center mb-16"
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
         >
-          <p className="text-amber-400 uppercase tracking-[0.3em] text-xs md:text-sm mb-3">
-            Szczegóły pakietów
+          <p className="text-amber-400 uppercase tracking-[0.3em] text-sm mb-4">
+            Nasze pakiety
           </p>
-          <h2 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
-            Co dokładnie zawiera pakiet?
+          <h2 className="font-playfair text-5xl md:text-6xl font-bold text-white mb-6">
+            Wybierz idealny pakiet
           </h2>
-          <p className="text-white/55 text-sm md:text-base max-w-3xl mx-auto">
-            Poniżej rozpisujemy w prosty sposób, do jakich imprez pasuje każdy
-            pakiet i co realnie dostajesz w cenie. Bez ściemy, bez „drobnego
-            druczku”.
-          </p>
+          <div className="w-20 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto" />
         </motion.div>
+      </Container>
 
-        {/* pakiety */}
-        <div className="space-y-10 md:space-y-12 mb-16">
+      {/* KARTY W KONTENERZE */}
+      <Container>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {Object.values(OFFERS).map((offer) => {
-            const details = PACKAGE_DETAILS[offer.id];
+            const details =
+              PACKAGE_DETAILS[offer.id as keyof typeof PACKAGE_DETAILS];
+            const Icon = PACKAGE_ICONS[offer.id as keyof typeof PACKAGE_ICONS];
+
             if (!details) return null;
 
             return (
-              <motion.article
+              <motion.div
                 key={offer.id}
-                id={`pakiet-${offer.id}`}
-                className="border border-white/10 bg-gradient-to-b from-neutral-950 to-black/90 p-6 md:p-8"
-                variants={sectionVariants}
-                initial="hidden"
-                whileInView="visible"
+                className="group relative bg-gradient-to-b from-neutral-900 to-neutral-950 border border-white/5 hover:border-amber-400/30 transition-all duration-500 h-full"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
               >
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-6">
-                  <div>
-                    <h3 className="font-playfair text-2xl md:text-3xl font-bold text-white mb-2">
+                {/* Popular badge */}
+                {details.popular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-full">
+                    NAJPOPULARNIEJSZY
+                  </div>
+                )}
+
+                <div className="p-6">
+                  {/* Icon & Title */}
+                  <div className="text-center mb-4">
+                    <div className="p-2 bg-gradient-to-br from-amber-500/20 to-amber-500/5 rounded-lg inline-flex items-center justify-center mb-3">
+                      <Icon className="w-6 h-6 text-amber-400" />
+                    </div>
+                    <h3 className="font-playfair text-xl font-bold text-white">
                       {offer.name}
                     </h3>
-                    <p className="text-amber-300 text-xs md:text-sm uppercase tracking-[0.25em] mb-3">
+                    <p className="text-amber-300 text-sm mt-1">
                       {details.subtitle}
                     </p>
                   </div>
-                  <div className="text-right md:text-right">
+
+                  {/* Price */}
+                  <div className="mb-4 text-center">
                     <p className="text-white/50 text-xs uppercase tracking-[0.2em]">
                       od
                     </p>
-                    <p className="font-playfair text-3xl md:text-4xl font-bold bg-gradient-to-r from-amber-200 to-yellow-400 bg-clip-text text-transparent">
-                      {offer.price.toLocaleString("pl-PL")} zł
+                    <p className="font-playfair text-2xl font-bold bg-gradient-to-r from-amber-200 to-yellow-400 bg-clip-text text-transparent">
+                      {offer.price.toLocaleString('pl-PL')} zł
                     </p>
                   </div>
-                </div>
 
-                <div className="grid md:grid-cols-2 gap-6 md:gap-10 text-sm md:text-base">
-                  <div className="space-y-3">
-                    <p className="text-white/45 text-xs uppercase tracking-[0.2em]">
-                      Idealny na
+                  {/* Highlights */}
+                  <div className="mb-4">
+                    <p className="text-white/40 text-xs uppercase tracking-[0.2em] mb-2 text-center">
+                      W pakiecie:
                     </p>
-                    <ul className="list-disc list-inside text-white/80 space-y-1.5">
-                      {details.idealFor.map((item) => (
-                        <li key={item}>{item}</li>
+                    <ul className="text-white/70 text-sm space-y-1">
+                      {details.highlights.map((item, idx) => (
+                        <li key={idx} className="flex items-start">
+                          <span className="text-amber-400 mr-2">✓</span>
+                          {item}
+                        </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="space-y-3">
-                    <p className="text-white/45 text-xs uppercase tracking-[0.2em]">
-                      W cenie pakietu
+                  {/* Ideal for */}
+                  <div>
+                    <p className="text-white/40 text-xs uppercase tracking-[0.2em] mb-2 text-center">
+                      Idealny na:
                     </p>
-                    <ul className="list-disc list-inside text-white/80 space-y-1.5">
-                      {details.includes.map((item) => (
-                        <li key={item}>{item}</li>
+                    <div className="flex flex-wrap gap-1">
+                      {details.idealFor.map((item, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-1 bg-white/5 text-white/60 text-xs rounded"
+                        >
+                          {item}
+                        </span>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 </div>
-
-                {details.notes && (
-                  <div className="mt-5 border-t border-white/10 pt-4 text-xs md:text-sm text-white/60 space-y-1.5">
-                    {details.notes.map((n) => (
-                      <p key={n}>• {n}</p>
-                    ))}
-                  </div>
-                )}
-              </motion.article>
+              </motion.div>
             );
           })}
         </div>
+      </Container>
 
-        {/* dodatki */}
+      {/* DODATKI - TYTUŁ W KONTENERZE */}
+      <Container>
         <motion.div
-          className="border border-amber-400/40 bg-gradient-to-b from-neutral-950 to-black/90 p-6 md:p-8"
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <h3 className="font-playfair text-2xl md:text-3xl font-bold text-amber-200 mb-2">
-            Dodatki specjalne
-          </h3>
-          <p className="text-white/60 text-sm md:text-base mb-6">
-            Każdy dodatek w kalkulatorze to realna usługa z zaplanowaną ilością
-            produktów. Poniżej rozpisujemy, co dokładnie zawiera cena
-            orientacyjna.
+          <p className="text-amber-400 uppercase tracking-[0.3em] text-sm mb-4">
+            Dodatki
           </p>
-
-          <div className="grid md:grid-cols-3 gap-6 text-sm md:text-base">
-            {ADDON_DETAILS.map((addon) => (
-              <div
-                key={addon.id}
-                className="border border-white/10 bg-black/40 p-4 md:p-5"
-              >
-                <h4 className="text-white font-semibold mb-3">
-                  {addon.name}
-                </h4>
-                <ul className="list-disc list-inside text-white/80 space-y-1.5 mb-3">
-                  {addon.bullets.map((b) => (
-                    <li key={b}>{b}</li>
-                  ))}
-                </ul>
-                <p className="text-white/55 text-xs">{addon.note}</p>
-              </div>
-            ))}
-          </div>
+          <h3 className="font-playfair text-3xl md:text-4xl font-bold text-white mb-6">
+            Uzupełnij swój pakiet
+          </h3>
+          <div className="w-20 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto" />
         </motion.div>
-      </div>
-    </section>
+      </Container>
+
+      {/* KARTY DODATKÓW W KONTENERZE */}
+      <Container>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[
+            {
+              name: 'Fontanna czekolady',
+              desc: 'Belgijska czekolada z owocami',
+              price: 'od 400 zł',
+            },
+            {
+              name: 'Stacja lemoniad',
+              desc: '3 smaki, dystrybutory 24L',
+              price: 'od 300 zł',
+            },
+            {
+              name: 'KEG piwa',
+              desc: '30L z chłodzeniem i obsługą',
+              price: 'od 500 zł',
+            },
+            {
+              name: 'Hockery 6 szt.',
+              desc: 'Eleganckie stołki barowe',
+              price: '200 zł',
+            },
+            {
+              name: 'Oświetlenie LED z personalizacją',
+              desc: "Dekoracja świetlna z napisem (np. '30 lat', nazwa pary młodej, logo firmy)",
+              price: 'od 500 zł',
+            },
+          ].map((addon, idx) => (
+            <motion.div
+              key={idx}
+              className="bg-gradient-to-b from-neutral-900 to-neutral-950 border border-white/5 p-6"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.1 }}
+            >
+              <h4 className="text-white font-playfair text-lg font-bold mb-2 text-center">
+                {addon.name}
+              </h4>
+              <p className="text-white/60 text-sm mb-3 text-center">
+                {addon.desc}
+              </p>
+              <p className="text-amber-400 font-bold text-center">
+                {addon.price}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      </Container>
+    </Section>
   );
 }

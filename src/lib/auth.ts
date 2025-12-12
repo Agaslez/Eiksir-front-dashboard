@@ -6,7 +6,7 @@ const getJwtSecret = () => {
   if (typeof jest !== 'undefined') {
     return 'test-secret-key-for-jest-tests';
   }
-  
+
   // W środowisku Vite (przeglądarka)
   try {
     if (import.meta.env?.VITE_JWT_SECRET) {
@@ -15,7 +15,7 @@ const getJwtSecret = () => {
   } catch (e) {
     // Ignoruj błędy w testach
   }
-  
+
   // Fallback
   return 'eliksir-bar-secret-key-min-32-chars-change-in-prod';
 };
@@ -39,10 +39,12 @@ export async function createAuthToken(payload: UserPayload): Promise<string> {
     .sign(JWT_SECRET);
 }
 
-export async function verifyAuthToken(token: string): Promise<UserPayload | null> {
+export async function verifyAuthToken(
+  token: string
+): Promise<UserPayload | null> {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
-    
+
     if (
       payload &&
       typeof payload === 'object' &&
@@ -53,10 +55,10 @@ export async function verifyAuthToken(token: string): Promise<UserPayload | null
       return {
         id: String(payload.id),
         email: String(payload.email),
-        role: payload.role as 'admin' | 'editor' | 'viewer'
+        role: payload.role as 'admin' | 'editor' | 'viewer',
       };
     }
-    
+
     return null;
   } catch (error) {
     console.error('Token verification failed:', error);
@@ -66,12 +68,12 @@ export async function verifyAuthToken(token: string): Promise<UserPayload | null
 
 export function isAuthenticated(): boolean {
   if (typeof window === 'undefined') return false;
-  
+
   const token = localStorage.getItem('auth_token');
   const userData = localStorage.getItem('user_data');
-  
+
   if (!token || !userData) return false;
-  
+
   try {
     // Podstawowa weryfikacja - w produkcji verifyAuthToken(token)
     const user = JSON.parse(userData);
@@ -83,10 +85,10 @@ export function isAuthenticated(): boolean {
 
 export function getUserRole(): string | null {
   if (typeof window === 'undefined') return null;
-  
+
   const userData = localStorage.getItem('user_data');
   if (!userData) return null;
-  
+
   try {
     const user = JSON.parse(userData);
     return user.role || null;
@@ -95,33 +97,24 @@ export function getUserRole(): string | null {
   }
 }
 
-export function requireAuth(requiredRole?: string): boolean {
-  // DEBUG: Sprawdź co jest w localStorage
-  console.log('requireAuth called, localStorage:', {
-    auth_token: localStorage.getItem('auth_token'),
-    user_data: localStorage.getItem('user_data'),
-    isAuthenticated: isAuthenticated()
-  });
-  
-  if (!isAuthenticated()) {
-    console.log('Not authenticated, redirecting to login');
-    window.location.href = '/admin/login';
-    return false;
+// Funkcja pomocnicza do sprawdzania autoryzacji (bez przekierowania)
+export function checkAuth(requiredRole?: string): {
+  isAuthenticated: boolean;
+  hasPermission: boolean;
+} {
+  const isAuth = isAuthenticated();
+
+  if (!isAuth) {
+    return { isAuthenticated: false, hasPermission: false };
   }
-  
+
   if (requiredRole) {
     const userRole = getUserRole();
-    console.log('User role:', userRole, 'Required role:', requiredRole);
-    
-    if (userRole !== requiredRole && userRole !== 'admin') {
-      console.log('Insufficient permissions, redirecting to unauthorized');
-      window.location.href = '/admin/unauthorized';
-      return false;
-    }
+    const hasPermission = userRole === requiredRole || userRole === 'admin';
+    return { isAuthenticated: true, hasPermission };
   }
-  
-  console.log('Authentication successful');
-  return true;
+
+  return { isAuthenticated: true, hasPermission: true };
 }
 
 export function logout(): void {

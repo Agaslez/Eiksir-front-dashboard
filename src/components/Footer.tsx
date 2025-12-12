@@ -32,7 +32,9 @@ const Footer = () => {
               target="_blank"
               rel="noopener noreferrer"
               className="text-white/40 hover:text-amber-400 transition-colors text-sm uppercase tracking-wider"
-              onClick={() => trackEvent('footer_social_click', { platform: 'instagram' })}
+              onClick={() =>
+                trackEvent('footer_social_click', { platform: 'instagram' })
+              }
             >
               Instagram
             </a>
@@ -41,7 +43,9 @@ const Footer = () => {
               target="_blank"
               rel="noopener noreferrer"
               className="text-white/40 hover:text-amber-400 transition-colors text-sm uppercase tracking-wider"
-              onClick={() => trackEvent('footer_social_click', { platform: 'facebook' })}
+              onClick={() =>
+                trackEvent('footer_social_click', { platform: 'facebook' })
+              }
             >
               Facebook
             </a>
@@ -51,7 +55,9 @@ const Footer = () => {
         <div className="border-t border-white/5 mt-8 pt-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
             <div>
-              <h4 className="text-white/60 uppercase tracking-wider mb-4">Kontakt</h4>
+              <h4 className="text-white/60 uppercase tracking-wider mb-4">
+                Kontakt
+              </h4>
               <div className="space-y-2">
                 <p className="text-white/40">517-616-618</p>
                 <p className="text-white/40">eliksir@bar.pl</p>
@@ -59,66 +65,86 @@ const Footer = () => {
               </div>
             </div>
             <div>
-              <h4 className="text-white/60 uppercase tracking-wider mb-4">Szybkie linki</h4>
+              <h4 className="text-white/60 uppercase tracking-wider mb-4">
+                Szybkie linki
+              </h4>
               <div className="space-y-2">
                 <a
                   href="#oferta"
                   className="block text-white/40 hover:text-amber-400 transition-colors"
-                  onClick={() => trackEvent('footer_link_click', { link: 'oferta' })}
+                  onClick={() =>
+                    trackEvent('footer_link_click', { link: 'oferta' })
+                  }
                 >
                   Oferta i pakiety
                 </a>
                 <a
                   href="#kalkulator"
                   className="block text-white/40 hover:text-amber-400 transition-colors"
-                  onClick={() => trackEvent('footer_link_click', { link: 'kalkulator' })}
+                  onClick={() =>
+                    trackEvent('footer_link_click', { link: 'kalkulator' })
+                  }
                 >
                   Kalkulator wyceny
                 </a>
                 <a
                   href="#galeria"
                   className="block text-white/40 hover:text-amber-400 transition-colors"
-                  onClick={() => trackEvent('footer_link_click', { link: 'galeria' })}
+                  onClick={() =>
+                    trackEvent('footer_link_click', { link: 'galeria' })
+                  }
                 >
                   Galeria realizacji
                 </a>
                 <a
                   href="#kontakt"
                   className="block text-white/40 hover:text-amber-400 transition-colors"
-                  onClick={() => trackEvent('footer_link_click', { link: 'kontakt' })}
+                  onClick={() =>
+                    trackEvent('footer_link_click', { link: 'kontakt' })
+                  }
                 >
                   Formularz kontaktowy
                 </a>
                 <a
                   href="/admin/login"
                   className="block text-amber-400 hover:text-amber-300 transition-colors font-medium"
-                  onClick={() => trackEvent('footer_link_click', { link: 'admin' })}
+                  onClick={() =>
+                    trackEvent('footer_link_click', { link: 'admin' })
+                  }
                 >
                   Panel Admina
                 </a>
               </div>
             </div>
             <div>
-              <h4 className="text-white/60 uppercase tracking-wider mb-4">Informacje</h4>
+              <h4 className="text-white/60 uppercase tracking-wider mb-4">
+                Informacje
+              </h4>
               <div className="space-y-2">
                 <a
                   href="#"
                   className="block text-white/40 hover:text-amber-400 transition-colors"
-                  onClick={() => trackEvent('footer_legal_click', { link: 'privacy' })}
+                  onClick={() =>
+                    trackEvent('footer_legal_click', { link: 'privacy' })
+                  }
                 >
                   Polityka prywatności
                 </a>
                 <a
                   href="#"
                   className="block text-white/40 hover:text-amber-400 transition-colors"
-                  onClick={() => trackEvent('footer_legal_click', { link: 'terms' })}
+                  onClick={() =>
+                    trackEvent('footer_legal_click', { link: 'terms' })
+                  }
                 >
                   Regulamin
                 </a>
                 <a
                   href="#"
                   className="block text-white/40 hover:text-amber-400 transition-colors"
-                  onClick={() => trackEvent('footer_legal_click', { link: 'cookies' })}
+                  onClick={() =>
+                    trackEvent('footer_legal_click', { link: 'cookies' })
+                  }
                 >
                   Cookies
                 </a>
@@ -133,7 +159,8 @@ const Footer = () => {
             Stworzone z pasją dla najlepszych imprez w Polsce
           </p>
           <p className="text-white/20 text-xs mt-1">
-            Wersja: 1.0.0 | Ostatnia aktualizacja: {new Date().toLocaleDateString('pl-PL')}
+            Wersja: 1.0.0 | Ostatnia aktualizacja:{' '}
+            {new Date().toLocaleDateString('pl-PL')}
           </p>
         </div>
       </div>

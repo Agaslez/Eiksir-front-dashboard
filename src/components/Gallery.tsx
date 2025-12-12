@@ -1,6 +1,15 @@
-import { ChevronLeft, ChevronRight, Heart, Maximize2, Share2, X } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  Maximize2,
+  Share2,
+  X,
+} from 'lucide-react';
 import { useState } from 'react';
 import { trackEvent } from '../lib/error-monitoring';
+import { Container } from './layout/Container';
+import { Section } from './layout/Section';
 
 const galleryImages = [
   {
@@ -23,7 +32,7 @@ const galleryImages = [
   },
   {
     id: 3,
-    src: 'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w-800',
+    src: 'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w=800',
     alt: 'Urodziny z barem koktajlowym',
     category: 'urodziny',
     title: '40. urodziny',
@@ -32,7 +41,7 @@ const galleryImages = [
   },
   {
     id: 4,
-    src: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=800',
+    src: 'https://images.unsplash.com/photo-1604321115296-f4b73745c7d9?auto=format&fit=crop&w=800',
     alt: 'Koktajle premium',
     category: 'drinki',
     title: 'Nasze signature drinki',
@@ -41,21 +50,21 @@ const galleryImages = [
   },
   {
     id: 5,
-    src: 'https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&w=800',
-    alt: 'Dekoracja baru',
-    category: 'dekoracje',
-    title: 'Stylowa aranżacja',
-    description: 'Dopracowane w każdym detalu',
-    likes: 31,
+    src: 'https://images.unsplash.com/photo-1509669803555-fd5edd8d5a41?auto=format&fit=crop&w=800',
+    alt: 'Barman przy pracy',
+    category: 'zespół',
+    title: 'Profesjonalny barman',
+    description: 'Tworzenie drinków z pasją i precyzją',
+    likes: 49,
   },
   {
     id: 6,
-    src: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800',
-    alt: 'Barman przy pracy',
+    src: 'https://images.unsplash.com/photo-1462539405390-d0bdb635c7d1?auto=format&fit=crop&w=800',
+    alt: 'Zespół barmanów',
     category: 'zespół',
     title: 'Nasz zespół',
     description: 'Profesjonalni barmani z pasją',
-    likes: 49,
+    likes: 31,
   },
 ];
 
@@ -72,23 +81,32 @@ const Gallery = () => {
     { id: 'zespół', label: 'Zespół' },
   ];
 
-  const filteredImages = activeCategory === 'wszystkie' 
-    ? galleryImages 
-    : galleryImages.filter(img => img.category === activeCategory);
+  const filteredImages =
+    activeCategory === 'wszystkie'
+      ? galleryImages
+      : galleryImages.filter((img) => img.category === activeCategory);
 
   const handlePrev = () => {
     if (selectedImage !== null) {
-      const prevIndex = selectedImage === 0 ? filteredImages.length - 1 : selectedImage - 1;
+      const prevIndex =
+        selectedImage === 0 ? filteredImages.length - 1 : selectedImage - 1;
       setSelectedImage(prevIndex);
-      trackEvent('gallery_nav', { direction: 'prev', imageId: filteredImages[prevIndex].id });
+      trackEvent('gallery_nav', {
+        direction: 'prev',
+        imageId: filteredImages[prevIndex].id,
+      });
     }
   };
 
   const handleNext = () => {
     if (selectedImage !== null) {
-      const nextIndex = selectedImage === filteredImages.length - 1 ? 0 : selectedImage + 1;
+      const nextIndex =
+        selectedImage === filteredImages.length - 1 ? 0 : selectedImage + 1;
       setSelectedImage(nextIndex);
-      trackEvent('gallery_nav', { direction: 'next', imageId: filteredImages[nextIndex].id });
+      trackEvent('gallery_nav', {
+        direction: 'next',
+        imageId: filteredImages[nextIndex].id,
+      });
     }
   };
 
@@ -97,7 +115,7 @@ const Gallery = () => {
     // W rzeczywistej aplikacji tutaj byłby zapis do backendu
   };
 
-  const handleShare = (image: typeof galleryImages[0]) => {
+  const handleShare = (image: (typeof galleryImages)[0]) => {
     const shareText = `Zobacz realizację Eliksir Bar: ${image.title} - ${image.description}`;
     if (navigator.share) {
       navigator.share({
@@ -113,8 +131,9 @@ const Gallery = () => {
   };
 
   return (
-    <section id="galeria" className="py-20 bg-black">
-      <div className="max-w-6xl mx-auto px-6">
+    <Section id="galeria" className="bg-black">
+      {/* TYTUŁ W KONTENERZE */}
+      <Container>
         {/* Header */}
         <div className="text-center mb-12">
           <p className="text-amber-400 uppercase tracking-[0.3em] text-sm mb-4">
@@ -124,11 +143,14 @@ const Gallery = () => {
             Galeria Eliksir Bar
           </h2>
           <p className="text-white/60 text-sm md:text-base max-w-2xl mx-auto">
-            Zobacz nasze najpiękniejsze realizacje. Każda impreza to wyjątkowa historia, 
-            a my jesteśmy dumni, że możemy być jej częścią.
+            Zobacz nasze najpiękniejsze realizacje. Każda impreza to wyjątkowa
+            historia, a my jesteśmy dumni, że możemy być jej częścią.
           </p>
         </div>
+      </Container>
 
+      {/* GALERIA W KONTENERZE */}
+      <Container>
         {/* Category Filters */}
         <div className="flex flex-wrap justify-center gap-2 mb-8">
           {categories.map((category) => (
@@ -173,12 +195,17 @@ const Gallery = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      image.category === 'wesele' ? 'bg-pink-500/20 text-pink-300' :
-                      image.category === 'firmowe' ? 'bg-blue-500/20 text-blue-300' :
-                      image.category === 'urodziny' ? 'bg-purple-500/20 text-purple-300' :
-                      'bg-amber-500/20 text-amber-300'
-                    }`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        image.category === 'wesele'
+                          ? 'bg-pink-500/20 text-pink-300'
+                          : image.category === 'firmowe'
+                            ? 'bg-blue-500/20 text-blue-300'
+                            : image.category === 'urodziny'
+                              ? 'bg-purple-500/20 text-purple-300'
+                              : 'bg-amber-500/20 text-amber-300'
+                      }`}
+                    >
                       {image.category === 'wesele' && 'Wesele'}
                       {image.category === 'firmowe' && 'Firmowe'}
                       {image.category === 'urodziny' && 'Urodziny'}
@@ -196,8 +223,12 @@ const Gallery = () => {
                       <Heart className="w-5 h-5" />
                     </button>
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-1">{image.title}</h3>
-                  <p className="text-gray-300 text-sm">{image.description}</p>
+                  <h3 className="text-xl font-bold text-white mb-1 text-center">
+                    {image.title}
+                  </h3>
+                  <p className="text-gray-300 text-sm text-center">
+                    {image.description}
+                  </p>
                 </div>
               </div>
 
@@ -228,24 +259,28 @@ const Gallery = () => {
           ))}
         </div>
 
-        {/* Stats */}
-        <div className="mt-12 text-center">
-          <div className="inline-flex items-center space-x-8 text-gray-400">
-            <div>
-              <div className="text-2xl font-bold text-amber-400">{galleryImages.length}+</div>
-              <div className="text-sm">Realizacji</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-amber-400">100%</div>
-              <div className="text-sm">Zadowolonych klientów</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-amber-400">24/7</div>
-              <div className="text-sm">Dostępność</div>
+        {/* Stats - w kontenerze */}
+        <div className="mt-12">
+          <div className="text-center">
+            <div className="inline-flex items-center space-x-8 text-gray-400">
+              <div>
+                <div className="text-2xl font-bold text-amber-400">
+                  {galleryImages.length}+
+                </div>
+                <div className="text-sm">Realizacji</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-amber-400">100%</div>
+                <div className="text-sm">Zadowolonych klientów</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-amber-400">24/7</div>
+                <div className="text-sm">Dostępność</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </Container>
 
       {/* Lightbox Modal */}
       {selectedImage !== null && (
@@ -277,12 +312,12 @@ const Gallery = () => {
               alt={filteredImages[selectedImage].alt}
               className="w-full h-auto max-h-[70vh] object-contain rounded-lg"
             />
-            
+
             <div className="mt-6 text-center">
-              <h3 className="text-2xl font-bold text-white mb-2">
+              <h3 className="text-2xl font-bold text-white mb-2 text-center">
                 {filteredImages[selectedImage].title}
               </h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-gray-300 mb-4 text-center">
                 {filteredImages[selectedImage].description}
               </p>
               <div className="flex items-center justify-center space-x-6">
@@ -305,7 +340,7 @@ const Gallery = () => {
           </div>
         </div>
       )}
-    </section>
+    </Section>
   );
 };
 

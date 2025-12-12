@@ -1,4 +1,12 @@
-import { Clock, Facebook, Instagram, MapPin, Menu, Phone, X } from 'lucide-react';
+import {
+  Clock,
+  Facebook,
+  Instagram,
+  MapPin,
+  Menu,
+  Phone,
+  X,
+} from 'lucide-react';
 import { useState } from 'react';
 import { trackEvent } from '../lib/error-monitoring';
 
@@ -34,21 +42,25 @@ const Header = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <a 
-                href="https://instagram.com" 
-                target="_blank" 
+              <a
+                href="https://instagram.com"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-amber-300 hover:text-amber-400"
-                onClick={() => trackEvent('social_click', { platform: 'instagram' })}
+                onClick={() =>
+                  trackEvent('social_click', { platform: 'instagram' })
+                }
               >
                 <Instagram className="w-5 h-5" />
               </a>
-              <a 
-                href="https://facebook.com" 
-                target="_blank" 
+              <a
+                href="https://facebook.com"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-amber-300 hover:text-amber-400"
-                onClick={() => trackEvent('social_click', { platform: 'facebook' })}
+                onClick={() =>
+                  trackEvent('social_click', { platform: 'facebook' })
+                }
               >
                 <Facebook className="w-5 h-5" />
               </a>
@@ -80,7 +92,7 @@ const Header = () => {
                 key={item.label}
                 href={item.href}
                 className={`font-medium transition-colors ${
-                  item.admin 
+                  item.admin
                     ? 'text-amber-400 hover:text-amber-300 border border-amber-500/50 px-4 py-2 rounded-lg'
                     : 'text-gray-300 hover:text-amber-400'
                 }`}
@@ -89,11 +101,13 @@ const Header = () => {
                 {item.label}
               </a>
             ))}
-            <button 
+            <button
               className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-bold px-6 py-3 rounded-full transition-all"
               onClick={() => {
                 trackEvent('cta_click', { location: 'header' });
-                document.getElementById('kontakt')?.scrollIntoView({ behavior: 'smooth' });
+                document
+                  .getElementById('kontakt')
+                  ?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
               Wyceń swoją imprezę
@@ -105,7 +119,11 @@ const Header = () => {
             className="md:hidden text-white"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
 
@@ -118,7 +136,7 @@ const Header = () => {
                   key={item.label}
                   href={item.href}
                   className={`font-medium py-2 ${
-                    item.admin 
+                    item.admin
                       ? 'text-amber-400 border border-amber-500/50 px-4 rounded-lg'
                       : 'text-gray-300 hover:text-amber-400'
                   }`}
@@ -130,12 +148,14 @@ const Header = () => {
                   {item.label}
                 </a>
               ))}
-              <button 
+              <button
                 className="bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold px-6 py-3 rounded-full mt-4"
                 onClick={() => {
                   trackEvent('mobile_cta_click');
                   setIsMenuOpen(false);
-                  document.getElementById('kontakt')?.scrollIntoView({ behavior: 'smooth' });
+                  document
+                    .getElementById('kontakt')
+                    ?.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
                 Wyceń swoją imprezę

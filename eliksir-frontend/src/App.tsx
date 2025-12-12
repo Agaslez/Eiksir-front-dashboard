@@ -1,0 +1,143 @@
+﻿import React, { Suspense, lazy } from 'react';
+import {
+  Navigate,
+  Route,
+  BrowserRouter as Router,
+  Routes,
+} from 'react-router-dom';
+import './App.css';
+import LoadingSpinner from './components/LoadingSpinner';
+import { checkAuth } from './lib/auth';
+
+// Lazy load components
+const Home = lazy(() => import('./pages/Home'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Quiz = lazy(() => import('./pages/Quiz'));
+const Gallery = lazy(() => import('./pages/Gallery'));
+const AdminLogin = lazy(() => import('./pages/admin/Login'));
+const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
+const DashboardHome = lazy(() => import('./components/admin/DashboardHome'));
+const AdminUnauthorized = lazy(() => import('./pages/admin/Unauthorized'));
+const ReservationsManager = lazy(
+  () => import('./pages/admin/ReservationsManager')
+);
+const ContentEditor = lazy(() => import('./pages/admin/ContentEditor'));
+const ShoppingLists = lazy(() => import('./pages/admin/ShoppingLists'));
+const GalleryManager = lazy(() => import('./pages/admin/GalleryManager'));
+const Customers = lazy(() => import('./pages/admin/Customers'));
+const Analytics = lazy(() => import('./pages/admin/Analytics'));
+const Settings = lazy(() => import('./pages/admin/Settings'));
+
+const ProtectedRoute = ({
+  children,
+  requiredRole,
+}: {
+  children: React.ReactNode;
+  requiredRole?: string;
+}) => {
+  const { isAuthenticated, hasPermission } = checkAuth(requiredRole);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  if (requiredRole && !hasPermission) {
+    return <Navigate to="/admin/unauthorized" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+function App() {
+  return (
+    <Router>
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/quiz" element={<Quiz />} />
+          <Route path="/gallery" element={<Gallery />} />
+
+          {/* Admin routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/unauthorized" element={<AdminUnauthorized />} />
+
+          {/* Protected admin routes with nested routing */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<DashboardHome />} />
+            <Route
+              path="reservations"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <ReservationsManager />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="content"
+              element={
+                <ProtectedRoute requiredRole="editor">
+                  <ContentEditor />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="shopping-lists"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <ShoppingLists />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="gallery"
+              element={
+                <ProtectedRoute requiredRole="editor">
+                  <GalleryManager />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="customers"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <Customers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="analytics"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <Analytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="settings"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
+
+          {/* Catch all route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    </Router>
+  );
+}
+
+export default App;

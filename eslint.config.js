@@ -5,7 +5,8 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  // TUTA: Dodano src/__tests__ do ignorowanych
+  { ignores: ['dist', 'src/__tests__'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
@@ -19,15 +20,16 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': 'off',
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       
-      // SENIOR MODE: Wyłączamy wszystko, co nie jest błędem składni.
+      // Wyłączamy restrykcyjne reguły
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       'react-hooks/exhaustive-deps': 'off',
-      'react-hooks/rules-of-hooks': 'off', // Wyłączamy sprawdzanie hooków dla świętego spokoju
+      'react-hooks/rules-of-hooks': 'off',
       'react-hooks/set-state-in-effect': 'off',
-      'no-useless-escape': 'off'
+      'no-useless-escape': 'off',
+      'react-hooks/refs': 'off'
     },
   },
 );

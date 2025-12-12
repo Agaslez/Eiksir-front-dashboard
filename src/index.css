@@ -62,11 +62,11 @@ h6 {
 
 /* Tekst */
 .text-gradient-gold {
-  @apply bg-gradient-to-r from-eliksir-gold via-eliksir-gold-light to-eliksir-gold bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-600 bg-clip-text text-transparent;
 }
 
 .text-gradient-purple {
-  @apply bg-gradient-to-r from-eliksir-purple via-purple-500 to-pink-500 bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 bg-clip-text text-transparent;
 }
 
 /* Karty */
@@ -92,7 +92,7 @@ h6 {
 
 /* Przyciski */
 .btn-primary {
-  @apply bg-gradient-to-r from-eliksir-gold to-eliksir-gold-dark text-black font-semibold px-8 py-3 rounded-lg hover:from-eliksir-gold-light hover:to-eliksir-gold transition-all duration-300;
+  @apply bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold px-8 py-3 rounded-lg hover:from-yellow-400 hover:to-yellow-500 transition-all duration-300;
 }
 
 .btn-secondary {
@@ -100,7 +100,7 @@ h6 {
 }
 
 .btn-danger {
-  @apply bg-gradient-to-r from-eliksir-red to-red-700 text-white font-semibold px-8 py-3 rounded-lg hover:from-red-600 hover:to-red-800 transition-all duration-300;
+  @apply bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold px-8 py-3 rounded-lg hover:from-red-600 hover:to-red-800 transition-all duration-300;
 }
 
 /* Animacje */
@@ -190,3 +190,9 @@ html {
 .text-pretty {
   text-wrap: pretty;
 }
+
+
+
+
+
+

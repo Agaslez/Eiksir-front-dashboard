@@ -1,23 +1,15 @@
 ﻿import { motion, useScroll, useTransform } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { ELIKSIR_STYLES } from '../lib/styles';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
 const HeroEliksir = () => {
   const ref = useRef<HTMLElement>(null);
-  const [isMounted, setIsMounted] = useState(false);
 
-  // Ustaw isMounted na true po zamontowaniu komponentu
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // Używaj useScroll tylko jeśli ref.current istnieje
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start start', 'end start'],
-    enabled: isMounted && !!ref.current,
   });
 
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);

@@ -1,36 +1,32 @@
-// src/components/ThemeSwitcher.tsx
-'use client';
-
-import { themes, type ThemeName } from '@/lib/theme';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { themes, type ThemeName } from '../lib/theme';
 
 export function ThemeSwitcher() {
-  const [currentTheme, setCurrentTheme] = useState<ThemeName>('eliksir');
-  const [isVisible, setIsVisible] = useState(false);
+  // SENIOR FIX: Ładujemy stan leniwie (w funkcji).
+  // Dzięki temu nie potrzebujemy useEffect i unikamy błędu "setState in effect".
+  const [currentTheme, setCurrentTheme] = useState<ThemeName>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme') as ThemeName;
+      if (saved && themes[saved]) return saved;
+    }
+    return 'eliksir';
+  });
 
-  // Bezpieczne sprawdzenie debuga przy inicjalizacji
+  const [isVisible, setIsVisible] = useState(false);
+  
+  // SENIOR FIX: To samo dla flagi debug. Czysto i synchronicznie.
   const [showDebug] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.location.search.includes('debug');
     }
     return false;
   });
-
+  
   const isDev = process.env.NODE_ENV === 'development';
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme') as ThemeName;
-      if (savedTheme && themes[savedTheme]) {
-        setCurrentTheme(savedTheme);
-      }
-    }
-  }, []);
 
   const handleThemeChange = (theme: ThemeName) => {
     setCurrentTheme(theme);
     localStorage.setItem('theme', theme);
-    window.location.reload(); // tymczasowo – potem zrobimy bez reloadu
   };
 
   if (!isDev && !showDebug) return null;
@@ -62,7 +58,7 @@ export function ThemeSwitcher() {
       <button
         onClick={() => setIsVisible(!isVisible)}
         className="absolute bottom-0 right-0 w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 to-rose-600 shadow-2xl cursor-pointer border-4 border-white/30 hover:scale-110 transition-all"
-        title="Przełącznik motywów"
+        title="Toggle theme switcher"
       />
     </div>
   );

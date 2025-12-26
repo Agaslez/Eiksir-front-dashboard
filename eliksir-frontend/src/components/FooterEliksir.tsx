@@ -172,7 +172,7 @@ export default function FooterEliksir() {
                 Polityka prywatności
               </a>
               <a
-                href="/admin"
+                href="/admin/login"
                 className="hover:text-eliksir-gold transition-colors text-xs opacity-50"
               >
                 Panel Admin

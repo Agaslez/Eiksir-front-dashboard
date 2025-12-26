@@ -1,13 +1,14 @@
-﻿import React, { Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react';
 import {
-  Navigate,
-  Route,
-  BrowserRouter as Router,
-  Routes,
+    Navigate,
+    Route,
+    BrowserRouter as Router,
+    Routes,
 } from 'react-router-dom';
 import './App.css';
 import LoadingSpinner from './components/LoadingSpinner';
-import { checkAuth } from './lib/auth';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext';
 
 // Lazy load components
 const Home = lazy(() => import('./pages/Home'));
@@ -28,31 +29,14 @@ const Customers = lazy(() => import('./pages/admin/Customers'));
 const Analytics = lazy(() => import('./pages/admin/Analytics'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
 
-const ProtectedRoute = ({
-  children,
-  requiredRole,
-}: {
-  children: React.ReactNode;
-  requiredRole?: string;
-}) => {
-  const { isAuthenticated, hasPermission } = checkAuth(requiredRole);
 
-  if (!isAuthenticated) {
-    return <Navigate to="/admin/login" replace />;
-  }
-
-  if (requiredRole && !hasPermission) {
-    return <Navigate to="/admin/unauthorized" replace />;
-  }
-
-  return <>{children}</>;
-};
 
 function App() {
   return (
-    <Router>
-      <Suspense fallback={<LoadingSpinner />}>
-        <Routes>
+    <AuthProvider>
+      <Router>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
           {/* Public routes */}
           <Route path="/" element={<Home />} />
           <Route path="/contact" element={<Contact />} />
@@ -135,9 +119,16 @@ function App() {
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </Suspense>
-    </Router>
+        </Suspense>
+      </Router>
+    </AuthProvider>
   );
 }
 
 export default App;
+
+
+
+
+
+

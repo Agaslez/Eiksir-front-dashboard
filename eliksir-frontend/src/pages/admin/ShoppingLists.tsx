@@ -1,13 +1,3 @@
-import React from 'react';
-import DashboardLayout from '../../components/admin/DashboardLayout';
-import ShoppingListsComponent from '../../components/admin/ShoppingLists';
-
-const ShoppingLists: React.FC = () => {
-  return (
-    <DashboardLayout>
-      <ShoppingListsComponent />
-    </DashboardLayout>
-  );
-};
-
-export default ShoppingLists;
+export default function ShoppingLists() {
+  return <div className="bg-white rounded-lg shadow p-6"><h2 className="text-2xl font-bold">Shopping Lists</h2></div>;
+}

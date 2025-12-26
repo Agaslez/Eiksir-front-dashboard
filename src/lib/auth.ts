@@ -1,124 +1,101 @@
-import { jwtVerify, SignJWT } from 'jose';
+﻿// Nowy system auth z HttpOnly cookies
+// Backend ustawia cookies, frontend tylko wysyła credentials: "include"
 
-// Proste rozwiązanie - zawsze używaj fallbacka w testach
-const getJwtSecret = () => {
-  // W środowisku testowym (Jest) - zawsze fallback
-  if (typeof jest !== 'undefined') {
-    return 'test-secret-key-for-jest-tests';
-  }
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
-  // W środowisku Vite (przeglądarka)
-  try {
-    if (import.meta.env?.VITE_JWT_SECRET) {
-      return import.meta.env.VITE_JWT_SECRET;
-    }
-  } catch (e) {
-    // Ignoruj błędy w testach
-  }
-
-  // Fallback
-  return 'eliksir-bar-secret-key-min-32-chars-change-in-prod';
-};
-
-const JWT_SECRET = new TextEncoder().encode(getJwtSecret());
-
-const TOKEN_EXPIRY = '7d';
-
-interface UserPayload {
+interface User {
   id: string;
   email: string;
-  role: 'admin' | 'editor' | 'viewer';
-  [key: string]: unknown;
+  role: "admin" | "editor" | "viewer";
+  name?: string;
 }
 
-export async function createAuthToken(payload: UserPayload): Promise<string> {
-  return await new SignJWT(payload)
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime(TOKEN_EXPIRY)
-    .sign(JWT_SECRET);
-}
-
-export async function verifyAuthToken(
-  token: string
-): Promise<UserPayload | null> {
+// Sprawdź czy użytkownik jest zalogowany (zapytanie do backendu)
+export async function checkAuthStatus(): Promise<User | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const response = await fetch(`${API_URL}/api/auth/me`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
 
-    if (
-      payload &&
-      typeof payload === 'object' &&
-      'id' in payload &&
-      'email' in payload &&
-      'role' in payload
-    ) {
-      return {
-        id: String(payload.id),
-        email: String(payload.email),
-        role: payload.role as 'admin' | 'editor' | 'viewer',
-      };
+    if (response.ok) {
+      return await response.json();
     }
-
     return null;
   } catch (error) {
-    console.error('Token verification failed:', error);
+    console.error("Auth status check error:", error);
     return null;
   }
 }
 
-export function isAuthenticated(): boolean {
-  if (typeof window === 'undefined') return false;
+// Logowanie - backend ustawia cookies
+export async function login(email: string, password: string): Promise<User> {
+  const response = await fetch(`${API_URL}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+    credentials: "include",
+  });
 
-  const token = localStorage.getItem('auth_token');
-  const userData = localStorage.getItem('user_data');
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Login failed");
+  }
 
-  if (!token || !userData) return false;
+  return await response.json();
+}
 
+// Wylogowanie - backend czyści cookies
+export async function logout(): Promise<void> {
   try {
-    // Podstawowa weryfikacja - w produkcji verifyAuthToken(token)
-    const user = JSON.parse(userData);
-    return !!user.id && !!user.email && !!user.role;
-  } catch {
-    return false;
+    await fetch(`${API_URL}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
   }
 }
 
-export function getUserRole(): string | null {
-  if (typeof window === 'undefined') return null;
-
-  const userData = localStorage.getItem('user_data');
-  if (!userData) return null;
-
-  try {
-    const user = JSON.parse(userData);
-    return user.role || null;
-  } catch {
-    return null;
-  }
+// Helper do sprawdzania roli (dla kompatybilności)
+export async function getUserRole(): Promise<string | null> {
+  const user = await checkAuthStatus();
+  return user?.role || null;
 }
 
-// Funkcja pomocnicza do sprawdzania autoryzacji (bez przekierowania)
-export function checkAuth(requiredRole?: string): {
+// Helper do sprawdzania autoryzacji (dla kompatybilności)
+export async function checkAuth(requiredRole?: string): Promise<{
   isAuthenticated: boolean;
   hasPermission: boolean;
-} {
-  const isAuth = isAuthenticated();
+}> {
+  const user = await checkAuthStatus();
 
-  if (!isAuth) {
+  if (!user) {
     return { isAuthenticated: false, hasPermission: false };
   }
 
   if (requiredRole) {
-    const userRole = getUserRole();
-    const hasPermission = userRole === requiredRole || userRole === 'admin';
+    const hasPermission = user.role === requiredRole || user.role === "admin";
     return { isAuthenticated: true, hasPermission };
   }
 
   return { isAuthenticated: true, hasPermission: true };
 }
 
-export function logout(): void {
-  localStorage.removeItem('auth_token');
-  localStorage.removeItem('user_data');
-  window.location.href = '/admin/login';
+// Stare funkcje dla kompatybilności (tylko dla testów)
+export function isAuthenticated(): boolean {
+  console.warn("isAuthenticated() is deprecated - use checkAuthStatus()");
+  return false;
+}
+
+// Stare funkcje JWT tylko dla testów/developmentu
+export async function createAuthToken(payload: any): Promise<string> {
+  console.warn("createAuthToken() is for tests only - use backend in production");
+  return "mock-token-for-tests-only";
+}
+
+export async function verifyAuthToken(token: string): Promise<any> {
+  console.warn("verifyAuthToken() is for tests only - use backend in production");
+  return null;
 }

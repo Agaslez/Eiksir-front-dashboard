@@ -1,21 +1,21 @@
-import { useState } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard,
+  BarChart3,
+  Bell,
   Calendar,
-  ShoppingCart,
   FileText,
   Image,
-  Settings,
-  Users,
-  BarChart3,
+  LayoutDashboard,
   LogOut,
   Menu,
-  X,
-  Bell,
   Search,
+  Settings,
+  ShoppingCart,
+  Users,
+  X,
 } from 'lucide-react';
-import { logout, getUserRole } from '../../lib/auth';
+import { useState } from 'react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { trackEvent } from '../../lib/error-monitoring';
 
 type NavItem = {
@@ -29,10 +29,7 @@ type NavItem = {
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [user] = useState(() => {
-    const userData = localStorage.getItem('user_data');
-    return userData ? JSON.parse(userData) : null;
-  });
+  const { user, logout, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const navItems: NavItem[] = [
@@ -95,17 +92,25 @@ export default function DashboardLayout() {
     },
   ];
 
-  const userRole = getUserRole() || 'viewer';
+  const userRole = user?.role || 'viewer';
   const filteredNavItems = navItems.filter(
     (item) =>
       item.role === 'viewer' || item.role === userRole || userRole === 'admin'
   );
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     trackEvent('admin_logout');
-    logout();
+    await logout();
     navigate('/admin/login');
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-900 text-white">
+        Ładowanie sesji...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -138,12 +143,12 @@ export default function DashboardLayout() {
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full flex items-center justify-center">
                 <span className="font-bold text-white">
-                  {user?.name?.charAt(0) || 'A'}
+                  {user?.name?.charAt(0) || user?.email?.charAt(0) || 'A'}
                 </span>
               </div>
               <div>
                 <div className="font-medium text-white">
-                  {user?.name || 'Administrator'}
+                  {user?.name || user?.email || 'Administrator'}
                 </div>
                 <div className="text-sm text-gray-400 capitalize">
                   {userRole}

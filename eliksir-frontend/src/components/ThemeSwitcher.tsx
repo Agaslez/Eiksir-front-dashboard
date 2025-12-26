@@ -1,34 +1,36 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { themes, type ThemeName } from '../lib/theme';
 
 export function ThemeSwitcher() {
-  const [currentTheme, setCurrentTheme] = useState<ThemeName>('eliksir');
+  // SENIOR FIX: Ładujemy stan leniwie (w funkcji).
+  // Dzięki temu nie potrzebujemy useEffect i unikamy błędu "setState in effect".
+  const [currentTheme, setCurrentTheme] = useState<ThemeName>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme') as ThemeName;
+      if (saved && themes[saved]) return saved;
+    }
+    return 'eliksir';
+  });
+
   const [isVisible, setIsVisible] = useState(false);
   
-  // Sprawdź czy jesteśmy w development lub debug mode
-  const isDev = process.env.NODE_ENV === 'development';
-  const showDebug = typeof window !== 'undefined' && window.location.search.includes('debug');
-  
-  // Ukryj w produkcji jeśli nie ma debug flag
-  if (!isDev && !showDebug) return null;
-  
-  // Załaduj zapisany motyw przy starcie
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as ThemeName;
-    if (savedTheme && themes[savedTheme]) {
-      setCurrentTheme(savedTheme);
+  // SENIOR FIX: To samo dla flagi debug. Czysto i synchronicznie.
+  const [showDebug] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.search.includes('debug');
     }
-  }, []);
+    return false;
+  });
   
-  // Zmień motyw
+  const isDev = process.env.NODE_ENV === 'development';
+
   const handleThemeChange = (theme: ThemeName) => {
     setCurrentTheme(theme);
     localStorage.setItem('theme', theme);
-    // W prawdziwej aplikacji tutaj użyłbyś Context/Redux do zmiany motywu
-    // Na razie tylko zapisujemy do localStorage
-    console.log(`Theme changed to: ${theme}`);
   };
-  
+
+  if (!isDev && !showDebug) return null;
+
   return (
     <div className="fixed bottom-6 right-6 z-[9999] group">
       <div 

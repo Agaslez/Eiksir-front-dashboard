@@ -1,25 +1,16 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-
-const AdminUnauthorized: React.FC = () => {
+export default function Unauthorized() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-4">
-      <div className="text-center max-w-md">
-        <div className="text-amber-500 text-6xl mb-6">⛔</div>
-        <h1 className="text-3xl font-bold text-white mb-4">Brak uprawnień</h1>
-        <p className="text-gray-400 mb-8">
-          Nie masz wystarczających uprawnień do dostępu do tej sekcji.
-          Skontaktuj się z administratorem, jeśli uważasz, że to błąd.
-        </p>
-        <Link
-          to="/admin/login"
-          className="inline-block bg-amber-500 hover:bg-amber-600 text-black font-semibold py-3 px-6 rounded-lg transition-colors"
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+        <h1 className="text-4xl font-bold text-red-600 mb-4">Unauthorized</h1>
+        <p className="text-gray-600 mb-6">You don't have permission to access this resource.</p>
+        <a
+          href="/admin/login"
+          className="inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
         >
-          Wróć do logowania
-        </Link>
+          Back to Login
+        </a>
       </div>
     </div>
   );
-};
-
-export default AdminUnauthorized;
+}

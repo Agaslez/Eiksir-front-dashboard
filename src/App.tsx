@@ -22,12 +22,14 @@ const AdminUnauthorized = lazy(() => import('./pages/admin/Unauthorized'));
 const ReservationsManager = lazy(
   () => import('./pages/admin/ReservationsManager')
 );
-const ContentEditor = lazy(() => import('./pages/admin/ContentEditor'));
+const ContentEditor = lazy(() => import('./components/admin/ContentEditor'));
 const ShoppingLists = lazy(() => import('./pages/admin/ShoppingLists'));
 const GalleryManager = lazy(() => import('./pages/admin/GalleryManager'));
 const Customers = lazy(() => import('./pages/admin/Customers'));
 const Analytics = lazy(() => import('./pages/admin/Analytics'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
+const EmailSettings = lazy(() => import('./components/admin/EmailSettings'));
+const CalculatorSettings = lazy(() => import('./components/admin/CalculatorSettings'));
 
 
 
@@ -111,6 +113,22 @@ function App() {
               element={
                 <ProtectedRoute requiredRole="admin">
                   <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="email"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <EmailSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="calculator"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <CalculatorSettings />
                 </ProtectedRoute>
               }
             />

@@ -5,7 +5,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'owner' | 'manager' | 'staff' | 'customer';
+  role: 'owner' | 'admin' | 'manager' | 'staff' | 'customer';
   tenantId: string;
   isActive: boolean;
   emailVerified: boolean;
@@ -18,111 +18,130 @@ export interface AuthContextType {
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  refreshToken: () => Promise<void>;
   clearError: () => void;
+  // No refresh token - JWT Bearer only
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Storage key for JWT token (optional - for dev convenience)
+const JWT_STORAGE_KEY = 'eliksir_jwt_token';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(() => {
+    // Load token from localStorage on init (optional)
+    return localStorage.getItem(JWT_STORAGE_KEY);
+  });
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-  // Get CSRF token
-  const getCSRFToken = (): string | null => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; csrf-token=`);
-    return parts.length === 2 ? parts.pop()?.split(';').shift() || null : null;
-  };
-
-  // Create request headers with CSRF token
+  // Create request headers with JWT Bearer token
   const createHeaders = (): HeadersInit => {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
-    const csrfToken = getCSRFToken();
-    if (csrfToken) {
-      headers['X-CSRF-Token'] = csrfToken;
+    
+    if (accessToken) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
     }
+    
     return headers;
   };
+
+  // Fetch current user from /me endpoint (source of truth)
+  const fetchCurrentUser = useCallback(async (token: string | null) => {
+    if (!token) {
+      setUser(null);
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.user) {
+          const userData = data.user;
+          setUser({
+            id: userData.id.toString(),
+            email: userData.email,
+            firstName: userData.firstName || '',
+            lastName: userData.lastName || '',
+            role: userData.role,
+            tenantId: userData.tenantId?.toString() || '',
+            isActive: true,
+            emailVerified: true,
+          });
+          return true;
+        }
+      }
+      // If /me fails, token is invalid
+      setUser(null);
+      setAccessToken(null);
+      localStorage.removeItem(JWT_STORAGE_KEY);
+      return false;
+    } catch (err) {
+      console.error('Failed to fetch current user:', err);
+      setUser(null);
+      return false;
+    }
+  }, [API_BASE_URL]);
 
   // Check if user is authenticated on mount
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-          credentials: 'include',
-          headers: createHeaders(),
-        });
-
-        if (response.ok) {
-          const userData = await response.json();
-          setUser({
-            id: userData.id,
-            email: userData.email,
-            firstName: userData.first_name,
-            lastName: userData.last_name,
-            role: userData.role,
-            tenantId: userData.tenant_id,
-            isActive: userData.is_active,
-            emailVerified: userData.email_verified,
-          });
-        } else {
-          setUser(null);
-        }
-      } catch (err) {
-        console.error('Auth check failed:', err);
+      if (accessToken) {
+        await fetchCurrentUser(accessToken);
+      } else {
         setUser(null);
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
     checkAuth();
-  }, []);
+  }, [accessToken, fetchCurrentUser]);
 
   const login = useCallback(async (email: string, password: string) => {
     try {
       setError(null);
       setIsLoading(true);
 
-      // First get CSRF token
-      const csrfResponse = await fetch(`${API_BASE_URL}/api/csrf-token`, {
-        credentials: 'include',
-      });
-
-      if (!csrfResponse.ok) {
-        throw new Error('Failed to get CSRF token');
-      }
-
-      // Now login with CSRF token
+      // Login with JWT Bearer (no cookies, no CSRF)
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
-        credentials: 'include',
-        headers: createHeaders(),
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Login failed');
+        throw new Error(errorData.error || 'Login failed');
       }
 
-      const userData = await response.json();
-      setUser({
-        id: userData.id,
-        email: userData.email,
-        firstName: userData.first_name,
-        lastName: userData.last_name,
-        role: userData.role,
-        tenantId: userData.tenant_id,
-        isActive: userData.is_active,
-        emailVerified: userData.email_verified,
-      });
+      const data = await response.json();
+      
+      if (!data.success || !data.accessToken) {
+        throw new Error('Invalid response from server');
+      }
+
+      // Store JWT token
+      const token = data.accessToken;
+      setAccessToken(token);
+      localStorage.setItem(JWT_STORAGE_KEY, token);
+
+      // Fetch user data from /me (source of truth)
+      await fetchCurrentUser(token);
+
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
@@ -130,51 +149,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [API_BASE_URL, fetchCurrentUser]);
 
   const logout = useCallback(async () => {
     try {
       setError(null);
-      await fetch(`${API_BASE_URL}/api/auth/logout`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: createHeaders(),
-      });
+      
+      // Optional: call logout endpoint (though JWT is stateless)
+      if (accessToken) {
+        await fetch(`${API_BASE_URL}/api/auth/logout`, {
+          method: 'POST',
+          headers: createHeaders(),
+        });
+      }
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
+      // Clear token and user
+      setAccessToken(null);
       setUser(null);
+      localStorage.removeItem(JWT_STORAGE_KEY);
     }
-  }, []);
-
-  const refreshToken = useCallback(async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: createHeaders(),
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setUser({
-          id: userData.id,
-          email: userData.email,
-          firstName: userData.first_name,
-          lastName: userData.last_name,
-          role: userData.role,
-          tenantId: userData.tenant_id,
-          isActive: userData.is_active,
-          emailVerified: userData.email_verified,
-        });
-      } else {
-        setUser(null);
-      }
-    } catch (err) {
-      console.error('Token refresh failed:', err);
-      setUser(null);
-    }
-  }, []);
+  }, [API_BASE_URL, accessToken]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -187,7 +183,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     error,
     login,
     logout,
-    refreshToken,
     clearError,
   };
 
@@ -205,3 +200,5 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+
+export default AuthContext;

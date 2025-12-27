@@ -146,34 +146,25 @@ jobs:
           name: frontend-build
           path: dist/
       
-      - name: Start preview server
+      - name: Test preview server
         run: |
-          npx serve dist -l 4173 > /tmp/preview.log 2>&1 &
-          echo $! > /tmp/preview.pid
-      
-      - name: Wait for preview server
-        run: |
-          MAX_ATTEMPTS=30
-          ATTEMPT=0
-          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-            if curl -f http://localhost:4173 2>/dev/null; then
-              echo "✅ Preview server is running"
-              exit 0
-            fi
-            ATTEMPT=$((ATTEMPT + 1))
-            if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
-              echo "Attempt $ATTEMPT/$MAX_ATTEMPTS - retrying..."
-            fi
-          done
-          echo "❌ Preview server failed to start"
-          cat /tmp/preview.log
-          exit 1
-      
-      - name: Cleanup preview server
-        if: always()
-        run: |
-          if [ -f /tmp/preview.pid ]; then
-            kill $(cat /tmp/preview.pid) 2>/dev/null || true
+          npm run preview > /tmp/preview.log 2>&1 &
+          PREVIEW_PID=$!
+          echo $PREVIEW_PID > /tmp/preview.pid
+          
+          echo "Preview server started with PID: $PREVIEW_PID"
+          sleep 5
+          
+          if curl -f http://localhost:4173 2>/dev/null; then
+            echo "✅ Preview server is running and responding"
+            kill $PREVIEW_PID 2>/dev/null || true
+            exit 0
+          else
+            echo "❌ Preview server failed to respond"
+            echo "Server logs:"
+            cat /tmp/preview.log
+            kill $PREVIEW_PID 2>/dev/null || true
+            exit 1
           fi
 
   # Security Audit

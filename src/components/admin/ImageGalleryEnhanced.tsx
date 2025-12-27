@@ -10,6 +10,7 @@ interface UploadedImage {
   description: string;
   category: string;
   size: number;
+  displayOrder?: number;
   uploadedAt: string;
 }
 

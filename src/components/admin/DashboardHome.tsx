@@ -4,11 +4,12 @@ import { ELIKSIR_STYLES } from '../../lib/styles';
 
 interface SEOStats {
   totalViews: number;
-  uniqueVisitors: number;
-  avgTimeOnSite: string;
-  bounceRate: string;
-  topPages: Array<{ path: string; views: number }>;
-  trafficSources: Array<{ source: string; count: number }>;
+  uniqueVisitors: string | number;
+  averageTimeOnPage: number;
+  bounceRate: number;
+  popularPages: Array<{ path: string; views: string | number }>;
+  trafficSources: Array<{ referrer: string; visits: string | number }>;
+  recentViews?: number;
 }
 
 export default function DashboardHome() {
@@ -108,7 +109,7 @@ export default function DashboardHome() {
           <div>
             <p className="text-white/60 text-sm">Średni Czas</p>
             <p className="text-3xl font-bold text-white mt-1">
-              {stats?.avgTimeOnSite || '0:00'}
+              {stats?.averageTimeOnPage ? `${stats.averageTimeOnPage}s` : '0s'}
             </p>
           </div>
         </div>
@@ -121,7 +122,7 @@ export default function DashboardHome() {
           <div>
             <p className="text-white/60 text-sm">Współczynnik Odrzuceń</p>
             <p className="text-3xl font-bold text-white mt-1">
-              {stats?.bounceRate || '0%'}
+              {stats?.bounceRate ? `${stats.bounceRate}%` : '0%'}
             </p>
           </div>
         </div>
@@ -135,7 +136,7 @@ export default function DashboardHome() {
             Najpopularniejsze Strony
           </h3>
           <div className="space-y-3">
-            {stats?.topPages.map((page, index) => (
+            {stats?.popularPages?.map((page, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
@@ -146,7 +147,7 @@ export default function DashboardHome() {
                   <span className="text-white/80">{page.path}</span>
                 </div>
                 <span className="text-eliksir-gold font-bold">
-                  {page.views.toLocaleString('pl-PL')}
+                  {typeof page.views === 'string' ? parseInt(page.views) : page.views}
                 </span>
               </div>
             )) || (
@@ -161,19 +162,20 @@ export default function DashboardHome() {
             Źródła Ruchu
           </h3>
           <div className="space-y-3">
-            {stats?.trafficSources.map((source, index) => {
-              const total = stats.trafficSources.reduce((sum, s) => sum + s.count, 0);
-              const percentage = total > 0 ? (source.count / total * 100).toFixed(1) : 0;
+            {stats?.trafficSources?.map((source, index) => {
+              const total = stats.trafficSources.reduce((sum, s) => sum + (typeof s.visits === 'string' ? parseInt(s.visits) : s.visits), 0);
+              const visits = typeof source.visits === 'string' ? parseInt(source.visits) : source.visits;
+              const percentage = total > 0 ? (visits / total * 100).toFixed(1) : 0;
               
               return (
                 <div key={index} className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Globe className="text-eliksir-gold" size={16} />
-                      <span className="text-white/80">{source.source}</span>
+                      <span className="text-white/80">{source.referrer}</span>
                     </div>
                     <span className="text-white/60 text-sm">
-                      {percentage}% • {source.count}
+                      {percentage}% • {visits}
                     </span>
                   </div>
                   <div className="w-full bg-white/10 rounded-full h-2">

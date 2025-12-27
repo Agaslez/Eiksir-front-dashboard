@@ -1,6 +1,7 @@
 import { Eye, EyeOff, Image as ImageIcon, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ELIKSIR_STYLES } from '../../lib/styles';
+import ImageGalleryEnhanced from './ImageGalleryEnhanced';
 
 interface ContentSection {
   id: string;

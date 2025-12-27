@@ -210,4 +210,8 @@ jobs:
           if [[ "${{ needs.lint.result }}" == "failure" ]]; then
             echo "⚠️ CI Pipeline Warning - Lint Failed (non-blocking)"
           fi
-          echo "✅ CI Pipeline Completed"
+          if [[ "${{ needs.preview.result }}" == "failure" ]]; then
+            echo "⚠️ CI Pipeline Warning - Preview Failed (non-blocking)"
+          fi
+          echo "✅ CI Pipeline Completed - Build Successful"
+

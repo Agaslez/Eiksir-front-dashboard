@@ -1,6 +1,14 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { COCKTAILS, OFFERS, GALLERY_IMAGES } from './lib/content';
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { COCKTAILS, OFFERS } from './lib/content';
+
+interface GalleryImage {
+  id: number;
+  url: string;
+  title: string;
+  description: string;
+  category: string;
+}
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 60 },
@@ -379,6 +387,37 @@ function Pricing() {
 }
 
 function Gallery() {
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
+
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/content/gallery/public`);
+        const data = await response.json();
+        if (data.success) {
+          setGalleryImages(data.images);
+        }
+      } catch (error) {
+        console.error('Error fetching gallery:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchGallery();
+  }, []);
+
+  if (loading) {
+    return (
+      <section id="galeria" className="py-32 bg-neutral-950">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-amber-400">Ładowanie galerii...</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="galeria" className="py-32 bg-neutral-950">
       <div className="container mx-auto px-6">
@@ -396,9 +435,9 @@ function Gallery() {
         </motion.div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {GALLERY_IMAGES.map((src, idx) => (
+          {galleryImages.map((image, idx) => (
             <motion.div
-              key={idx}
+              key={image.id}
               className={`relative overflow-hidden group ${
                 idx === 0 || idx === 3 ? 'md:row-span-2' : ''
               }`}
@@ -409,13 +448,22 @@ function Gallery() {
             >
               <div className={`${idx === 0 || idx === 3 ? 'aspect-[3/4]' : 'aspect-square'}`}>
                 <img
-                  src={src}
-                  alt={`Realizacja ${idx + 1}`}
+                  src={`${API_URL}${image.url}`}
+                  alt={image.title || `Realizacja ${idx + 1}`}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   loading="lazy"
                 />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                {image.title && (
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <h3 className="font-playfair text-xl font-bold mb-1">{image.title}</h3>
+                    {image.description && (
+                      <p className="text-sm text-amber-200">{image.description}</p>
+                    )}
+                  </div>
+                )}
+              </div>
             </motion.div>
           ))}
         </div>

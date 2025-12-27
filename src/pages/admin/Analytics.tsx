@@ -47,8 +47,8 @@ export default function Analytics() {
         }
 
         const data = await response.json();
-        if (data.success && data.stats) {
-          setStats(data.stats);
+        if (data.success && data.data) {
+          setStats(data.data);
         } else {
           throw new Error('Invalid response format');
         }
@@ -98,7 +98,7 @@ export default function Analytics() {
         <div>
           <h2 className="text-2xl font-bold text-gray-800">SEO Analytics</h2>
           <p className="text-gray-600 mt-1">
-            Statistics for the last 30 days • Updated just now
+            Statistics for the last 30 days ï¿½ Updated just now
           </p>
         </div>
         <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-full">

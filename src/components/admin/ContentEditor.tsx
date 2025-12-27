@@ -1,7 +1,6 @@
 import { Eye, EyeOff, Image as ImageIcon, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ELIKSIR_STYLES } from '../../lib/styles';
-import ImageGallery from './ImageGallery';
 
 interface ContentSection {
   id: string;
@@ -109,7 +108,7 @@ export default function ContentEditor() {
       {/* Image Gallery */}
       {showGallery && (
         <div className="bg-eliksir-gray/30 p-6 rounded-eliksir border border-white/10">
-          <ImageGallery />
+          <ImageGalleryEnhanced />
         </div>
       )}
 

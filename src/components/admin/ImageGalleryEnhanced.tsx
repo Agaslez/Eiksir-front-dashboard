@@ -54,7 +54,11 @@ export default function ImageGalleryEnhanced() {
       });
       const data = await response.json();
       if (data.success) {
-        setImages(data.images);
+        // Sort images by display order
+        const sortedImages = data.images.sort((a: UploadedImage, b: UploadedImage) => 
+          (a.displayOrder || 0) - (b.displayOrder || 0)
+        );
+        setImages(sortedImages);
       }
     } catch (error) {
       console.error('Error fetching images:', error);
@@ -120,6 +124,43 @@ export default function ImageGalleryEnhanced() {
     } catch (error) {
       console.error('Error updating image:', error);
       alert('❌ Błąd podczas aktualizacji');
+    }
+  };
+
+  const handleReorder = async (imageId: number, direction: 'up' | 'down') => {
+    const sortedImages = [...images].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    const currentIndex = sortedImages.findIndex(img => img.id === imageId);
+    
+    if (currentIndex === -1) return;
+    if (direction === 'up' && currentIndex === 0) return;
+    if (direction === 'down' && currentIndex === sortedImages.length - 1) return;
+
+    const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    
+    // Swap display orders
+    const newOrder = sortedImages.map((img, idx) => ({
+      id: img.id,
+      order: idx === currentIndex ? swapIndex :
+             idx === swapIndex ? currentIndex : idx
+    }));
+
+    try {
+      const response = await fetch(`${API_URL}/api/content/images/reorder`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
+        },
+        body: JSON.stringify({ images: newOrder }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        await fetchImages();
+      }
+    } catch (error) {
+      console.error('Error reordering images:', error);
+      alert('❌ Błąd podczas zmiany kolejności');
     }
   };
 
@@ -246,6 +287,20 @@ export default function ImageGalleryEnhanced() {
                 title="Podgląd"
               >
                 <Eye size={16} />
+              </button>
+              <button
+                onClick={() => handleReorder(image.id, 'up')}
+                className="p-2 bg-eliksir-dark/90 text-white rounded-eliksir hover:bg-blue-500 transition-colors"
+                title="Przesuń w górę"
+              >
+                ↑
+              </button>
+              <button
+                onClick={() => handleReorder(image.id, 'down')}
+                className="p-2 bg-eliksir-dark/90 text-white rounded-eliksir hover:bg-blue-500 transition-colors"
+                title="Przesuń w dół"
+              >
+                ↓
               </button>
               <button
                 onClick={() => setEditingImage(image)}

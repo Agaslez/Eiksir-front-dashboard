@@ -2,6 +2,21 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Section } from './layout/Section';
 
+// Ensure API_URL always ends with /api
+const baseUrl = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
+const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+
+// Helper function to handle both Cloudinary and local URLs
+const getImageUrl = (url: string) => {
+  if (!url) return '';
+  // If already absolute URL (Cloudinary), return as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  // Otherwise, prepend backend API URL
+  return `${API_URL.replace('/api', '')}${url}`;
+};
+
 interface GalleryImage {
   id: number;
   url: string;
@@ -74,7 +89,7 @@ export default function HorizontalGallery() {
               whileHover={{ scale: 1.05 }}
             >
               <img
-                src={image.url}
+                src={getImageUrl(image.url)}
                 alt={image.title}
                 className="w-full h-full object-cover"
                 loading="lazy"

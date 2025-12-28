@@ -1,144 +1,136 @@
-import { Calculator as CalcIcon, DollarSign, Save } from 'lucide-react';
+import { Calculator as CalcIcon, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { ELIKSIR_STYLES } from '../../lib/styles';
 
-interface PricingSettings {
-  basePrice: number;
-  drinkTypes: Array<{ id: string; name: string; multiplier: number }>;
-  eventTypes: Array<{ id: string; name: string; multiplier: number }>;
-  serviceOptions: Array<{ id: string; name: string; price: number }>;
-  discounts: Array<{ minGuests: number; discount: number }>;
+interface CalculatorConfig {
+  promoDiscount: number; // 0-1 (0.2 = 20%)
+  pricePerExtraGuest: {
+    basic: number;
+    premium: number;
+    exclusive: number;
+    kids: number;
+    family: number;
+    business: number;
+  };
+  addons: {
+    fountain: {
+      perGuest: number;
+      min: number;
+      max: number;
+    };
+    keg: {
+      pricePerKeg: number;
+      guestsPerKeg: number;
+    };
+    lemonade: {
+      base: number;
+      blockGuests: number;
+    };
+    hockery: number;
+    ledLighting: number;
+  };
+  shoppingList: {
+    vodkaRumGinBottles: number; // dla 50 osób
+    liqueurBottles: number;
+    aperolBottles: number;
+    proseccoBottles: number;
+    syrupsLiters: number;
+    iceKg: number;
+  };
 }
 
-export default function CalculatorSettings() {
-  const [settings, setSettings] = useState<PricingSettings>({
-    basePrice: 150,
-    drinkTypes: [
-      { id: 'beer', name: 'Piwo', multiplier: 1.0 },
-      { id: 'wine', name: 'Wino', multiplier: 1.3 },
-      { id: 'whiskey', name: 'Whiskey', multiplier: 1.6 },
-      { id: 'cocktails', name: 'Koktajle Premium', multiplier: 2.0 },
-    ],
-    eventTypes: [
-      { id: 'corporate', name: 'Impreza Firmowa', multiplier: 1.2 },
-      { id: 'wedding', name: 'Wesele', multiplier: 1.5 },
-      { id: 'birthday', name: 'Urodziny', multiplier: 1.0 },
-      { id: 'other', name: 'Inne', multiplier: 1.0 },
-    ],
-    serviceOptions: [
-      { id: 'bartender', name: 'Barman (4h)', price: 800 },
-      { id: 'dj', name: 'DJ (4h)', price: 1200 },
-      { id: 'catering', name: 'Catering', price: 2000 },
-    ],
-    discounts: [
-      { minGuests: 50, discount: 5 },
-      { minGuests: 100, discount: 10 },
-      { minGuests: 200, discount: 15 },
-    ],
-  });
-
-  const [testCalculation, setTestCalculation] = useState({
-    guests: 100,
-    drinkType: 'beer',
-    eventType: 'corporate',
-    services: [] as string[],
-    totalPrice: 0,
+export default function CalculatorSettingsNew() {
+  const [config, setConfig] = useState<CalculatorConfig>({
+    promoDiscount: 0.2,
+    pricePerExtraGuest: {
+      basic: 40,
+      premium: 50,
+      exclusive: 60,
+      kids: 30,
+      family: 35,
+      business: 45,
+    },
+    addons: {
+      fountain: {
+        perGuest: 10,
+        min: 600,
+        max: 1200,
+      },
+      keg: {
+        pricePerKeg: 550,
+        guestsPerKeg: 50,
+      },
+      lemonade: {
+        base: 250,
+        blockGuests: 60,
+      },
+      hockery: 200,
+      ledLighting: 500,
+    },
+    shoppingList: {
+      vodkaRumGinBottles: 5,
+      liqueurBottles: 2,
+      aperolBottles: 2,
+      proseccoBottles: 5,
+      syrupsLiters: 12,
+      iceKg: 8,
+    },
   });
 
   const [saving, setSaving] = useState(false);
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
 
   useEffect(() => {
-    fetchSettings();
+    fetchConfig();
   }, []);
 
-  useEffect(() => {
-    calculateTestPrice();
-  }, [testCalculation.guests, testCalculation.drinkType, testCalculation.eventType, testCalculation.services, settings]);
-
-  const fetchSettings = async () => {
+  const fetchConfig = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/calculator/settings`, {
+      const response = await fetch(`${API_URL}/api/calculator/config`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
         },
       });
       const data = await response.json();
-      if (data.success) {
-        setSettings(data.settings);
+      if (data.success && data.config) {
+        setConfig(data.config);
       }
     } catch (error) {
-      console.error('Error fetching settings:', error);
+      console.error('Error fetching calculator config:', error);
     }
-  };
-
-  const calculateTestPrice = () => {
-    const drinkMultiplier = settings.drinkTypes.find(d => d.id === testCalculation.drinkType)?.multiplier || 1;
-    const eventMultiplier = settings.eventTypes.find(e => e.id === testCalculation.eventType)?.multiplier || 1;
-    
-    const baseTotal = settings.basePrice * testCalculation.guests * drinkMultiplier * eventMultiplier;
-    
-    const servicesTotal = testCalculation.services.reduce((sum, serviceId) => {
-      const service = settings.serviceOptions.find(s => s.id === serviceId);
-      return sum + (service?.price || 0);
-    }, 0);
-
-    const discount = settings.discounts
-      .filter(d => testCalculation.guests >= d.minGuests)
-      .reduce((max, d) => Math.max(max, d.discount), 0);
-
-    const total = (baseTotal + servicesTotal) * (1 - discount / 100);
-    
-    setTestCalculation(prev => ({ ...prev, totalPrice: Math.round(total) }));
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await fetch(`${API_URL}/api/calculator/settings`, {
+      const response = await fetch(`${API_URL}/api/calculator/config`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
         },
-        body: JSON.stringify(settings),
+        body: JSON.stringify(config),
       });
 
       if (response.ok) {
-        alert('✅ Ustawienia zapisane!');
+        alert('✅ Konfiguracja kalkulatora zapisana!');
+      } else {
+        alert('❌ Błąd podczas zapisywania');
       }
     } catch (error) {
-      console.error('Error saving settings:', error);
+      console.error('Error saving config:', error);
       alert('❌ Błąd podczas zapisywania');
     } finally {
       setSaving(false);
     }
   };
 
-  const updateDrinkType = (id: string, field: 'name' | 'multiplier', value: string | number) => {
-    setSettings({
-      ...settings,
-      drinkTypes: settings.drinkTypes.map(d =>
-        d.id === id ? { ...d, [field]: value } : d
-      ),
-    });
-  };
-
-  const updateEventType = (id: string, field: 'name' | 'multiplier', value: string | number) => {
-    setSettings({
-      ...settings,
-      eventTypes: settings.eventTypes.map(e =>
-        e.id === id ? { ...e, [field]: value } : e
-      ),
-    });
-  };
-
-  const updateService = (id: string, field: 'name' | 'price', value: string | number) => {
-    setSettings({
-      ...settings,
-      serviceOptions: settings.serviceOptions.map(s =>
-        s.id === id ? { ...s, [field]: value } : s
-      ),
+  const updatePricePerGuest = (offerId: keyof typeof config.pricePerExtraGuest, value: number) => {
+    setConfig({
+      ...config,
+      pricePerExtraGuest: {
+        ...config.pricePerExtraGuest,
+        [offerId]: value,
+      },
     });
   };
 
@@ -147,237 +139,392 @@ export default function CalculatorSettings() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-playfair text-3xl text-eliksir-gold font-bold">
-            Kalkulator Cenowy
+          <h2 className="font-playfair text-3xl text-amber-500 font-bold flex items-center gap-3">
+            <CalcIcon size={32} />
+            Konfiguracja Kalkulatora
           </h2>
-          <p className="text-white/60 mt-1">
-            Zarządzaj cenami i mnożnikami kalkulatora
+          <p className="text-white/60 mt-2">
+            Zarządzaj cenami, dodatkami i listą zakupów używanymi w kalkulatorze na stronie głównej
           </p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
-          className={`${ELIKSIR_STYLES.buttonPrimary} flex items-center space-x-2`}
+          className="px-6 py-3 bg-amber-500 text-black font-semibold rounded hover:bg-amber-400 disabled:opacity-50 flex items-center gap-2"
         >
           <Save size={20} />
-          <span>{saving ? 'Zapisywanie...' : 'Zapisz Wszystko'}</span>
+          {saving ? 'Zapisuję...' : 'Zapisz'}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Settings Column */}
-        <div className="space-y-6">
-          {/* Base Price */}
-          <div className="bg-eliksir-gray/50 rounded-eliksir border border-white/10 p-6">
-            <h3 className="font-playfair text-xl text-eliksir-gold font-bold mb-4">
-              Cena Bazowa
-            </h3>
-            <div>
-              <label className="block text-white/80 text-sm mb-2">
-                Cena za osobę (PLN)
+      {/* Zniżka promocyjna */}
+      <div className="bg-neutral-900 border border-white/10 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">Zniżka Promocyjna</h3>
+        <div className="grid gap-4">
+          <div>
+            <label className="block text-sm text-white/70 mb-2">
+              Rabat (%) - wyświetlany jako -20% itp.
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              value={config.promoDiscount * 100}
+              onChange={(e) =>
+                setConfig({ ...config, promoDiscount: parseFloat(e.target.value) / 100 })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
+            <p className="text-xs text-white/50 mt-1">
+              Aktualna wartość: {(config.promoDiscount * 100).toFixed(0)}%
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Ceny za dodatkowego gościa */}
+      <div className="bg-neutral-900 border border-white/10 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">Cena za Dodatkowego Gościa (zł)</h3>
+        <p className="text-sm text-white/60 mb-4">
+          Koszt dodawany za każdego gościa powyżej minimum pakietu
+        </p>
+        <div className="grid md:grid-cols-2 gap-4">
+          {Object.entries(config.pricePerExtraGuest).map(([offerId, price]) => (
+            <div key={offerId}>
+              <label className="block text-sm text-white/70 mb-2 capitalize">
+                {offerId === 'basic' && 'Basic Bartending'}
+                {offerId === 'premium' && 'Premium Mix'}
+                {offerId === 'exclusive' && 'Exclusive Experience'}
+                {offerId === 'kids' && 'Kids Party 0%'}
+                {offerId === 'family' && 'Family & Seniors'}
+                {offerId === 'business' && 'Business & Luxury'}
               </label>
               <input
                 type="number"
-                value={settings.basePrice}
-                onChange={(e) => setSettings({ ...settings, basePrice: parseFloat(e.target.value) })}
-                className={ELIKSIR_STYLES.input}
-                step="10"
+                min="0"
+                step="5"
+                value={price}
+                onChange={(e) =>
+                  updatePricePerGuest(
+                    offerId as keyof typeof config.pricePerExtraGuest,
+                    parseInt(e.target.value) || 0
+                  )
+                }
+                className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
               />
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
 
-          {/* Drink Types */}
-          <div className="bg-eliksir-gray/50 rounded-eliksir border border-white/10 p-6">
-            <h3 className="font-playfair text-xl text-eliksir-gold font-bold mb-4">
-              Rodzaje Napojów
-            </h3>
-            <div className="space-y-3">
-              {settings.drinkTypes.map((drink) => (
-                <div key={drink.id} className="flex items-center space-x-3">
-                  <input
-                    type="text"
-                    value={drink.name}
-                    onChange={(e) => updateDrinkType(drink.id, 'name', e.target.value)}
-                    className={`${ELIKSIR_STYLES.input} flex-1`}
-                  />
-                  <div className="flex items-center space-x-2">
-                    <span className="text-white/60 text-sm">×</span>
-                    <input
-                      type="number"
-                      value={drink.multiplier}
-                      onChange={(e) => updateDrinkType(drink.id, 'multiplier', parseFloat(e.target.value))}
-                      className={`${ELIKSIR_STYLES.input} w-20`}
-                      step="0.1"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+      {/* Dodatki - Fontanna */}
+      <div className="bg-neutral-900 border border-white/10 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">🍾 Fontanna Szampańska</h3>
+        <div className="grid md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Cena za gościa (zł)</label>
+            <input
+              type="number"
+              min="0"
+              value={config.addons.fountain.perGuest}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  addons: {
+                    ...config.addons,
+                    fountain: { ...config.addons.fountain, perGuest: parseInt(e.target.value) || 0 },
+                  },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
           </div>
-
-          {/* Event Types */}
-          <div className="bg-eliksir-gray/50 rounded-eliksir border border-white/10 p-6">
-            <h3 className="font-playfair text-xl text-eliksir-gold font-bold mb-4">
-              Rodzaje Wydarzeń
-            </h3>
-            <div className="space-y-3">
-              {settings.eventTypes.map((event) => (
-                <div key={event.id} className="flex items-center space-x-3">
-                  <input
-                    type="text"
-                    value={event.name}
-                    onChange={(e) => updateEventType(event.id, 'name', e.target.value)}
-                    className={`${ELIKSIR_STYLES.input} flex-1`}
-                  />
-                  <div className="flex items-center space-x-2">
-                    <span className="text-white/60 text-sm">×</span>
-                    <input
-                      type="number"
-                      value={event.multiplier}
-                      onChange={(e) => updateEventType(event.id, 'multiplier', parseFloat(e.target.value))}
-                      className={`${ELIKSIR_STYLES.input} w-20`}
-                      step="0.1"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Minimalna cena (zł)</label>
+            <input
+              type="number"
+              min="0"
+              value={config.addons.fountain.min}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  addons: {
+                    ...config.addons,
+                    fountain: { ...config.addons.fountain, min: parseInt(e.target.value) || 0 },
+                  },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
           </div>
-
-          {/* Services */}
-          <div className="bg-eliksir-gray/50 rounded-eliksir border border-white/10 p-6">
-            <h3 className="font-playfair text-xl text-eliksir-gold font-bold mb-4">
-              Dodatkowe Usługi
-            </h3>
-            <div className="space-y-3">
-              {settings.serviceOptions.map((service) => (
-                <div key={service.id} className="flex items-center space-x-3">
-                  <input
-                    type="text"
-                    value={service.name}
-                    onChange={(e) => updateService(service.id, 'name', e.target.value)}
-                    className={`${ELIKSIR_STYLES.input} flex-1`}
-                  />
-                  <div className="flex items-center space-x-2">
-                    <DollarSign size={16} className="text-white/60" />
-                    <input
-                      type="number"
-                      value={service.price}
-                      onChange={(e) => updateService(service.id, 'price', parseFloat(e.target.value))}
-                      className={`${ELIKSIR_STYLES.input} w-28`}
-                      step="100"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Maksymalna cena (zł)</label>
+            <input
+              type="number"
+              min="0"
+              value={config.addons.fountain.max}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  addons: {
+                    ...config.addons,
+                    fountain: { ...config.addons.fountain, max: parseInt(e.target.value) || 0 },
+                  },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
           </div>
         </div>
+        <p className="text-xs text-white/50 mt-2">
+          Formuła: min({config.addons.fountain.max}, max({config.addons.fountain.min}, goście ×{' '}
+          {config.addons.fountain.perGuest}))
+        </p>
+      </div>
 
-        {/* Test Calculator Column */}
-        <div className="space-y-6">
-          <div className="bg-gradient-to-br from-eliksir-gold/20 to-eliksir-gold-dark/20 rounded-eliksir border border-eliksir-gold/30 p-6 sticky top-6">
-            <h3 className="font-playfair text-xl text-eliksir-gold font-bold mb-4 flex items-center space-x-2">
-              <CalcIcon size={24} />
-              <span>Podgląd na Żywo</span>
-            </h3>
-
-            <div className="space-y-4">
-              {/* Guests */}
-              <div>
-                <label className="block text-white/80 text-sm mb-2">
-                  Liczba Gości: {testCalculation.guests}
-                </label>
-                <input
-                  type="range"
-                  min="10"
-                  max="500"
-                  value={testCalculation.guests}
-                  onChange={(e) => setTestCalculation({ ...testCalculation, guests: parseInt(e.target.value) })}
-                  className="w-full"
-                />
-              </div>
-
-              {/* Drink Type */}
-              <div>
-                <label className="block text-white/80 text-sm mb-2">
-                  Rodzaj Napojów
-                </label>
-                <select
-                  value={testCalculation.drinkType}
-                  onChange={(e) => setTestCalculation({ ...testCalculation, drinkType: e.target.value })}
-                  className={ELIKSIR_STYLES.input}
-                >
-                  {settings.drinkTypes.map((drink) => (
-                    <option key={drink.id} value={drink.id}>
-                      {drink.name} (×{drink.multiplier})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Event Type */}
-              <div>
-                <label className="block text-white/80 text-sm mb-2">
-                  Rodzaj Wydarzenia
-                </label>
-                <select
-                  value={testCalculation.eventType}
-                  onChange={(e) => setTestCalculation({ ...testCalculation, eventType: e.target.value })}
-                  className={ELIKSIR_STYLES.input}
-                >
-                  {settings.eventTypes.map((event) => (
-                    <option key={event.id} value={event.id}>
-                      {event.name} (×{event.multiplier})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Services */}
-              <div>
-                <label className="block text-white/80 text-sm mb-2">
-                  Dodatkowe Usługi
-                </label>
-                <div className="space-y-2">
-                  {settings.serviceOptions.map((service) => (
-                    <label key={service.id} className="flex items-center space-x-2 text-white/70">
-                      <input
-                        type="checkbox"
-                        checked={testCalculation.services.includes(service.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setTestCalculation({
-                              ...testCalculation,
-                              services: [...testCalculation.services, service.id],
-                            });
-                          } else {
-                            setTestCalculation({
-                              ...testCalculation,
-                              services: testCalculation.services.filter(s => s !== service.id),
-                            });
-                          }
-                        }}
-                        className="rounded"
-                      />
-                      <span>{service.name} (+{service.price} PLN)</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Total Price */}
-              <div className="pt-4 border-t border-white/20">
-                <div className="text-center">
-                  <p className="text-white/60 text-sm mb-1">Szacowana Cena</p>
-                  <p className="text-4xl font-bold text-eliksir-gold">
-                    {testCalculation.totalPrice.toLocaleString('pl-PL')} PLN
-                  </p>
-                </div>
-              </div>
-            </div>
+      {/* Dodatki - Keg */}
+      <div className="bg-neutral-900 border border-white/10 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">🍺 Beczka (Keg)</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Cena za beczkę (zł)</label>
+            <input
+              type="number"
+              min="0"
+              value={config.addons.keg.pricePerKeg}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  addons: {
+                    ...config.addons,
+                    keg: { ...config.addons.keg, pricePerKeg: parseInt(e.target.value) || 0 },
+                  },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Gości na beczkę</label>
+            <input
+              type="number"
+              min="1"
+              value={config.addons.keg.guestsPerKeg}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  addons: {
+                    ...config.addons,
+                    keg: { ...config.addons.keg, guestsPerKeg: parseInt(e.target.value) || 50 },
+                  },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
           </div>
         </div>
+        <p className="text-xs text-white/50 mt-2">
+          Liczba beczek: ceil(goście / {config.addons.keg.guestsPerKeg}) × {config.addons.keg.pricePerKeg} zł
+        </p>
+      </div>
+
+      {/* Dodatki - Lemonade */}
+      <div className="bg-neutral-900 border border-white/10 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">🍹 Lemoniada/Soki</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Cena bazowa (zł)</label>
+            <input
+              type="number"
+              min="0"
+              value={config.addons.lemonade.base}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  addons: {
+                    ...config.addons,
+                    lemonade: { ...config.addons.lemonade, base: parseInt(e.target.value) || 0 },
+                  },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Gości na blok</label>
+            <input
+              type="number"
+              min="1"
+              value={config.addons.lemonade.blockGuests}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  addons: {
+                    ...config.addons,
+                    lemonade: { ...config.addons.lemonade, blockGuests: parseInt(e.target.value) || 60 },
+                  },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
+          </div>
+        </div>
+        <p className="text-xs text-white/50 mt-2">
+          Cena: ceil(goście / {config.addons.lemonade.blockGuests}) × {config.addons.lemonade.base} zł
+        </p>
+      </div>
+
+      {/* Dodatki - Stałe */}
+      <div className="bg-neutral-900 border border-white/10 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">Dodatki o Stałej Cenie</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-white/70 mb-2">🎯 Hokery (zł)</label>
+            <input
+              type="number"
+              min="0"
+              value={config.addons.hockery}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  addons: { ...config.addons, hockery: parseInt(e.target.value) || 0 },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-2">💡 Oświetlenie LED (zł)</label>
+            <input
+              type="number"
+              min="0"
+              value={config.addons.ledLighting}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  addons: { ...config.addons, ledLighting: parseInt(e.target.value) || 0 },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Lista zakupów */}
+      <div className="bg-neutral-900 border border-white/10 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">📋 Lista Zakupów (dla 50 osób)</h3>
+        <p className="text-sm text-white/60 mb-4">
+          Wartości bazowe które będą skalowane proporcjonalnie do liczby gości
+        </p>
+        <div className="grid md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Wódka/Rum/Gin (but. 0.7L)</label>
+            <input
+              type="number"
+              min="0"
+              value={config.shoppingList.vodkaRumGinBottles}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  shoppingList: {
+                    ...config.shoppingList,
+                    vodkaRumGinBottles: parseInt(e.target.value) || 0,
+                  },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Likiery (but. 0.7L)</label>
+            <input
+              type="number"
+              min="0"
+              value={config.shoppingList.liqueurBottles}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  shoppingList: { ...config.shoppingList, liqueurBottles: parseInt(e.target.value) || 0 },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Aperol (but. 0.7L)</label>
+            <input
+              type="number"
+              min="0"
+              value={config.shoppingList.aperolBottles}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  shoppingList: { ...config.shoppingList, aperolBottles: parseInt(e.target.value) || 0 },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Prosecco (but. 0.75L)</label>
+            <input
+              type="number"
+              min="0"
+              value={config.shoppingList.proseccoBottles}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  shoppingList: { ...config.shoppingList, proseccoBottles: parseInt(e.target.value) || 0 },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Syropy (L)</label>
+            <input
+              type="number"
+              min="0"
+              value={config.shoppingList.syrupsLiters}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  shoppingList: { ...config.shoppingList, syrupsLiters: parseInt(e.target.value) || 0 },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Lód (kg)</label>
+            <input
+              type="number"
+              min="0"
+              value={config.shoppingList.iceKg}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  shoppingList: { ...config.shoppingList, iceKg: parseInt(e.target.value) || 0 },
+                })
+              }
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Save button (bottom) */}
+      <div className="flex justify-end">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="px-8 py-3 bg-amber-500 text-black font-semibold rounded hover:bg-amber-400 disabled:opacity-50 flex items-center gap-2"
+        >
+          <Save size={20} />
+          {saving ? 'Zapisuję...' : 'Zapisz Wszystkie Zmiany'}
+        </button>
       </div>
     </div>
   );

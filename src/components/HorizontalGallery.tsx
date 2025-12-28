@@ -7,11 +7,14 @@ interface GalleryImage {
   url: string;
   title: string;
   category: string;
+  displayOrder?: number;
+  isActive?: boolean;
 }
 
 export default function HorizontalGallery() {
   const [images, setImages] = useState<GalleryImage[]>([]);
-  const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend.onrender.com';
+  const baseUrl = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
+  const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
 
   useEffect(() => {
     fetchImages();
@@ -19,11 +22,18 @@ export default function HorizontalGallery() {
 
   const fetchImages = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/content/images`);
+      const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`);
       if (response.ok) {
         const data = await response.json();
-        console.log('HorizontalGallery fetched images:', data.length);
-        setImages(data);
+        if (data.success && Array.isArray(data.images)) {
+          const activeImages = data.images
+            .filter((img: GalleryImage) => img.isActive !== false)
+            .sort((a: GalleryImage, b: GalleryImage) => 
+              (a.displayOrder || 0) - (b.displayOrder || 0)
+            );
+          console.log('HorizontalGallery fetched images:', activeImages.length);
+          setImages(activeImages);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch images:', error);

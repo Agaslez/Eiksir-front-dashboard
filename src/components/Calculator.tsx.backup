@@ -3,33 +3,6 @@ import { OFFERS } from '../lib/content';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
-interface CalculatorConfig {
-  promoDiscount: number;
-  pricePerExtraGuest: {
-    basic: number;
-    premium: number;
-    exclusive: number;
-    kids: number;
-    family: number;
-    business: number;
-  };
-  addons: {
-    fountain: { perGuest: number; min: number; max: number };
-    keg: { pricePerKeg: number; guestsPerKeg: number };
-    lemonade: { base: number; blockGuests: number };
-    hockery: number;
-    ledLighting: number;
-  };
-  shoppingList: {
-    vodkaRumGinBottles: number;
-    liqueurBottles: number;
-    aperolBottles: number;
-    proseccoBottles: number;
-    syrupsLiters: number;
-    iceKg: number;
-  };
-}
-
 // Dodajemy eksportowany typ
 export type CalculatorSnapshot = {
   offerName: string;
@@ -53,7 +26,7 @@ type CalculatorProps = {
 
 function Calculator({ onCalculate }: CalculatorProps) {
   const [selectedOfferId, setSelectedOfferId] =
-    useState<keyof typeof OFFERS>('family');
+    useState<keyof typeof OFFERS>('family'); // start np. od Family & Seniors
   const [guests, setGuests] = useState(50);
   const [addons, setAddons] = useState({
     fountain: false,
@@ -62,78 +35,18 @@ function Calculator({ onCalculate }: CalculatorProps) {
     hockery: false,
     ledLighting: false,
   });
-  const [config, setConfig] = useState<CalculatorConfig | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
-
-  // Fetch config from API
-  useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/calculator/config`);
-        const data = await response.json();
-        if (data.success && data.config) {
-          setConfig(data.config);
-        }
-      } catch (error) {
-        console.error('Failed to fetch calculator config:', error);
-        // Fallback to defaults if API fails
-        setConfig({
-          promoDiscount: 0.2,
-          pricePerExtraGuest: {
-            basic: 40,
-            premium: 50,
-            exclusive: 60,
-            kids: 30,
-            family: 35,
-            business: 45,
-          },
-          addons: {
-            fountain: { perGuest: 10, min: 600, max: 1200 },
-            keg: { pricePerKeg: 550, guestsPerKeg: 50 },
-            lemonade: { base: 250, blockGuests: 60 },
-            hockery: 200,
-            ledLighting: 500,
-          },
-          shoppingList: {
-            vodkaRumGinBottles: 5,
-            liqueurBottles: 2,
-            aperolBottles: 2,
-            proseccoBottles: 5,
-            syrupsLiters: 12,
-            iceKg: 8,
-          },
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchConfig();
-  }, [API_URL]);
-
-  if (loading || !config) {
-    return (
-      <Section id="kalkulator" className="bg-black border-t border-white/10">
-        <Container>
-          <div className="text-center py-20">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-amber-500 border-r-transparent"></div>
-            <p className="text-white/60 mt-4">Ładowanie kalkulatora...</p>
-          </div>
-        </Container>
-      </Section>
-    );
-  }
 
   const offer = OFFERS[selectedOfferId];
-  const promoDiscount = config.promoDiscount;
-  const isKidsOffer = offer.id === 'kids';
+  const promoDiscount = 0.2; // -20%
+  const isKidsOffer = offer.id === 'kids'; // zakładam, że pakiet Kids ma id "kids"
 
   // --- ADD-ONY ZALEŻNE OD LICZBY GOŚCI ---
 
   const fountainCost = addons.fountain
     ? (() => {
-        const { perGuest, min, max } = config.addons.fountain;
+        const perGuest = 10;
+        const min = 600;
+        const max = 1200;
         const value = guests * perGuest;
         return Math.min(max, Math.max(min, value));
       })()
@@ -144,7 +57,8 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
   const kegCost = kegSelected
     ? (() => {
-        const { pricePerKeg, guestsPerKeg } = config.addons.keg;
+        const pricePerKeg = 550;
+        const guestsPerKeg = 50;
         const kegs = Math.max(1, Math.ceil(guests / guestsPerKeg));
         return pricePerKeg * kegs;
       })()
@@ -152,14 +66,16 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
   const lemonadeCost = addons.lemonade
     ? (() => {
-        const { base, blockGuests } = config.addons.lemonade;
+        const base = 250;
+        const blockGuests = 60;
         const blocks = Math.max(1, Math.ceil(guests / blockGuests));
         return base * blocks;
       })()
     : 0;
 
-  const hockeryCost = addons.hockery ? config.addons.hockery : 0;
-  const ledLightingCost = addons.ledLighting ? config.addons.ledLighting : 0;
+  // Nowe dodatki
+  const hockeryCost = addons.hockery ? 200 : 0; // Stała cena 200 zł
+  const ledLightingCost = addons.ledLighting ? 500 : 0; // Stała cena 500 zł
 
   const addonsPrice =
     fountainCost + kegCost + lemonadeCost + hockeryCost + ledLightingCost;
@@ -169,8 +85,25 @@ function Calculator({ onCalculate }: CalculatorProps) {
   // Cena minimalna pakietu (z lib/content)
   const basePackagePrice = offer.price;
 
-  // Cena za dodatkowego gościa
-  const pricePerExtraGuest = config.pricePerExtraGuest[offer.id as keyof typeof config.pricePerExtraGuest] || 40;
+  // Cena za dodatkowego gościa (przykładowe wartości - można dostosować)
+  const pricePerExtraGuest = (() => {
+    switch (offer.id) {
+      case 'basic':
+        return 40; // +40 zł za gościa ponad minimum
+      case 'premium':
+        return 50; // +50 zł za gościa ponad minimum
+      case 'exclusive':
+        return 60; // +60 zł za gościa ponad minimum
+      case 'kids':
+        return 30; // +30 zł za gościa ponad minimum
+      case 'family':
+        return 35; // +35 zł za gościa ponad minimum
+      case 'business':
+        return 45; // +45 zł za gościa ponad minimum
+      default:
+        return 40;
+    }
+  })();
 
   // Oblicz skalowaną cenę pakietu
   const scaledPackagePrice = (() => {
@@ -213,18 +146,12 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
   const vodkaRumGinBottles = isKidsOffer
     ? 0
-    : Math.max(1, Math.ceil(config.shoppingList.vodkaRumGinBottles * scale50));
-  const liqueurBottles = isKidsOffer
-    ? 0
-    : Math.max(1, Math.ceil(config.shoppingList.liqueurBottles * scale50));
-  const aperolBottles = isKidsOffer
-    ? 0
-    : Math.max(1, Math.ceil(config.shoppingList.aperolBottles * scale50));
-  const proseccoBottles = isKidsOffer
-    ? 0
-    : Math.max(1, Math.ceil(config.shoppingList.proseccoBottles * scale50));
-  const syrupsLiters = Math.max(1, Math.ceil(config.shoppingList.syrupsLiters * scale50));
-  const iceKg = Math.max(4, Math.ceil(config.shoppingList.iceKg * scale50));
+    : Math.max(1, Math.ceil(5 * scale50)); // 5 but. 0.7L dla 50 os.
+  const liqueurBottles = isKidsOffer ? 0 : Math.max(1, Math.ceil(2 * scale50));
+  const aperolBottles = isKidsOffer ? 0 : Math.max(1, Math.ceil(2 * scale50));
+  const proseccoBottles = isKidsOffer ? 0 : Math.max(1, Math.ceil(5 * scale50));
+  const syrupsLiters = Math.max(1, Math.ceil(12 * scale50));
+  const iceKg = Math.max(4, Math.ceil(8 * scale50));
 
   // Wywołaj callback z danymi kalkulacji przy każdej zmianie
   useEffect(() => {
@@ -248,7 +175,6 @@ function Calculator({ onCalculate }: CalculatorProps) {
     estimatedCocktails,
     estimatedShots,
     addons,
-    onCalculate,
   ]);
 
   return (
@@ -480,7 +406,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
             <div className="mb-4">
               <p className="text-xs text-white/60 mb-1 uppercase tracking-wider">
-                Szacunkowa cena pakietu + dodatki (z rabatem −{Math.round(promoDiscount * 100)}%)
+                Szacunkowa cena pakietu + dodatki (z rabatem −20%)
               </p>
               <div className="flex items-baseline gap-2">
                 <span className="font-playfair text-5xl font-bold text-amber-300">

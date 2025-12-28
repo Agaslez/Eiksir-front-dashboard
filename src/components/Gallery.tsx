@@ -1,76 +1,80 @@
 import {
-  ChevronLeft,
-  ChevronRight,
-  Heart,
-  Maximize2,
-  Share2,
-  X,
+    ChevronLeft,
+    ChevronRight,
+    Heart,
+    Maximize2,
+    Share2,
+    X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { trackEvent } from '../lib/error-monitoring';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
-const galleryImages = [
-  {
-    id: 1,
-    src: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800',
-    alt: 'Bar mobilny na weselu',
-    category: 'wesele',
-    title: 'Wesele w Pałacu',
-    description: 'Pełna obsługa baru na 120 osób',
-    likes: 42,
-  },
-  {
-    id: 2,
-    src: 'https://images.unsplash.com/photo-1536935338788-846bb9981813?auto=format&fit=crop&w=800',
-    alt: 'Event firmowy z barem',
-    category: 'firmowe',
-    title: 'Event integracyjny',
-    description: 'Bar dla 80 pracowników korporacji',
-    likes: 28,
-  },
-  {
-    id: 3,
-    src: 'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w=800',
-    alt: 'Urodziny z barem koktajlowym',
-    category: 'urodziny',
-    title: '40. urodziny',
-    description: 'Kameralna impreza z autorskimi drinkami',
-    likes: 35,
-  },
-  {
-    id: 4,
-    src: 'https://images.unsplash.com/photo-1604321115296-f4b73745c7d9?auto=format&fit=crop&w=800',
-    alt: 'Koktajle premium',
-    category: 'drinki',
-    title: 'Nasze signature drinki',
-    description: 'Autorskie kompozycje smakowe',
-    likes: 56,
-  },
-  {
-    id: 5,
-    src: 'https://images.unsplash.com/photo-1509669803555-fd5edd8d5a41?auto=format&fit=crop&w=800',
-    alt: 'Barman przy pracy',
-    category: 'zespół',
-    title: 'Profesjonalny barman',
-    description: 'Tworzenie drinków z pasją i precyzją',
-    likes: 49,
-  },
-  {
-    id: 6,
-    src: 'https://images.unsplash.com/photo-1462539405390-d0bdb635c7d1?auto=format&fit=crop&w=800',
-    alt: 'Zespół barmanów',
-    category: 'zespół',
-    title: 'Nasz zespół',
-    description: 'Profesjonalni barmani z pasją',
-    likes: 31,
-  },
-];
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+// Helper function to handle both Cloudinary and local URLs
+const getImageUrl = (url: string) => {
+  if (!url) return '';
+  // If already absolute URL (Cloudinary), return as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  // Otherwise, prepend backend API URL
+  return `${API_URL.replace('/api', '')}${url}`;
+};
+
+interface GalleryImage {
+  id: number;
+  url: string;
+  alt?: string;
+  category: string;
+  title: string;
+  description: string;
+  displayOrder?: number;
+  isActive?: boolean;
+}
 
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState('wszystkie');
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch images from backend API
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_URL}/content/images?category=wszystkie`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && Array.isArray(data.data)) {
+          // Filter active images and sort by display order
+          const activeImages = data.data
+            .filter((img: GalleryImage) => img.isActive !== false)
+            .sort((a: GalleryImage, b: GalleryImage) => 
+              (a.displayOrder || 0) - (b.displayOrder || 0)
+            );
+          setGalleryImages(activeImages);
+        }
+      } catch (error) {
+        console.error('Failed to fetch gallery images:', error);
+        trackEvent('gallery_fetch_error', { error: String(error) });
+        // Keep empty array on error - show empty gallery instead of crash
+        setGalleryImages([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchImages();
+  }, []);
 
   const categories = [
     { id: 'wszystkie', label: 'Wszystkie' },
@@ -85,6 +89,19 @@ const Gallery = () => {
     activeCategory === 'wszystkie'
       ? galleryImages
       : galleryImages.filter((img) => img.category === activeCategory);
+
+  if (loading) {
+    return (
+      <Section id="galeria" className="bg-black">
+        <Container>
+          <div className="text-center py-20">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-amber-500 border-r-transparent"></div>
+            <p className="text-white/60 mt-4">Ładowanie galerii...</p>
+          </div>
+        </Container>
+      </Section>
+    );
+  }
 
   const handlePrev = () => {
     if (selectedImage !== null) {
@@ -185,8 +202,8 @@ const Gallery = () => {
               {/* Image */}
               <div className="aspect-[4/3] overflow-hidden">
                 <img
-                  src={image.src}
-                  alt={image.alt}
+                  src={getImageUrl(image.url)}
+                  alt={image.alt || image.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
@@ -308,8 +325,8 @@ const Gallery = () => {
 
           <div className="max-w-4xl w-full">
             <img
-              src={filteredImages[selectedImage].src}
-              alt={filteredImages[selectedImage].alt}
+              src={getImageUrl(filteredImages[selectedImage].url)}
+              alt={filteredImages[selectedImage].alt || filteredImages[selectedImage].title}
               className="w-full h-auto max-h-[70vh] object-contain rounded-lg"
             />
 
@@ -326,7 +343,6 @@ const Gallery = () => {
                   className="flex items-center space-x-2 text-gray-400 hover:text-red-400"
                 >
                   <Heart className="w-5 h-5" />
-                  <span>{filteredImages[selectedImage].likes}</span>
                 </button>
                 <button
                   onClick={() => handleShare(filteredImages[selectedImage])}

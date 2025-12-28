@@ -122,17 +122,9 @@ class ErrorMonitor {
   }
 
   private async sendToBackend(entry: LogEntry): Promise<void> {
-    try {
-      // W produkcji: wysyłaj do własnego backendu lub Sentry
-      await fetch('/api/logs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(entry),
-      });
-    } catch (error) {
-      // Fallback: zapisz w localStorage
-      this.saveToLocalStorage(entry);
-    }
+    // Disable remote logging for now - only use localStorage
+    // TODO: Implement proper backend logging endpoint at ${BACKEND_API}/api/logs
+    this.saveToLocalStorage(entry);
   }
 
   private saveToLocalStorage(entry: LogEntry): void {

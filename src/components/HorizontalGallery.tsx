@@ -92,7 +92,6 @@ export default function HorizontalGallery() {
                 src={getImageUrl(image.url)}
                 alt={image.title}
                 className="w-full h-full object-cover"
-                loading="lazy"
               />
             </motion.div>
           ))}

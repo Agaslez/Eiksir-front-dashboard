@@ -31,6 +31,11 @@ export default function ImageGalleryEnhanced() {
   const [previewMode, setPreviewMode] = useState(false);
   const [activeCategory, setActiveCategory] = useState('wszystkie');
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  
+  // Helper: Get full image URL (handles both relative and absolute URLs)
+  const getImageUrl = (url: string) => {
+    return url.startsWith('http://') || url.startsWith('https://') ? url : `${API_URL}${url}`;
+  };
 
   useEffect(() => {
     fetchImages();
@@ -207,7 +212,7 @@ export default function ImageGalleryEnhanced() {
             {/* Image */}
             <div className="aspect-square overflow-hidden">
               <img
-                src={`${API_URL}${image.url}`}
+                src={getImageUrl(image.url)}
                 alt={image.title || image.filename}
                 className="w-full h-full object-cover transition-transform group-hover:scale-110"
               />
@@ -302,7 +307,7 @@ export default function ImageGalleryEnhanced() {
               {/* Preview */}
               <div className="aspect-video bg-black/20 rounded-eliksir overflow-hidden">
                 <img
-                  src={`${API_URL}${editingImage.url}`}
+                  src={getImageUrl(editingImage.url)}
                   alt={editingImage.title}
                   className="w-full h-full object-contain"
                 />
@@ -388,7 +393,7 @@ export default function ImageGalleryEnhanced() {
           </button>
           <div className="max-w-5xl w-full text-center">
             <img
-              src={`${API_URL}${selectedImage.url}`}
+              src={getImageUrl(selectedImage.url)}
               alt={selectedImage.title}
               className="max-w-full max-h-[80vh] object-contain mx-auto"
               onClick={(e) => e.stopPropagation()}

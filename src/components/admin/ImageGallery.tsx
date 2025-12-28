@@ -15,6 +15,11 @@ export default function ImageGallery() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  
+  // Helper: Get full image URL (handles both relative and absolute URLs)
+  const getImageUrl = (url: string) => {
+    return url.startsWith('http://') || url.startsWith('https://') ? url : `${API_URL}${url}`;
+  };
 
   useEffect(() => {
     fetchImages();
@@ -133,7 +138,7 @@ export default function ImageGallery() {
             {/* Image */}
             <div className="aspect-square overflow-hidden rounded-t-eliksir">
               <img
-                src={`${API_URL}${image.url}`}
+                src={getImageUrl(image.url)}
                 alt={image.filename}
                 className="w-full h-full object-cover transition-transform group-hover:scale-110"
               />

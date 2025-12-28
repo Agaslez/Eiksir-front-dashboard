@@ -110,7 +110,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
       }
     };
     fetchConfig();
-  }, [API_URL]);
+  }, []); // Empty deps - fetch only once on mount
 
   if (loading || !config) {
     return (
@@ -240,6 +240,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
       };
       onCalculate(snapshot);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     offer.name,
     guests,
@@ -248,7 +249,6 @@ function Calculator({ onCalculate }: CalculatorProps) {
     estimatedCocktails,
     estimatedShots,
     addons,
-    onCalculate,
   ]);
 
   return (

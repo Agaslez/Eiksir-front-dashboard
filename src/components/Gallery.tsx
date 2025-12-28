@@ -81,7 +81,7 @@ const Gallery = () => {
   const categories = [
     { id: 'wszystkie', label: 'Wszystkie' },
     { id: 'wesela', label: 'Wesela' },
-    { id: 'firmowe', label: 'Eventy firmowe' },
+    { id: 'eventy-firmowe', label: 'Eventy firmowe' },
     { id: 'urodziny', label: 'Urodziny' },
     { id: 'drinki', label: 'Drinki' },
     { id: 'zespol', label: 'Zespół' },
@@ -218,7 +218,7 @@ const Gallery = () => {
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
                         image.category === 'wesela'
                           ? 'bg-pink-500/20 text-pink-300'
-                          : image.category === 'firmowe'
+                          : image.category === 'eventy-firmowe'
                             ? 'bg-blue-500/20 text-blue-300'
                             : image.category === 'urodziny'
                               ? 'bg-purple-500/20 text-purple-300'
@@ -228,7 +228,7 @@ const Gallery = () => {
                       }`}
                     >
                       {image.category === 'wesela' && 'Wesele'}
-                      {image.category === 'firmowe' && 'Firmowe'}
+                      {image.category === 'eventy-firmowe' && 'Firmowe'}
                       {image.category === 'urodziny' && 'Urodziny'}
                       {image.category === 'drinki' && 'Drinki'}
                       {image.category === 'zespol' && 'Zespół'}

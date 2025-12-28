@@ -22,12 +22,18 @@ export default function HorizontalGallery() {
       const response = await fetch(`${API_URL}/api/content/images`);
       if (response.ok) {
         const data = await response.json();
+        console.log('HorizontalGallery fetched images:', data.length);
         setImages(data);
       }
     } catch (error) {
       console.error('Failed to fetch images:', error);
     }
   };
+
+  // Don't render if no images
+  if (images.length === 0) {
+    return null;
+  }
 
   return (
     <Section className="bg-black py-6 overflow-hidden">

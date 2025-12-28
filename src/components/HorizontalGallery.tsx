@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
 // Ensure API_URL always ends with /api
@@ -61,20 +62,21 @@ export default function HorizontalGallery() {
   }
 
   return (
-    <Section className="bg-black py-3 md:py-4 overflow-hidden">
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-        className="relative"
-      >
-        {/* Gradient overlays for smooth edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+    <Section className="bg-black py-3 md:py-4">
+      <Container className="!px-0 !max-w-none">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="relative overflow-hidden"
+        >
+          {/* Gradient overlays for smooth edges */}
+          <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
 
-        {/* Scrolling container */}
-        <div className="flex gap-2 md:gap-3 animate-scroll hover:pause-animation">
+          {/* Scrolling container */}
+          <div className="flex gap-2 md:gap-3 animate-scroll hover:pause-animation">
           {/* Duplicate images for infinite scroll effect */}
           {[...images, ...images].map((image, index) => (
             <motion.div
@@ -91,6 +93,7 @@ export default function HorizontalGallery() {
           ))}
         </div>
       </motion.div>
+      </Container>
 
       <style>{`
         @keyframes scroll {

@@ -6,6 +6,7 @@ import Contact from '../components/Contact';
 import FooterEliksir from '../components/FooterEliksir';
 import Gallery from '../components/Gallery';
 import HeroEliksir from '../components/HeroEliksir';
+import HorizontalGallery from '../components/HorizontalGallery';
 import { Container } from '../components/layout/Container';
 import { Section } from '../components/layout/Section';
 import PackageDetails from '../components/PackageDetails';
@@ -248,6 +249,7 @@ const Home: React.FC = () => {
     <main className="min-h-screen bg-black text-white antialiased w-full flex flex-col items-center relative">
       <HeroEliksir />
       <About />
+      <HorizontalGallery />
       <Stats />
       <Menu />
       <PackageDetails />

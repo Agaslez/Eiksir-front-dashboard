@@ -40,9 +40,15 @@ export default function HorizontalGallery() {
     }
   };
 
-  // Don't render if no images
+  // Don't render anything if no images yet
   if (images.length === 0) {
-    return null;
+    return (
+      <Section className="bg-black py-6">
+        <div className="text-center text-white/40 text-sm">
+          Ładowanie galerii...
+        </div>
+      </Section>
+    );
   }
 
   return (

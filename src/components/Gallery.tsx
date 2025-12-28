@@ -1,10 +1,10 @@
 import {
-    ChevronLeft,
-    ChevronRight,
-    Heart,
-    Maximize2,
-    Share2,
-    X,
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  Maximize2,
+  Share2,
+  X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { trackEvent } from '../lib/error-monitoring';
@@ -46,7 +46,7 @@ const Gallery = () => {
     const fetchImages = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/content/images?category=wszystkie`);
+        const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -54,9 +54,9 @@ const Gallery = () => {
         
         const data = await response.json();
         
-        if (data.success && Array.isArray(data.data)) {
+        if (data.success && Array.isArray(data.images)) {
           // Filter active images and sort by display order
-          const activeImages = data.data
+          const activeImages = data.images
             .filter((img: GalleryImage) => img.isActive !== false)
             .sort((a: GalleryImage, b: GalleryImage) => 
               (a.displayOrder || 0) - (b.displayOrder || 0)

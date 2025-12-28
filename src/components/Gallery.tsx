@@ -11,7 +11,9 @@ import { trackEvent } from '../lib/error-monitoring';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com/api';
+// Ensure API_URL always ends with /api
+const baseUrl = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
+const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
 
 // Helper function to handle both Cloudinary and local URLs
 const getImageUrl = (url: string) => {

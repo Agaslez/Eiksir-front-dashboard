@@ -246,6 +246,7 @@ const Home: React.FC = () => {
   return (
     <main className="min-h-screen bg-black text-white antialiased w-full flex flex-col items-center relative">
       <HeroEliksir />
+      <About />
       <Stats />
       <Menu />
       <PackageDetails />

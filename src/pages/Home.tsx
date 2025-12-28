@@ -1,5 +1,6 @@
 ﻿import { motion } from 'framer-motion';
 import React, { useCallback, useState } from 'react';
+import About from '../components/About';
 import Calculator, { CalculatorSnapshot } from '../components/Calculator';
 import Contact from '../components/Contact';
 import FooterEliksir from '../components/FooterEliksir';

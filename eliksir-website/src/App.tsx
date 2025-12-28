@@ -391,6 +391,11 @@ function Gallery() {
   const [loading, setLoading] = useState(true);
   const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
 
+  // Helper: Get full image URL (handles both relative and absolute URLs)
+  const getImageUrl = (url: string) => {
+    return url.startsWith('http://') || url.startsWith('https://') ? url : `${API_URL}${url}`;
+  };
+
   useEffect(() => {
     const fetchGallery = async () => {
       try {
@@ -448,7 +453,7 @@ function Gallery() {
             >
               <div className={`${idx === 0 || idx === 3 ? 'aspect-[3/4]' : 'aspect-square'}`}>
                 <img
-                  src={`${API_URL}${image.url}`}
+                  src={getImageUrl(image.url)}
                   alt={image.title || `Realizacja ${idx + 1}`}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   loading="lazy"

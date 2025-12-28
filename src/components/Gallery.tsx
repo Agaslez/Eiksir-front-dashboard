@@ -80,11 +80,11 @@ const Gallery = () => {
 
   const categories = [
     { id: 'wszystkie', label: 'Wszystkie' },
-    { id: 'wesele', label: 'Wesela' },
+    { id: 'wesela', label: 'Wesela' },
     { id: 'firmowe', label: 'Eventy firmowe' },
     { id: 'urodziny', label: 'Urodziny' },
     { id: 'drinki', label: 'Drinki' },
-    { id: 'zespół', label: 'Zespół' },
+    { id: 'zespol', label: 'Zespół' },
   ];
 
   const filteredImages =
@@ -216,21 +216,23 @@ const Gallery = () => {
                   <div className="flex items-center justify-between mb-2">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        image.category === 'wesele'
+                        image.category === 'wesela'
                           ? 'bg-pink-500/20 text-pink-300'
                           : image.category === 'firmowe'
                             ? 'bg-blue-500/20 text-blue-300'
                             : image.category === 'urodziny'
                               ? 'bg-purple-500/20 text-purple-300'
-                              : 'bg-amber-500/20 text-amber-300'
+                              : image.category === 'zespol'
+                                ? 'bg-green-500/20 text-green-300'
+                                : 'bg-amber-500/20 text-amber-300'
                       }`}
                     >
-                      {image.category === 'wesele' && 'Wesele'}
+                      {image.category === 'wesela' && 'Wesele'}
                       {image.category === 'firmowe' && 'Firmowe'}
                       {image.category === 'urodziny' && 'Urodziny'}
                       {image.category === 'drinki' && 'Drinki'}
-                      {image.category === 'dekoracje' && 'Dekoracje'}
-                      {image.category === 'zespół' && 'Zespół'}
+                      {image.category === 'zespol' && 'Zespół'}
+                      {image.category === 'wszystkie' && 'Ogólne'}
                     </span>
                     <button
                       onClick={(e) => {

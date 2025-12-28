@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ELIKSIR Login Test</title>
+    <style>
+        body { 
+            font-family: monospace; 
+            padding: 20px; 
+            background: #0A0A0F;
+            color: #D4AF37;
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: #1A1A2E;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        button { 
+            background: #D4AF37; 
+            color: #0A0A0F; 
+            border: none; 
+            padding: 10px 20px; 
+            cursor: pointer; 
+            margin: 5px;
+            border-radius: 4px;
+        }
+        button:hover { background: #FBBF24; }
+        pre { 
+            background: #000; 
+            padding: 10px; 
+            overflow-x: auto; 
+            border-radius: 4px;
+            color: #0f0;
+        }
+        input { 
+            padding: 8px; 
+            margin: 5px 0; 
+            width: 100%; 
+            background: #0A0A0F;
+            color: #D4AF37;
+            border: 1px solid #D4AF37;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 ELIKSIR Login Test</h1>
+        
+        <h3>1. Test Backend Health</h3>
+        <button onclick="testHealth()">Test /api/health</button>
+        <pre id="health-result">Kliknij przycisk...</pre>
+        
+        <h3>2. Test Login</h3>
+        <input type="email" id="email" value="admin@eliksir-bar.pl" placeholder="Email">
+        <input type="password" id="password" value="Admin123!" placeholder="Password">
+        <button onclick="testLogin()">Test Login</button>
+        <pre id="login-result">Kliknij przycisk...</pre>
+        
+        <h3>3. Test /me (wymagany token)</h3>
+        <button onclick="testMe()">Test /api/auth/me</button>
+        <pre id="me-result">Najpierw zaloguj się...</pre>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001';
+        let accessToken = null;
+
+        async function testHealth() {
+            const result = document.getElementById('health-result');
+            try {
+                result.textContent = 'Sprawdzanie...';
+                const response = await fetch(`${API_URL}/api/health`);
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.textContent = 'ERROR: ' + error.message;
+            }
+        }
+
+        async function testLogin() {
+            const result = document.getElementById('login-result');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                result.textContent = 'Logowanie...';
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.accessToken) {
+                    accessToken = data.accessToken;
+                    result.textContent = '✅ Login successful!\n\n' + JSON.stringify(data, null, 2);
+                } else {
+                    result.textContent = '❌ Login failed!\n\n' + JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                result.textContent = 'ERROR: ' + error.message;
+            }
+        }
+
+        async function testMe() {
+            const result = document.getElementById('me-result');
+            
+            if (!accessToken) {
+                result.textContent = '❌ Brak tokenu! Najpierw zaloguj się.';
+                return;
+            }
+            
+            try {
+                result.textContent = 'Sprawdzanie użytkownika...';
+                const response = await fetch(`${API_URL}/api/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.textContent = 'ERROR: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

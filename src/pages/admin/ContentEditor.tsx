@@ -1,3 +1,4 @@
+import { config } from '@/lib/config';
 import { Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -17,7 +18,7 @@ export default function ContentEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingSection, setEditingSection] = useState<Section | null>(null);
-  const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
+  const API_URL = config.apiUrl;
 
   useEffect(() => {
     fetchSections();
@@ -115,8 +116,9 @@ export default function ContentEditor() {
 
             {editingSection.content.heading !== undefined && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Heading</label>
+                <label htmlFor="heading-input" className="block text-sm font-medium text-gray-700 mb-1">Heading</label>
                 <input
+                  id="heading-input"
                   type="text"
                   value={editingSection.content.heading || ''}
                   onChange={(e) =>
@@ -132,8 +134,9 @@ export default function ContentEditor() {
 
             {editingSection.content.subheading !== undefined && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Subheading</label>
+                <label htmlFor="subheading-input" className="block text-sm font-medium text-gray-700 mb-1">Subheading</label>
                 <input
+                  id="subheading-input"
                   type="text"
                   value={editingSection.content.subheading || ''}
                   onChange={(e) =>
@@ -149,8 +152,9 @@ export default function ContentEditor() {
 
             {editingSection.content.description !== undefined && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label htmlFor="description-input" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
+                  id="description-input"
                   value={editingSection.content.description || ''}
                   onChange={(e) =>
                     setEditingSection({

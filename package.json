@@ -47,6 +47,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
     "@tailwindcss/postcss": "^4.1.18",
     "@testing-library/jest-dom": "^6.4.5",
     "@testing-library/react": "^15.0.7",
@@ -56,6 +58,7 @@
     "@types/node-fetch": "^2.6.13",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "babel-plugin-transform-vite-meta-env": "^1.0.3",
     "cypress": "^13.10.0",
     "eslint": "^9.3.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc-fb9a90fa48-20240614",

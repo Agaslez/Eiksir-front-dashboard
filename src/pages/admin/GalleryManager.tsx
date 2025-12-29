@@ -1,3 +1,4 @@
+import { config } from '@/lib/config';
 import { Image as ImageIcon, RefreshCw, Trash2, Upload } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -15,7 +16,7 @@ export default function GalleryManager() {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
+  const API_URL = config.apiUrl;
 
   useEffect(() => {
     fetchImages();

@@ -77,7 +77,7 @@ export default function CalculatorSettingsNew() {
   });
 
   const [saving, setSaving] = useState(false);
-  const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
+  const API_URL = config.apiUrl;
 
   useEffect(() => {
     fetchConfig();

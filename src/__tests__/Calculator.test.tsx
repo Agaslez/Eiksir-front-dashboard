@@ -2,47 +2,19 @@ import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Calculator from '../components/Calculator';
+import { createMockFetch, mockCalculatorConfig } from './helpers/testUtils';
 
 // Mock fetch API
-global.fetch = jest.fn();
-
-const mockConfig = {
-  promoDiscount: 0.2,
-  pricePerExtraGuest: {
-    basic: 40,
-    premium: 50,
-    exclusive: 60,
-    kids: 30,
-    family: 35,
-    business: 45,
-  },
-  addons: {
-    fountain: { perGuest: 10, min: 600, max: 1200 },
-    keg: { pricePerKeg: 550, guestsPerKeg: 50 },
-    lemonade: { base: 250, blockGuests: 60 },
-    hockery: 200,
-    ledLighting: 500,
-  },
-  shoppingList: {
-    vodkaRumGinBottles: 5,
-    liqueurBottles: 2,
-    aperolBottles: 2,
-    proseccoBottles: 5,
-    syrupsLiters: 12,
-    iceKg: 8,
-  },
-};
+global.fetch = createMockFetch({
+  '/api/calculator/config': { success: true, config: mockCalculatorConfig },
+});
 
 describe('Calculator Component', () => {
   beforeEach(() => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => ({ success: true, config: mockConfig }),
-    });
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
+    global.fetch = createMockFetch({
+      '/api/calculator/config': { success: true, config: mockCalculatorConfig },
+    });
   });
 
   describe('API Integration', () => {
@@ -62,7 +34,9 @@ describe('Calculator Component', () => {
     });
 
     it('falls back to default config on API failure', async () => {
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('API Error'));
+      global.fetch = createMockFetch({
+        '/api/calculator/config': { ok: false, status: 500, data: { error: 'Failed' } },
+      });
       
       render(<Calculator />);
       

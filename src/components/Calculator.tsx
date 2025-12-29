@@ -1,3 +1,4 @@
+import { config as appConfig } from '@/lib/config';
 import { useEffect, useState } from 'react';
 import { OFFERS } from '../lib/content';
 import { Container } from './layout/Container';
@@ -65,7 +66,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const [config, setConfig] = useState<CalculatorConfig | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = config.apiUrl;
+  const API_URL = appConfig.apiUrl;
 
   useEffect(() => {
     fetchConfig();

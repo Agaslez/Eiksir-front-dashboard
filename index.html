@@ -47,7 +47,8 @@
       });
     </script>
     
-    <!-- Facebook Pixel -->
+    <!-- Facebook Pixel - Disabled until Pixel ID is configured -->
+    <!-- Uncomment and replace YOUR_FACEBOOK_PIXEL_ID when ready
     <script>
       !function(f,b,e,v,n,t,s)
       {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -60,6 +61,7 @@
       fbq('init', 'YOUR_FACEBOOK_PIXEL_ID');
       fbq('track', 'PageView');
     </script>
+    -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -68,11 +70,12 @@
     />
   </head>
   <body>
-    <!-- Facebook Pixel NoScript -->
+    <!-- Facebook Pixel noscript - Disabled
     <noscript>
       <img height="1" width="1" style="display:none"
            src="https://www.facebook.com/tr?id=YOUR_FACEBOOK_PIXEL_ID&ev=PageView&noscript=1"/>
     </noscript>
+    -->
     
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

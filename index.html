@@ -47,8 +47,7 @@
       });
     </script>
     
-    <!-- Facebook Pixel - Disabled until Pixel ID is configured -->
-    <!-- Uncomment and replace YOUR_FACEBOOK_PIXEL_ID when ready
+    <!-- Meta Pixel Code -->
     <script>
       !function(f,b,e,v,n,t,s)
       {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -58,10 +57,11 @@
       t.src=v;s=b.getElementsByTagName(e)[0];
       s.parentNode.insertBefore(t,s)}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', 'YOUR_FACEBOOK_PIXEL_ID');
+      fbq('init', '756005747529490');
       fbq('track', 'PageView');
     </script>
-    -->
+    <!-- End Meta Pixel Code -->
+    
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -70,12 +70,11 @@
     />
   </head>
   <body>
-    <!-- Facebook Pixel noscript - Disabled
+    <!-- Meta Pixel noscript -->
     <noscript>
       <img height="1" width="1" style="display:none"
-           src="https://www.facebook.com/tr?id=YOUR_FACEBOOK_PIXEL_ID&ev=PageView&noscript=1"/>
+           src="https://www.facebook.com/tr?id=756005747529490&ev=PageView&noscript=1"/>
     </noscript>
-    -->
     
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

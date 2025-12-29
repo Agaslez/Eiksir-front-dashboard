@@ -226,35 +226,8 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const syrupsLiters = Math.max(1, Math.ceil(config.shoppingList.syrupsLiters * scale50));
   const iceKg = Math.max(4, Math.ceil(config.shoppingList.iceKg * scale50));
 
-  // Wywołaj callback z danymi kalkulacji przy każdej zmianie
-  // Wywołaj callback z danymi kalkulacji przy każdej zmianie
-  useEffect(() => {
-    if (onCalculate) {
-      const snapshot: CalculatorSnapshot = {
-        offerName: offer.name,
-        guests,
-        totalAfterDiscount,
-        pricePerGuest,
-        estimatedCocktails,
-        estimatedShots,
-        addons,
-      };
-      onCalculate(snapshot);
-    }
-     
-  }, [
-    selectedOfferId,  // Use ID instead of offer.name to avoid reference changes
-    guests,
-    totalAfterDiscount,
-    pricePerGuest,
-    estimatedCocktails,
-    estimatedShots,
-    addons.fountain,
-    addons.keg,
-    addons.lemonade,
-    addons.hockery,
-    addons.ledLighting,
-  ]);
+  // Note: Removed useEffect for onCalculate to prevent infinite loop
+  // Calculator values are calculated on every render, no need to track changes
 
   return (
     <Section id="kalkulator" className="bg-black border-t border-white/10">

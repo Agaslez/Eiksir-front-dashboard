@@ -1,3 +1,4 @@
+import { config } from '@/lib/config';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Container } from './layout/Container';
@@ -20,7 +21,7 @@ const About = () => {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
+        const API_URL = config.apiUrl;
         const baseUrl = API_URL.endsWith('/api') ? API_URL : `${API_URL}/api`;
         
         const response = await fetch(`${baseUrl}/content/sections`);

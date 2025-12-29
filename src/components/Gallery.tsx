@@ -1,3 +1,4 @@
+import { config } from '@/lib/config';
 import {
     ChevronLeft,
     ChevronRight,
@@ -13,7 +14,7 @@ import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
 // Ensure API_URL always ends with /api
-const baseUrl = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
+const baseUrl = config.apiUrl;
 const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
 
 // Helper function to handle both Cloudinary and local URLs

@@ -65,7 +65,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const [config, setConfig] = useState<CalculatorConfig | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
+  const API_URL = config.apiUrl;
 
   useEffect(() => {
     fetchConfig();

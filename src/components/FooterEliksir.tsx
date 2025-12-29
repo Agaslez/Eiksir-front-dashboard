@@ -17,8 +17,8 @@ export default function FooterEliksir() {
   ];
 
   const contactInfo = [
-    { icon: Phone, text: '+48 123 456 789', href: 'tel:+48123456789' },
-    { icon: Mail, text: 'eliksir@bar.pl', href: 'mailto:eliksir@bar.pl' },
+    { icon: Phone, text: '+48 781 024 701', href: 'tel:+48781024701' },
+    { icon: Mail, text: 'kontakt@eliksir-bar.pl', href: 'mailto:kontakt@eliksir-bar.pl' },
     { icon: MapPin, text: 'Cała Polska', href: '#' },
   ];
 

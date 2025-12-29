@@ -116,7 +116,7 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
     const subject = `Zapytanie ELIKSIR - ${formData.name || 'bez imienia'}`;
     const body = lines.join('\n');
 
-    const mailtoLink = `mailto:st.pitek@gmail.com?subject=${encodeURIComponent(
+    const mailtoLink = `mailto:kontakt@eliksir-bar.pl?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
 
@@ -182,7 +182,7 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
 
             <div className="space-y-7 text-sm">
               <a
-                href="tel:+48517616618"
+                href="tel:+48781024701"
                 className="flex items-center gap-4 group"
               >
                 <div className="w-12 h-12 border border-amber-400/40 flex items-center justify-center group-hover:bg-amber-400/10 transition-colors">
@@ -211,7 +211,7 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
               </a>
 
               <a
-                href="mailto:st.pitek@gmail.com"
+                href="mailto:kontakt@eliksir-bar.pl"
                 className="flex items-center gap-4 group"
               >
                 <div className="w-12 h-12 border border-amber-400/40 flex items-center justify-center group-hover:bg-amber-400/10 transition-colors">
@@ -234,7 +234,7 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
                     Email
                   </p>
                   <p className="text-white text-base group-hover:text-amber-300 transition-colors">
-                    st.pitek@gmail.com
+                    kontakt@eliksir-bar.pl
                   </p>
                 </div>
               </a>

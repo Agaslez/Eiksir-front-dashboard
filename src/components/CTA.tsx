@@ -1,11 +1,11 @@
 import {
-  Award,
-  Calendar,
-  CheckCircle,
-  Clock,
-  Mail,
-  Phone,
-  Users,
+    Award,
+    Calendar,
+    CheckCircle,
+    Clock,
+    Mail,
+    Phone,
+    Users,
 } from 'lucide-react';
 import { trackEvent } from '../lib/error-monitoring';
 
@@ -15,10 +15,10 @@ const CTA = () => {
 
     switch (method) {
       case 'phone':
-        window.location.href = 'tel:+48517616618';
+        window.location.href = 'tel:+48781024701';
         break;
       case 'email':
-        window.location.href = 'mailto:eliksir@bar.pl';
+        window.location.href = 'mailto:kontakt@eliksir-bar.pl';
         break;
       case 'calculator':
         document

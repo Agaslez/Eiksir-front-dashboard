@@ -57,13 +57,13 @@ const Gallery = () => {
         const data = await response.json();
         
         if (data.success && Array.isArray(data.images)) {
-          // Backend doesn't return isActive/displayOrder, so use all images
-          const activeImages = data.images
+          // Backend now filters active images and returns displayOrder
+          const sortedImages = data.images
             .filter((img: GalleryImage) => img.url)
             .sort((a: GalleryImage, b: GalleryImage) => 
-              (a.id || 0) - (b.id || 0)
+              (a.displayOrder || 0) - (b.displayOrder || 0)
             );
-          setGalleryImages(activeImages);
+          setGalleryImages(sortedImages);
         }
       } catch (error) {
         console.error('Failed to fetch gallery images:', error);

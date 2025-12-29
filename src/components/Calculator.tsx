@@ -240,7 +240,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
       };
       onCalculate(snapshot);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [
     offer.name,
     guests,
@@ -248,7 +248,11 @@ function Calculator({ onCalculate }: CalculatorProps) {
     pricePerGuest,
     estimatedCocktails,
     estimatedShots,
-    addons,
+    addons.fountain,
+    addons.keg,
+    addons.lemonade,
+    addons.hockery,
+    addons.ledLighting,
   ]);
 
   return (

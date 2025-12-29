@@ -3,6 +3,7 @@ import {
     ChevronRight,
     Heart,
     Maximize2,
+    RefreshCw,
     Share2,
     X
 } from 'lucide-react';

@@ -23,7 +23,7 @@ export default function FooterEliksir() {
   ];
 
   const socialLinks = [
-    { icon: Facebook, href: 'https://www.facebook.com/eliksir.bar', label: 'Facebook' },
+    { icon: Facebook, href: 'https://www.facebook.com/profile.php?id=61585498184401', label: 'Facebook' },
     { icon: Instagram, href: 'https://www.instagram.com/eliksir.bar', label: 'Instagram' },
   ];
 

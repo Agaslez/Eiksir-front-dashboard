@@ -67,17 +67,19 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
   const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
 
-  // Fetch config from API
   useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/calculator/config`);
+    fetchConfig();
+  }, []);
+
+  const fetchConfig = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/calculator/config`);
+      if (response.ok) {
         const data = await response.json();
         if (data.success && data.config) {
           setConfig(data.config);
         }
-      } catch (error) {
-        console.error('Failed to fetch calculator config:', error);
+      } else {
         // Fallback to defaults if API fails
         setConfig({
           promoDiscount: 0.2,
@@ -105,12 +107,40 @@ function Calculator({ onCalculate }: CalculatorProps) {
             iceKg: 8,
           },
         });
-      } finally {
-        setLoading(false);
       }
-    };
-    fetchConfig();
-  }, []); // Empty deps - fetch only once on mount
+    } catch (error) {
+      console.error('Failed to fetch calculator config:', error);
+      // Fallback to defaults on error
+      setConfig({
+        promoDiscount: 0.2,
+        pricePerExtraGuest: {
+          basic: 40,
+          premium: 50,
+          exclusive: 60,
+          kids: 30,
+          family: 35,
+          business: 45,
+        },
+        addons: {
+          fountain: { perGuest: 10, min: 600, max: 1200 },
+          keg: { pricePerKeg: 550, guestsPerKeg: 50 },
+          lemonade: { base: 250, blockGuests: 60 },
+          hockery: 200,
+          ledLighting: 500,
+        },
+        shoppingList: {
+          vodkaRumGinBottles: 5,
+          liqueurBottles: 2,
+          aperolBottles: 2,
+          proseccoBottles: 5,
+          syrupsLiters: 12,
+          iceKg: 8,
+        },
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading || !config) {
     return (

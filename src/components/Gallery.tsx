@@ -1,10 +1,10 @@
 import {
-  ChevronLeft,
-  ChevronRight,
-  Heart,
-  Maximize2,
-  Share2,
-  X,
+    ChevronLeft,
+    ChevronRight,
+    Heart,
+    Maximize2,
+    Share2,
+    X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { trackEvent } from '../lib/error-monitoring';
@@ -57,11 +57,11 @@ const Gallery = () => {
         const data = await response.json();
         
         if (data.success && Array.isArray(data.images)) {
-          // Filter active images and sort by display order
+          // Backend doesn't return isActive/displayOrder, so use all images
           const activeImages = data.images
-            .filter((img: GalleryImage) => img.isActive !== false)
+            .filter((img: GalleryImage) => img.url)
             .sort((a: GalleryImage, b: GalleryImage) => 
-              (a.displayOrder || 0) - (b.displayOrder || 0)
+              (a.id || 0) - (b.id || 0)
             );
           setGalleryImages(activeImages);
         }

@@ -4,7 +4,7 @@ import {
     Heart,
     Maximize2,
     Share2,
-    X,
+    X
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { trackEvent } from '../lib/error-monitoring';
@@ -170,8 +170,8 @@ const Gallery = () => {
 
       {/* GALERIA W KONTENERZE */}
       <Container>
-        {/* Category Filters */}
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
+        {/* Category Filters + Refresh Button */}
+        <div className="flex flex-wrap justify-center items-center gap-2 mb-8">
           {categories.map((category) => (
             <button
               key={category.id}
@@ -188,6 +188,31 @@ const Gallery = () => {
               {category.label}
             </button>
           ))}
+          
+          {/* Refresh Button */}
+          <button
+            onClick={async () => {
+              setLoading(true);
+              const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`);
+              const data = await response.json();
+              if (data.success) {
+                const sortedImages = data.images
+                  .filter((img: GalleryImage) => img.url)
+                  .sort((a: GalleryImage, b: GalleryImage) => 
+                    (a.displayOrder || 0) - (b.displayOrder || 0)
+                  );
+                setGalleryImages(sortedImages);
+              }
+              setLoading(false);
+              trackEvent('gallery_refresh', { category: activeCategory });
+            }}
+            disabled={loading}
+            className="px-4 py-2 rounded-full text-sm font-medium transition-all bg-gray-800 text-gray-300 hover:bg-gray-700 disabled:opacity-50 flex items-center gap-2"
+            title="Odśwież galerię"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Odśwież
+          </button>
         </div>
 
         {/* Gallery Grid */}

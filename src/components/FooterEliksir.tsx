@@ -19,7 +19,6 @@ export default function FooterEliksir() {
   const contactInfo = [
     { icon: Phone, text: '+48 781 024 701', href: 'tel:+48781024701' },
     { icon: Mail, text: 'kontakt@eliksir-bar.pl', href: 'mailto:kontakt@eliksir-bar.pl' },
-    { icon: MapPin, text: 'Cała Polska', href: '#' },
   ];
 
   const socialLinks = [
@@ -126,6 +125,30 @@ export default function FooterEliksir() {
                   </a>
                 );
               })}
+            </div>
+
+            {/* Lokalizacja */}
+            <div className="mt-8 p-4 bg-eliksir-dark/50 backdrop-blur-sm border border-white/10 rounded-eliksir-lg">
+              <h5 className="text-eliksir-gold font-semibold mb-3 text-sm uppercase tracking-wider">Lokalizacja</h5>
+              <div className="space-y-2 text-sm">
+                <p className="text-white/70">
+                  <span className="text-white font-medium">Lokalizacja bazowa:</span><br />
+                  Kleszczów / Bełchatów
+                </p>
+                <p className="text-white/70">
+                  <span className="text-white font-medium">Działamy mobilnie:</span><br />
+                  Łódź, woj. łódzkie i cała Polska
+                </p>
+              </div>
+              <a
+                href="https://www.google.com/maps/place/Bełchatów"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 flex items-center gap-2 text-eliksir-gold hover:text-eliksir-goldLight transition-colors text-sm group"
+              >
+                <MapPin className="w-4 h-4" />
+                <span className="group-hover:underline">Zobacz na mapie →</span>
+              </a>
             </div>
 
             {/* Newsletter */}

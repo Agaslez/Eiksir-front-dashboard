@@ -12,7 +12,7 @@ interface AboutContent {
 const About = () => {
   const [content, setContent] = useState<AboutContent>({
     heading: 'Kim jesteśmy?',
-    description: 'Jesteśmy zespołem profesjonalnych barmanów z wieloletnim doświadczeniem w obsłudze najróżniejszych wydarzeń. Naszą specjalnością jest mobilny bar koktajlowy na zamówienie – pełna elastyczność, profesjonalizm i pasja w każdym drinku.\n\nDostosowujemy się do Twoich potrzeb: od kameralnych przyjęć po wielkie wesela. Oferujemy nie tylko doskonałe koktajle, ale również pełną oprawę wizualną baru, która idealnie wpisuje się w charakter Twojego wydarzenia. Z nami każda impreza staje się wyjątkową, smakową podróżą!',
+    description: 'Jesteśmy zespołem profesjonalnych barmanów z wieloletnim doświadczeniem w obsłudze wesel, eventów firmowych i imprez prywatnych. Specjalizujemy się w usłudze mobilnego baru koktajlowego premium, który realizujemy na terenie Bełchatowa, Kleszczowa, Łodzi oraz w całej Polsce.\n\nDostosowujemy się do Twoich potrzeb – od kameralnych przyjęć po duże wesela i wydarzenia korporacyjne. Oferujemy nie tylko autorskie koktajle i klasykę barmańską, ale również pełną oprawę wizualną mobilnego baru, dopasowaną do charakteru wydarzenia.\n\nELIKSIR to mobilny bar koktajlowy, który łączy profesjonalizm, estetykę i niezawodną obsługę – dzięki temu każda impreza staje się wyjątkowym doświadczeniem smakowym.',
     image: '/images/about.jpg',
   });
   const [loading, setLoading] = useState(true);

@@ -1,0 +1,12 @@
+<!-- 
+  UWAGA: To jest placeholder dla og-image.jpg
+  
+  Musisz stworzyć prawdziwy obraz 1200x630px:
+  1. Użyj Canva/Figma/Photoshop
+  2. Tło: czarne z gradientem złotym
+  3. Tekst: "ELIKSIR - Mobilny Bar Koktajlowy"
+  4. Logo/grafika: drink, barman, lub zdjęcie z galerii
+  5. Zapisz jako public/og-image.jpg
+  
+  Obecnie użyj dowolnego zdjęcia z galerii (1200x630px) jako tymczasowe.
+-->

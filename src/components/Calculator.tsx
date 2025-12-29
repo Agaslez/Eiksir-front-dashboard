@@ -227,6 +227,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const iceKg = Math.max(4, Math.ceil(config.shoppingList.iceKg * scale50));
 
   // Wywołaj callback z danymi kalkulacji przy każdej zmianie
+  // Wywołaj callback z danymi kalkulacji przy każdej zmianie
   useEffect(() => {
     if (onCalculate) {
       const snapshot: CalculatorSnapshot = {
@@ -242,7 +243,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
     }
      
   }, [
-    offer.name,
+    selectedOfferId,  // Use ID instead of offer.name to avoid reference changes
     guests,
     totalAfterDiscount,
     pricePerGuest,

@@ -70,19 +70,6 @@ export default function SystemHealthDashboard() {
       status: 'checking'
     },
     {
-      name: 'Stats API (Public)',
-      category: 'Backend',
-      endpoint: '/stats/public',
-      check: async () => {
-        const start = Date.now();
-        const res = await fetch(`${API_URL}/stats/public`);
-        const data = await res.json();
-        checks.find(c => c.name === 'Stats API (Public)')!.responseTime = Date.now() - start;
-        return res.ok && data.success;
-      },
-      status: 'checking'
-    },
-    {
       name: 'Input Validation (Zod)',
       category: 'Backend',
       endpoint: '/logs',

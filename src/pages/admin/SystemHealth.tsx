@@ -168,11 +168,54 @@ export default function SystemHealthDashboard() {
       status: 'checking'
     },
     {
+      name: 'Auth Health',
+      category: 'Backend',
+      endpoint: '/auth/health',
+      check: async () => {
+        return await performHttpCheck(
+          'Auth Health',
+          `${API_URL}/auth/health`,
+          undefined,
+          (data) => data.status === 'healthy'
+        );
+      },
+      status: 'checking'
+    },
+    {
+      name: 'AI Service Health',
+      category: 'Backend',
+      endpoint: '/ai/health',
+      check: async () => {
+        return await performHttpCheck(
+          'AI Service Health',
+          `${API_URL}/ai/health`,
+          undefined,
+          (data) => data.status === 'healthy'
+        );
+      },
+      status: 'checking'
+    },
+    {
       name: 'Database Connection',
       category: 'Database',
       endpoint: '/calculator/config',
       check: async () => {
         return await performHttpCheck('Database Connection', `${API_URL}/calculator/config`);
+      },
+      status: 'checking'
+    },
+    {
+      name: 'Database Query Performance',
+      category: 'Database',
+      endpoint: '/content/gallery/public',
+      check: async () => {
+        const start = Date.now();
+        const result = await performHttpCheck(
+          'Database Query Performance',
+          `${API_URL}/content/gallery/public?category=wszystkie`
+        );
+        const duration = Date.now() - start;
+        return result && duration < 2000; // Should respond within 2 seconds
       },
       status: 'checking'
     },
@@ -196,12 +239,121 @@ export default function SystemHealthDashboard() {
       status: 'checking'
     },
     {
+      name: 'Cloudinary CDN',
+      category: 'External',
+      check: async () => {
+        try {
+          // Test fetching a known Cloudinary image
+          const response = await fetch('https://res.cloudinary.com/demo/image/upload/sample.jpg', {
+            method: 'HEAD',
+            mode: 'no-cors'
+          });
+          return true; // If no error, Cloudinary CDN is accessible
+        } catch {
+          return false;
+        }
+      },
+      status: 'checking'
+    },
+    {
+      name: 'Backend Server (Render)',
+      category: 'External',
+      check: async () => {
+        // Test if backend is responding at all
+        const baseUrl = config.apiUrl;
+        try {
+          const response = await fetch(baseUrl.replace('/api', '') + '/health', { 
+            signal: AbortSignal.timeout(5000) 
+          });
+          return response.ok;
+        } catch {
+          return false;
+        }
+      },
+      status: 'checking'
+    },
+    {
+      name: 'Frontend Deployment (Vercel)',
+      category: 'External',
+      check: async () => {
+        // Check if we're running (if this runs, deployment is live)
+        return window.location.hostname.includes('vercel.app') || 
+               window.location.hostname === 'localhost';
+      },
+      status: 'checking'
+    },
+    {
       name: 'Error Boundary',
       category: 'Frontend',
       check: async () => {
         // Check if ErrorBoundary is in tree
         return document.querySelector('[data-error-boundary]') !== null ||
                window.location.pathname.includes('admin'); // Admin has error boundary
+      },
+      status: 'checking'
+    },
+    {
+      name: 'Page Performance',
+      category: 'Frontend',
+      check: async () => {
+        if (!performance || !performance.timing) return false;
+        const { loadEventEnd, navigationStart } = performance.timing;
+        const pageLoadTime = loadEventEnd - navigationStart;
+        return pageLoadTime > 0 && pageLoadTime < 5000; // Under 5 seconds
+      },
+      status: 'checking'
+    },
+    {
+      name: 'robots.txt',
+      category: 'SEO',
+      check: async () => {
+        try {
+          const response = await fetch('/robots.txt');
+          const text = await response.text();
+          return response.ok && text.includes('User-agent');
+        } catch {
+          return false;
+        }
+      },
+      status: 'checking'
+    },
+    {
+      name: 'sitemap.xml',
+      category: 'SEO',
+      check: async () => {
+        try {
+          const response = await fetch('/sitemap.xml');
+          const text = await response.text();
+          return response.ok && text.includes('<?xml') && text.includes('<urlset');
+        } catch {
+          return false;
+        }
+      },
+      status: 'checking'
+    },
+    {
+      name: 'Open Graph Tags',
+      category: 'SEO',
+      check: async () => {
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        const ogDescription = document.querySelector('meta[property="og:description"]');
+        const ogImage = document.querySelector('meta[property="og:image"]');
+        return !!(ogTitle && ogDescription && ogImage);
+      },
+      status: 'checking'
+    },
+    {
+      name: 'JSON-LD Schema',
+      category: 'SEO',
+      check: async () => {
+        const jsonLdScript = document.querySelector('script[type="application/ld+json"]');
+        if (!jsonLdScript) return false;
+        try {
+          const data = JSON.parse(jsonLdScript.textContent || '{}');
+          return data['@type'] === 'LocalBusiness' || data['@type'] === 'Organization';
+        } catch {
+          return false;
+        }
       },
       status: 'checking'
     }

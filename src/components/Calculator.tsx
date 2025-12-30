@@ -19,6 +19,7 @@ interface CalculatorConfig {
   addons: {
     fountain: { perGuest: number; min: number; max: number };
     keg: { pricePerKeg: number; guestsPerKeg: number };
+    extraBarman: number; // NEW: Required when KEG selected
     lemonade: { base: number; blockGuests: number };
     hockery: number;
     ledLighting: number;
@@ -74,6 +75,13 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
   useEffect(() => {
     fetchConfig();
+
+    // Polling co 60s - aktualizuje config z dashboard
+    const interval = setInterval(() => {
+      fetchConfig();
+    }, 60000); // 60 sekund
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchConfig = async () => {
@@ -102,7 +110,8 @@ function Calculator({ onCalculate }: CalculatorProps) {
           },
           addons: {
             fountain: { perGuest: 10, min: 600, max: 1200 },
-            keg: { pricePerKeg: 550, guestsPerKeg: 50 },
+            keg: { pricePerKeg: 800, guestsPerKeg: 50 },
+            extraBarman: 400,
             lemonade: { base: 250, blockGuests: 60 },
             hockery: 200,
             ledLighting: 500,
@@ -132,7 +141,8 @@ function Calculator({ onCalculate }: CalculatorProps) {
         },
         addons: {
           fountain: { perGuest: 10, min: 600, max: 1200 },
-          keg: { pricePerKeg: 550, guestsPerKeg: 50 },
+          keg: { pricePerKeg: 800, guestsPerKeg: 50 },
+          extraBarman: 400,
           lemonade: { base: 250, blockGuests: 60 },
           hockery: 200,
           ledLighting: 500,
@@ -189,6 +199,9 @@ function Calculator({ onCalculate }: CalculatorProps) {
       })()
     : 0;
 
+  // NEW: Dodatkowy barman (obowiązkowy gdy KEG)
+  const extraBarmanCost = kegSelected ? config.addons.extraBarman : 0;
+
   const lemonadeCost = addons.lemonade
     ? (() => {
         const { base, blockGuests } = config.addons.lemonade;
@@ -201,7 +214,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const ledLightingCost = addons.ledLighting ? config.addons.ledLighting : 0;
 
   const addonsPrice =
-    fountainCost + kegCost + lemonadeCost + hockeryCost + ledLightingCost;
+    fountainCost + kegCost + extraBarmanCost + lemonadeCost + hockeryCost + ledLightingCost;
 
   // --- CENA PAKIETU (SKALOWANA Z LICZBĄ GOŚCI) ---
 
@@ -405,14 +418,19 @@ function Calculator({ onCalculate }: CalculatorProps) {
                       }
                     />
                     <span>
-                      KEG piwa 30L z podajnikiem{' '}
+                      KEG piwa 30L (z obsługą – wymaga dodatkowego barmana){' '}
                       {kegSelected && (
                         <span className="text-amber-300">
-                          (+{kegCost.toLocaleString('pl-PL')} zł)
+                          (+{(kegCost + extraBarmanCost).toLocaleString('pl-PL')} zł)
                         </span>
                       )}
                     </span>
                   </label>
+                  {kegSelected && (
+                    <p className="text-xs text-amber-300/80 ml-6">
+                      w tym: KEG {kegCost.toLocaleString('pl-PL')} zł + dodatkowy barman {extraBarmanCost.toLocaleString('pl-PL')} zł
+                    </p>
+                  )}
                 )}
 
                 {isKidsOffer && (
@@ -549,66 +567,78 @@ function Calculator({ onCalculate }: CalculatorProps) {
               </p>
             </div>
 
-            <div className="border-t border-white/10 pt-4 mt-4 text-sm text-white/80 space-y-2">
-              <p className="font-semibold uppercase text-xs tracking-wider text-white/60">
-                Lista zakupów (napoje + dodatki) – orientacyjnie
-              </p>
+            <div className="border-t border-white/10 pt-4 mt-4 text-sm text-white/80 space-y-4">
+              {/* SEKCJA 1: Po stronie ELIKSIR (stałe copy, bez cen) */}
+              <div>
+                <p className="font-semibold uppercase text-xs tracking-wider text-amber-300 mb-2">
+                  Po stronie ELIKSIR (w cenie pakietu)
+                </p>
+                <ul className="space-y-1 text-xs text-white/70">
+                  <li>• soki i miksery</li>
+                  <li>• syropy / puree</li>
+                  <li>• likiery barmańskie (triple sec / blue curaçao / aperol)</li>
+                  <li>• owoce i zioła</li>
+                  <li>• lód kostkowany i kruszony</li>
+                  <li>• dodatki barowe + logistyka + sprzęt</li>
+                </ul>
+              </div>
 
-              {isKidsOffer ? (
-                <>
-                  <p className="text-amber-300">
-                    • Brak alkoholu – pakiet Kids Party 0% to wyłącznie napoje
-                    bezalkoholowe.
+              {/* SEKCJA 2: Po stronie Gości (wyliczenia) */}
+              <div className="border-t border-white/20 pt-3">
+                <p className="font-semibold uppercase text-xs tracking-wider text-white/60 mb-2">
+                  Po stronie Gości – alkohol mocny (orientacyjnie)
+                </p>
+
+                {isKidsOffer ? (
+                  <p className="text-amber-300 text-xs">
+                    • Brak alkoholu – pakiet Kids Party 0% to wyłącznie napoje bezalkoholowe.
                   </p>
-                  <p>
-                    • Soki / miksery / syropy:{' '}
-                    <span className="font-semibold">
-                      ok. {syrupsLiters} L łącznie
-                    </span>
-                  </p>
-                  <p>
-                    • Lód kostkowany / kruszony:{' '}
-                    <span className="font-semibold">ok. {iceKg} kg</span>
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p>
-                    • Wódka / rum / gin:{' '}
-                    <span className="font-semibold">
-                      ok. {vodkaRumGinBottles}× 0,7 L
-                    </span>
-                  </p>
-                  <p>
-                    • Likier (brzoskwinia / inne):{' '}
-                    <span className="font-semibold">
-                      ok. {liqueurBottles}× 0,7 L
-                    </span>
-                  </p>
-                  <p>
-                    • Aperol:{' '}
-                    <span className="font-semibold">
-                      ok. {aperolBottles}× 0,7 L
-                    </span>
-                  </p>
-                  <p>
-                    • Prosecco:{' '}
-                    <span className="font-semibold">
-                      ok. {proseccoBottles}× 0,75 L
-                    </span>
-                  </p>
-                  <p>
-                    • Soki / miksery / syropy:{' '}
-                    <span className="font-semibold">
-                      ok. {syrupsLiters} L łącznie
-                    </span>
-                  </p>
-                  <p>
-                    • Lód kostkowany / kruszony:{' '}
-                    <span className="font-semibold">ok. {iceKg} kg</span>
-                  </p>
-                </>
-              )}
+                ) : (
+                  <div className="space-y-1 text-xs">
+                    <p>
+                      • Wódka / rum / gin:{' '}
+                      <span className="font-semibold">ok. {vodkaRumGinBottles}× 0,7 L</span>
+                    </p>
+                    <p>
+                      • Likier (brzoskwinia / inne):{' '}
+                      <span className="font-semibold">ok. {liqueurBottles}× 0,7 L</span>
+                    </p>
+                    <p>
+                      • Aperol:{' '}
+                      <span className="font-semibold">ok. {aperolBottles}× 0,7 L</span>
+                    </p>
+                    <p>
+                      • Prosecco:{' '}
+                      <span className="font-semibold">ok. {proseccoBottles}× 0,75 L</span>
+                    </p>
+                  </div>
+                )}
+
+                <p className="text-[0.7rem] text-amber-300/80 mt-2 italic">
+                  ⚠️ Ilości są orientacyjne i dotyczą spożycia przy barze.<br />
+                  Nie obejmują alkoholu serwowanego na stołach.
+                </p>
+              </div>
+
+              {/* OPEN BAR / ALL-IN Info Box */}
+              <div className="border border-amber-500/30 bg-amber-500/5 rounded-lg p-3 mt-3">
+                <p className="text-xs font-semibold text-amber-300 mb-1">
+                  💡 OPEN BAR / ALL-IN
+                </p>
+                <p className="text-[0.7rem] text-white/70">
+                  ELIKSIR może zająć się zakupem, logistyką i zabezpieczeniem alkoholu.
+                  Opcja dostępna za dopłatą i po indywidualnych ustaleniach.
+                </p>
+              </div>
+
+              {/* Dopiski operacyjne */}
+              <div className="text-[0.65rem] text-white/50 space-y-1 mt-3 border-t border-white/10 pt-3">
+                <p>• Barman obsługuje wyłącznie strefę baru (brak obsługi stołów).</p>
+                <p>• Szkło zbierane – brak serwisu kelnerskiego.</p>
+                <p>• Alkohol premium (np. whisky/tequila) – wycena indywidualna.</p>
+                <p>• Przedłużenie: +400–500 zł / godz. / barman (wg ustaleń).</p>
+                <p>• Powyżej 80 gości może być wymagany dodatkowy barman (wg ustaleń).</p>
+              </div>
 
               <p className="text-[0.75rem] text-white/50 mt-2">
                 Po wysłaniu formularza kontaktowego możemy przesłać Ci tę listę

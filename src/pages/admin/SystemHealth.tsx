@@ -1,7 +1,9 @@
 import { Activity, AlertCircle, CheckCircle, RefreshCw, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// Ensure API_URL always includes /api
+const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
 
 interface HealthCheck {
   name: string;

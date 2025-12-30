@@ -121,10 +121,13 @@ export default function ImageGalleryEnhanced() {
         await fetchImages();
         setEditingImage(null);
         alert('✅ Zdjęcie zaktualizowane!');
+      } else {
+        // Show backend error details
+        alert(`❌ Błąd: ${data.error || 'Nieznany błąd'}\n${data.details || ''}`);
       }
     } catch (error) {
       console.error('Error updating image:', error);
-      alert('❌ Błąd podczas aktualizacji');
+      alert(`❌ Błąd podczas aktualizacji: ${error instanceof Error ? error.message : 'Nieznany błąd'}`);
     }
   };
 

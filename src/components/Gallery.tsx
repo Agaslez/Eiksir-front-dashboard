@@ -84,9 +84,7 @@ const Gallery = () => {
     { id: 'wszystkie', label: 'Wszystkie' },
     { id: 'wesela', label: 'Wesela' },
     { id: 'eventy-firmowe', label: 'Eventy firmowe' },
-    { id: 'urodziny', label: 'Urodziny' },
-    { id: 'drinki', label: 'Drinki' },
-    { id: 'zespol', label: 'Zespół' },
+    { id: 'imprezy-prywatne', label: 'Imprezy prywatne' },
   ];
 
   const filteredImages =
@@ -247,18 +245,14 @@ const Gallery = () => {
                           ? 'bg-pink-500/20 text-pink-300'
                           : image.category === 'eventy-firmowe'
                             ? 'bg-blue-500/20 text-blue-300'
-                            : image.category === 'urodziny'
+                            : image.category === 'imprezy-prywatne'
                               ? 'bg-purple-500/20 text-purple-300'
-                              : image.category === 'zespol'
-                                ? 'bg-green-500/20 text-green-300'
-                                : 'bg-amber-500/20 text-amber-300'
+                              : 'bg-amber-500/20 text-amber-300'
                       }`}
                     >
                       {image.category === 'wesela' && 'Wesele'}
-                      {image.category === 'eventy-firmowe' && 'Firmowe'}
-                      {image.category === 'urodziny' && 'Urodziny'}
-                      {image.category === 'drinki' && 'Drinki'}
-                      {image.category === 'zespol' && 'Zespół'}
+                      {image.category === 'eventy-firmowe' && 'Event Firmowy'}
+                      {image.category === 'imprezy-prywatne' && 'Impreza Prywatna'}
                       {image.category === 'wszystkie' && 'Ogólne'}
                     </span>
                     <button

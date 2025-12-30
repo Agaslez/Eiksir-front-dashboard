@@ -1,4 +1,4 @@
-import { Activity, AlertCircle, CheckCircle, RefreshCw, XCircle } from 'lucide-react';
+import { Activity, AlertCircle, CheckCircle, ChevronDown, ChevronUp, Copy, RefreshCw, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 // Ensure API_URL always includes /api

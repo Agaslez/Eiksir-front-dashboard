@@ -41,14 +41,14 @@ interface CalculatorConfig {
 
 export default function CalculatorSettingsNew() {
   const [config, setConfig] = useState<CalculatorConfig>({
-    promoDiscount: 0.2,
+    promoDiscount: 0,
     pricePerExtraGuest: {
       basic: 40,
       premium: 50,
       exclusive: 60,
       kids: 30,
       family: 35,
-      business: 45,
+      business: 60,
     },
     addons: {
       fountain: {

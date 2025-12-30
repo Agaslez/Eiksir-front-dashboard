@@ -144,7 +144,7 @@ export const OFFERS: Record<string, Offer> = {
     maxGuests: 120,
     hours: 7,
     drinksPerGuest: 4,
-    shotsPerGuest: 1.5,
+    shotsPerGuest: 1,
     features: [
       'Barman + barback',
       'Personalizacja baru (LED / branding)',
@@ -188,7 +188,7 @@ export const OFFERS: Record<string, Offer> = {
     id: 'business',
     name: 'Event firmowy',
     description: 'Szybki serwis dopasowany do charakteru wydarzenia.',
-    price: 3400,
+    price: 3900,
     minGuests: 30,
     maxGuests: 100,
     hours: 4,

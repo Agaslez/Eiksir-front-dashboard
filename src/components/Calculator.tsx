@@ -84,6 +84,16 @@ function Calculator({ onCalculate }: CalculatorProps) {
     return () => clearInterval(interval);
   }, []);
 
+  // Clamp guests when offer changes - ensure within min/max range
+  useEffect(() => {
+    const offer = OFFERS[selectedOfferId];
+    if (guests < offer.minGuests) {
+      setGuests(offer.minGuests);
+    } else if (guests > offer.maxGuests) {
+      setGuests(offer.maxGuests);
+    }
+  }, [selectedOfferId]);
+
   const fetchConfig = async () => {
     try {
       const response = await fetchWithRetry(
@@ -99,14 +109,14 @@ function Calculator({ onCalculate }: CalculatorProps) {
       } else {
         // Fallback to defaults if API fails
         setConfig({
-          promoDiscount: 0.2,
+          promoDiscount: 0,
           pricePerExtraGuest: {
             basic: 40,
             premium: 50,
             exclusive: 60,
             kids: 30,
             family: 35,
-            business: 45,
+            business: 60,
           },
           addons: {
             fountain: { perGuest: 10, min: 600, max: 1200 },
@@ -130,7 +140,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
       console.error('Failed to fetch calculator config:', error);
       // Fallback to defaults on error
       setConfig({
-        promoDiscount: 0.2,
+        promoDiscount: 0,
         pricePerExtraGuest: {
           basic: 40,
           premium: 50,
@@ -347,16 +357,16 @@ function Calculator({ onCalculate }: CalculatorProps) {
               </div>
               <input
                 type="range"
-                min={20}
-                max={150}
+                min={offer.minGuests}
+                max={offer.maxGuests}
                 value={guests}
                 onChange={(e) => setGuests(Number(e.target.value))}
                 className="w-full"
               />
               <div className="flex justify-between text-[0.7rem] text-white/40 mt-1">
-                <span>20</span>
-                <span>80</span>
-                <span>150</span>
+                <span>{offer.minGuests}</span>
+                <span>{Math.floor((offer.minGuests + offer.maxGuests) / 2)}</span>
+                <span>{offer.maxGuests}</span>
               </div>
               {guests < offer.minGuests && (
                 <p className="mt-2 text-[0.7rem] text-amber-300">

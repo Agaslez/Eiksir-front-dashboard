@@ -21,6 +21,7 @@ interface CalculatorConfig {
       pricePerKeg: number;
       guestsPerKeg: number;
     };
+    extraBarman: number;
     lemonade: {
       base: number;
       blockGuests: number;
@@ -56,9 +57,10 @@ export default function CalculatorSettingsNew() {
         max: 1200,
       },
       keg: {
-        pricePerKeg: 550,
+        pricePerKeg: 800,
         guestsPerKeg: 50,
       },
+      extraBarman: 400,
       lemonade: {
         base: 250,
         blockGuests: 60,
@@ -77,7 +79,7 @@ export default function CalculatorSettingsNew() {
   });
 
   const [saving, setSaving] = useState(false);
-  const API_URL = config.apiUrl;
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   useEffect(() => {
     fetchConfig();
@@ -85,7 +87,7 @@ export default function CalculatorSettingsNew() {
 
   const fetchConfig = async () => {
     try {
-      const response = await fetch(`${API_URL}/calculator/config`, {
+      const response = await fetch(`${API_URL}/api/calculator/config`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
         },
@@ -102,7 +104,7 @@ export default function CalculatorSettingsNew() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await fetch(`${API_URL}/calculator/config`, {
+      const response = await fetch(`${API_URL}/api/calculator/config`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -113,6 +115,8 @@ export default function CalculatorSettingsNew() {
 
       if (response.ok) {
         alert('✅ Konfiguracja kalkulatora zapisana!');
+        // Refresh config to show updated values
+        fetchConfig();
       } else {
         alert('❌ Błąd podczas zapisywania');
       }
@@ -326,6 +330,32 @@ export default function CalculatorSettingsNew() {
         </div>
         <p className="text-xs text-white/50 mt-2">
           Liczba beczek: ceil(goście / {config.addons.keg.guestsPerKeg}) × {config.addons.keg.pricePerKeg} zł
+        </p>
+      </div>
+
+      {/* Dodatki - Extra Barman (KEG) */}
+      <div className="bg-neutral-900 border border-white/10 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">👨‍🍳 Dodatkowy barman (KEG)</h3>
+        <div>
+          <label className="block text-sm text-white/70 mb-2">Koszt stały (zł)</label>
+          <input
+            type="number"
+            min="0"
+            value={config.addons.extraBarman}
+            onChange={(e) =>
+              setConfig({
+                ...config,
+                addons: {
+                  ...config.addons,
+                  extraBarman: parseInt(e.target.value) || 0,
+                },
+              })
+            }
+            className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+          />
+        </div>
+        <p className="text-xs text-white/50 mt-2">
+          ⚠️ Obowiązkowy dodatkowy barman gdy zaznaczony KEG piwa. Koszt dodawany automatycznie.
         </p>
       </div>
 

@@ -528,7 +528,8 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
             <div className="mb-4">
               <p className="text-xs text-white/60 mb-1 uppercase tracking-wider">
-                Szacunkowa cena pakietu + dodatki (z rabatem −{Math.round(promoDiscount * 100)}%)
+                Szacunkowa cena pakietu + dodatki
+                {promoDiscount > 0 && ` (z rabatem −${Math.round(promoDiscount * 100)}%)`}
               </p>
               <div className="flex items-baseline gap-2">
                 <span className="font-playfair text-5xl font-bold text-amber-300">

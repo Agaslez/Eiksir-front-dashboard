@@ -79,6 +79,7 @@ export default function CalculatorSettingsNew() {
   });
 
   const [saving, setSaving] = useState(false);
+  const [discountEnabled, setDiscountEnabled] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   useEffect(() => {
@@ -95,6 +96,8 @@ export default function CalculatorSettingsNew() {
       const data = await response.json();
       if (data.success && data.config) {
         setConfig(data.config);
+        // Set checkbox based on whether discount is active
+        setDiscountEnabled(data.config.promoDiscount > 0);
       }
     } catch (error) {
       console.error('Error fetching calculator config:', error);
@@ -104,13 +107,19 @@ export default function CalculatorSettingsNew() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      // If discount not enabled, force it to 0
+      const configToSave = {
+        ...config,
+        promoDiscount: discountEnabled ? config.promoDiscount : 0,
+      };
+
       const response = await fetch(`${API_URL}/api/calculator/config`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
         },
-        body: JSON.stringify(config),
+        body: JSON.stringify(configToSave),
       });
 
       if (response.ok) {
@@ -165,6 +174,27 @@ export default function CalculatorSettingsNew() {
       <div className="bg-neutral-900 border border-white/10 p-6 rounded-lg">
         <h3 className="text-xl font-semibold text-white mb-4">Zniżka Promocyjna</h3>
         <div className="grid gap-4">
+          {/* Checkbox - włącz/wyłącz rabat */}
+          <div className="flex items-center gap-3 p-4 bg-neutral-800/50 rounded border border-white/5">
+            <input
+              type="checkbox"
+              id="discount-enabled"
+              checked={discountEnabled}
+              onChange={(e) => {
+                setDiscountEnabled(e.target.checked);
+                // If disabling, set discount to 0
+                if (!e.target.checked) {
+                  setConfig({ ...config, promoDiscount: 0 });
+                }
+              }}
+              className="w-5 h-5 text-amber-500 bg-neutral-700 border-white/20 rounded focus:ring-amber-500 focus:ring-2"
+            />
+            <label htmlFor="discount-enabled" className="text-white font-medium cursor-pointer">
+              Włącz rabat promocyjny
+            </label>
+          </div>
+
+          {/* Pole numeryczne - aktywne tylko gdy checkbox zaznaczony */}
           <div>
             <label className="block text-sm text-white/70 mb-2">
               Rabat (%) - wyświetlany jako -20% itp.
@@ -174,7 +204,8 @@ export default function CalculatorSettingsNew() {
               min="0"
               max="100"
               step="1"
-              value={isNaN(config.promoDiscount * 100) ? 0 : config.promoDiscount * 100}
+              disabled={!discountEnabled}
+              value={discountEnabled ? (isNaN(config.promoDiscount * 100) ? 0 : config.promoDiscount * 100) : 0}
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
                 setConfig({ 
@@ -182,10 +213,12 @@ export default function CalculatorSettingsNew() {
                   promoDiscount: isNaN(value) ? 0 : value / 100 
                 });
               }}
-              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <p className="text-xs text-white/50 mt-1">
-              Aktualna wartość: {isNaN(config.promoDiscount) ? 0 : (config.promoDiscount * 100).toFixed(0)}%
+              {discountEnabled 
+                ? `Aktualna wartość: ${isNaN(config.promoDiscount) ? 0 : (config.promoDiscount * 100).toFixed(0)}%`
+                : 'Rabat wyłączony - użytkownicy nie zobaczą zniżki'}
             </p>
           </div>
         </div>

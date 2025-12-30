@@ -12,8 +12,11 @@ interface ErrorEntry {
   url?: string;
   line?: number;
   column?: number;
-  type: 'error' | 'unhandledRejection' | 'manual';
+  type: 'error' | 'unhandledRejection' | 'manual' | 'fetch' | 'network';
   context?: Record<string, any>;
+  httpStatus?: number;
+  httpMethod?: string;
+  endpoint?: string;
 }
 
 class GlobalErrorMonitor {
@@ -74,6 +77,9 @@ class GlobalErrorMonitor {
       column: error.column,
       type: error.type || 'manual',
       context: error.context,
+      httpStatus: error.httpStatus,
+      httpMethod: error.httpMethod,
+      endpoint: error.endpoint,
     };
 
     // Add to memory (FIFO - remove oldest if over limit)
@@ -85,6 +91,23 @@ class GlobalErrorMonitor {
     // Send to backend async (don't block UI)
     this.sendToBackend(entry).catch((err) => {
       console.warn('[GlobalErrorMonitor] Failed to send error to backend:', err);
+    });
+  }
+
+  /**
+   * Capture fetch/network error with HTTP details
+   */
+  captureFetchError(method: string, url: string, status: number, responseText?: string) {
+    this.captureError({
+      message: `${method} ${url} ${status} ${responseText || ''}`,
+      type: status >= 500 ? 'network' : 'fetch',
+      httpStatus: status,
+      httpMethod: method,
+      endpoint: url,
+      context: {
+        responseText: responseText?.substring(0, 200), // First 200 chars
+        userAction: 'API call failed',
+      },
     });
   }
 

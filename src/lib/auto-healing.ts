@@ -98,6 +98,23 @@ export async function fetchWithAuth(
   // Try initial request
   let response = await fetch(url, authOptions);
 
+  // Log HTTP errors to Global Error Monitor
+  if (!response.ok && response.status !== 401) {
+    const responseText = await response.text().catch(() => '');
+    getErrorMonitor()?.captureFetchError(
+      options.method || 'GET',
+      url,
+      response.status,
+      responseText
+    );
+    // Re-create response with same body (was consumed by text())
+    response = new Response(responseText, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+    });
+  }
+
   // If 401, try to refresh token
   if (response.status === 401) {
     const refreshed = await refreshAuthToken();

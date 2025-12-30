@@ -85,7 +85,7 @@ export default function CalculatorSettingsNew() {
 
   const fetchConfig = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/calculator/config`, {
+      const response = await fetch(`${API_URL}/calculator/config`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
         },
@@ -102,7 +102,7 @@ export default function CalculatorSettingsNew() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await fetch(`${API_URL}/api/calculator/config`, {
+      const response = await fetch(`${API_URL}/calculator/config`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

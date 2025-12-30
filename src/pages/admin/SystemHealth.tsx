@@ -1,3 +1,4 @@
+import { getComponentHealthMonitor } from '@/lib/component-health-monitor';
 import { config } from '@/lib/config';
 import { getErrorMonitor } from '@/lib/global-error-monitor';
 import { Activity, AlertCircle, CheckCircle, ChevronDown, ChevronUp, Copy, RefreshCw, XCircle } from 'lucide-react';
@@ -679,6 +680,9 @@ export default function SystemHealthDashboard() {
         {/* Recent Frontend Errors */}
         <RecentErrorsPanel />
 
+        {/* Component Health */}
+        <ComponentHealthPanel />
+
         {/* Auto-Healing Activity */}
         <AutoHealingActivityPanel />
       </div>
@@ -796,6 +800,132 @@ function RecentErrorsPanel() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function ComponentHealthPanel() {
+  const [components, setComponents] = useState<any[]>([]);
+
+  useEffect(() => {
+    const updateComponents = () => {
+      const monitor = getComponentHealthMonitor();
+      const allComponents = monitor.getAllComponents();
+      setComponents(allComponents);
+    };
+
+    updateComponents();
+    const interval = setInterval(updateComponents, 5000); // Update every 5s
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const healthyCount = components.filter((c) =>
+    getComponentHealthMonitor().isComponentHealthy(c.name)
+  ).length;
+  const unhealthyCount = components.length - healthyCount;
+
+  return (
+    <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">React Component Health</h3>
+          <p className="text-sm text-gray-500">Real-time component render monitoring</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-sm">
+            <span className="font-medium text-green-600">{healthyCount}</span>
+            <span className="text-gray-500"> healthy</span>
+          </div>
+          {unhealthyCount > 0 && (
+            <div className="text-sm">
+              <span className="font-medium text-red-600">{unhealthyCount}</span>
+              <span className="text-gray-500"> issues</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {components.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          <AlertCircle className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+          <p>No components registered yet</p>
+          <p className="text-xs mt-1">Components will appear as they mount</p>
+        </div>
+      ) : (
+        <div className="space-y-2 max-h-80 overflow-y-auto">
+          {components.map((component) => {
+            const isHealthy = getComponentHealthMonitor().isComponentHealthy(component.name);
+            const recentErrors = component.errors.filter(
+              (e: any) => Date.now() - e.timestamp < 5 * 60 * 1000
+            );
+
+            return (
+              <div
+                key={component.name}
+                className={`p-3 rounded border text-sm ${
+                  isHealthy
+                    ? 'bg-green-50 border-green-200'
+                    : 'bg-red-50 border-red-200'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    {isHealthy ? (
+                      <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    ) : (
+                      <XCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                    )}
+                    <span className={`font-medium ${isHealthy ? 'text-green-900' : 'text-red-900'}`}>
+                      {component.name}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    {component.mounted ? '🟢 Mounted' : '⚫ Unmounted'}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-4 text-xs text-gray-600">
+                  <span>Renders: {component.renderCount}</span>
+                  <span>
+                    Last render: {Math.floor((Date.now() - component.lastRender) / 1000)}s ago
+                  </span>
+                  {recentErrors.length > 0 && (
+                    <span className="text-red-600 font-medium">
+                      {recentErrors.length} error{recentErrors.length > 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+
+                {recentErrors.length > 0 && (
+                  <details className="mt-2">
+                    <summary className="cursor-pointer text-xs text-red-700 hover:text-red-900">
+                      View errors ({recentErrors.length})
+                    </summary>
+                    <div className="mt-2 space-y-1">
+                      {recentErrors.map((error: any, idx: number) => (
+                        <div key={idx} className="text-xs bg-white p-2 rounded border border-red-200">
+                          <div className="font-medium text-red-900">{error.message}</div>
+                          <div className="text-gray-500">
+                            {new Date(error.timestamp).toLocaleTimeString()}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-900">
+        <p>
+          ℹ️ <strong>Tip:</strong> Add <code>useComponentHealth('ComponentName')</code> to critical
+          components to track their health. Detects mount/unmount, render frequency, and errors.
+        </p>
+      </div>
     </div>
   );
 }

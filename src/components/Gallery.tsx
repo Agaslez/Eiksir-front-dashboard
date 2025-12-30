@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { fetchWithRetry } from '../lib/auto-healing';
+import { useComponentHealth } from '../lib/component-health-monitor';
 import { trackEvent } from '../lib/error-monitoring';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
@@ -41,6 +42,8 @@ interface GalleryImage {
 }
 
 const Gallery = () => {
+  useComponentHealth('Gallery');
+  
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState('wszystkie');
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);

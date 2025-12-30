@@ -1,6 +1,7 @@
 // src/components/Contact.tsx
 import { motion } from 'framer-motion';
 import { useState, type FormEvent } from 'react';
+import { useComponentHealth } from '../lib/component-health-monitor';
 import type { CalculatorSnapshot } from './Calculator';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
@@ -10,6 +11,8 @@ type ContactProps = {
 };
 
 export default function Contact({ calculatorSnapshot }: ContactProps) {
+  useComponentHealth('Contact');
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',

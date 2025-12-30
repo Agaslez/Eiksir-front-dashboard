@@ -1,6 +1,7 @@
 import { config as appConfig } from '@/lib/config';
 import { useEffect, useState } from 'react';
 import { fetchWithRetry } from '../lib/auto-healing';
+import { useComponentHealth } from '../lib/component-health-monitor';
 import { OFFERS } from '../lib/content';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
@@ -54,6 +55,8 @@ type CalculatorProps = {
 };
 
 function Calculator({ onCalculate }: CalculatorProps) {
+  useComponentHealth('Calculator');
+  
   const [selectedOfferId, setSelectedOfferId] =
     useState<keyof typeof OFFERS>('family');
   const [guests, setGuests] = useState(50);

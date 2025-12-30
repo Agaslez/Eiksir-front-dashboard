@@ -429,7 +429,8 @@ function Calculator({ onCalculate }: CalculatorProps) {
                     </label>
                     {kegSelected && (
                       <p className="text-xs text-amber-300/80 ml-6">
-                        w tym: KEG {kegCost.toLocaleString('pl-PL')} zł + dodatkowy barman {extraBarmanCost.toLocaleString('pl-PL')} zł
+                        w tym: KEG {kegCost.toLocaleString('pl-PL')} zł + dodatkowy barman{' '}
+                        {extraBarmanCost.toLocaleString('pl-PL')} zł
                       </p>
                     )}
                   </>

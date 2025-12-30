@@ -406,31 +406,33 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
                 {/* KEG tylko dla pakietów innych niż Kids */}
                 {!isKidsOffer && (
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={addons.keg}
-                      onChange={(e) =>
-                        setAddons((prev) => ({
-                          ...prev,
-                          keg: e.target.checked,
-                        }))
-                      }
-                    />
-                    <span>
-                      KEG piwa 30L (z obsługą – wymaga dodatkowego barmana){' '}
-                      {kegSelected && (
-                        <span className="text-amber-300">
-                          (+{(kegCost + extraBarmanCost).toLocaleString('pl-PL')} zł)
-                        </span>
-                      )}
-                    </span>
-                  </label>
-                  {kegSelected && (
-                    <p className="text-xs text-amber-300/80 ml-6">
-                      w tym: KEG {kegCost.toLocaleString('pl-PL')} zł + dodatkowy barman {extraBarmanCost.toLocaleString('pl-PL')} zł
-                    </p>
-                  )}
+                  <>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={addons.keg}
+                        onChange={(e) =>
+                          setAddons((prev) => ({
+                            ...prev,
+                            keg: e.target.checked,
+                          }))
+                        }
+                      />
+                      <span>
+                        KEG piwa 30L (z obsługą – wymaga dodatkowego barmana){' '}
+                        {kegSelected && (
+                          <span className="text-amber-300">
+                            (+{(kegCost + extraBarmanCost).toLocaleString('pl-PL')} zł)
+                          </span>
+                        )}
+                      </span>
+                    </label>
+                    {kegSelected && (
+                      <p className="text-xs text-amber-300/80 ml-6">
+                        w tym: KEG {kegCost.toLocaleString('pl-PL')} zł + dodatkowy barman {extraBarmanCost.toLocaleString('pl-PL')} zł
+                      </p>
+                    )}
+                  </>
                 )}
 
                 {isKidsOffer && (

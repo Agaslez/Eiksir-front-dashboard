@@ -113,6 +113,8 @@ export default function CalculatorSettingsNew() {
         promoDiscount: discountEnabled ? config.promoDiscount : 0,
       };
 
+      console.log('🔍 Wysyłam config:', JSON.stringify(configToSave, null, 2));
+
       const response = await fetch(`${API_URL}/api/calculator/config`, {
         method: 'PUT',
         headers: {
@@ -127,7 +129,9 @@ export default function CalculatorSettingsNew() {
         // Refresh config to show updated values
         fetchConfig();
       } else {
-        alert('❌ Błąd podczas zapisywania');
+        const errorData = await response.json();
+        console.error('❌ Backend error:', errorData);
+        alert(`❌ Błąd podczas zapisywania: ${JSON.stringify(errorData)}`);
       }
     } catch (error) {
       console.error('Error saving config:', error);

@@ -1,8 +1,10 @@
+import { config } from '@/lib/config';
+import { getErrorMonitor } from '@/lib/global-error-monitor';
 import { Activity, AlertCircle, CheckCircle, ChevronDown, ChevronUp, Copy, RefreshCw, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 // Ensure API_URL always includes /api
-const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const baseUrl = config.apiUrl;
 const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
 
 // Helper to perform HTTP checks with detailed error tracking
@@ -521,7 +523,124 @@ export default function SystemHealthDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Recent Frontend Errors */}
+        <RecentErrorsPanel />
       </div>
+    </div>
+  );
+}
+
+function RecentErrorsPanel() {
+  const [errors, setErrors] = useState<any[]>([]);
+  const [errorCount, setErrorCount] = useState(0);
+  const [summary, setSummary] = useState<any[]>([]);
+
+  useEffect(() => {
+    const updateErrors = () => {
+      const monitor = getErrorMonitor();
+      if (monitor) {
+        setErrors(monitor.getRecentErrors(10));
+        setErrorCount(monitor.getErrorCount(60));
+        setSummary(monitor.getErrorSummary());
+      }
+    };
+
+    updateErrors();
+    const interval = setInterval(updateErrors, 10000); // Update every 10s
+
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!getErrorMonitor()) {
+    return null; // Monitor not initialized
+  }
+
+  return (
+    <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Recent Frontend Errors</h3>
+          <p className="text-sm text-gray-500">Captured by Global Error Monitor</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-sm">
+            <span className="font-medium text-gray-900">{errorCount}</span>
+            <span className="text-gray-500"> errors in last hour</span>
+          </div>
+          <button
+            onClick={() => {
+              getErrorMonitor()?.clearAll();
+              setErrors([]);
+              setErrorCount(0);
+              setSummary([]);
+            }}
+            className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded text-gray-700"
+          >
+            Clear All
+          </button>
+        </div>
+      </div>
+
+      {/* Error Summary */}
+      {summary.length > 0 && (
+        <div className="mb-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
+          <h4 className="text-sm font-semibold text-amber-900 mb-2">Most Common Errors</h4>
+          <div className="space-y-1">
+            {summary.map((item, idx) => (
+              <div key={idx} className="flex justify-between text-sm">
+                <span className="text-gray-700 truncate flex-1">{item.type}</span>
+                <span className="font-medium text-amber-700 ml-2">{item.count}x</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Error List */}
+      {errors.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          <CheckCircle className="w-12 h-12 mx-auto mb-2 text-green-500" />
+          <p>No errors captured in the last 24 hours</p>
+        </div>
+      ) : (
+        <div className="space-y-2 max-h-96 overflow-y-auto">
+          {errors.map((error) => (
+            <div
+              key={error.id}
+              className="p-3 bg-red-50 rounded border border-red-200 text-sm"
+            >
+              <div className="flex items-start justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                  <span className="font-medium text-red-900">{error.type}</span>
+                </div>
+                <span className="text-gray-500 text-xs">
+                  {new Date(error.timestamp).toLocaleTimeString()}
+                </span>
+              </div>
+              <p className="text-gray-700 mb-1">{error.message}</p>
+              {error.url && (
+                <p className="text-xs text-gray-500">
+                  {error.url}
+                  {error.line && `:${error.line}`}
+                  {error.column && `:${error.column}`}
+                </p>
+              )}
+              {error.stack && (
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-xs text-red-700 hover:text-red-900">
+                    View stack trace
+                  </summary>
+                  <pre className="mt-2 text-xs bg-white p-2 rounded border border-red-200 overflow-x-auto">
+                    {error.stack}
+                  </pre>
+                </details>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

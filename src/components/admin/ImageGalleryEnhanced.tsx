@@ -146,8 +146,6 @@ export default function ImageGalleryEnhanced() {
       { id: image2.id, order: currentIndex }
     ];
 
-    console.log('Reordering:', newOrder); // Debug
-
     try {
       const response = await fetch(`${API_URL}/api/content/images/reorder`, {
         method: 'PUT',

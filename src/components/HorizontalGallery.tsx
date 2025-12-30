@@ -48,7 +48,6 @@ export default function HorizontalGallery() {
             .sort((a: GalleryImage, b: GalleryImage) => 
               (a.displayOrder || 0) - (b.displayOrder || 0)
             );
-          console.log('HorizontalGallery fetched images:', sortedImages.length);
           setImages(sortedImages);
         }
       }

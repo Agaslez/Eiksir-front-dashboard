@@ -203,6 +203,37 @@ export default function SystemHealthDashboard() {
       status: 'checking'
     },
     {
+      name: 'Gallery Data Available',
+      category: 'Frontend',
+      endpoint: '/content/gallery/public',
+      check: async () => {
+        try {
+          const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`);
+          if (!response.ok) return false;
+          
+          const data = await response.json();
+          
+          // Check: success=true AND images array exists AND has at least 1 active image
+          const hasImages = data.success && Array.isArray(data.images) && data.images.length > 0;
+          
+          if (!hasImages) {
+            // Store message for check display
+            const check = (window as any).__healthChecks?.find((c: HealthCheck) => c.name === 'Gallery Data Available');
+            if (check) {
+              check.message = data.images?.length === 0 
+                ? 'No active images in database (upload images in ImageGalleryEnhanced)'
+                : 'Invalid response format';
+            }
+          }
+          
+          return hasImages;
+        } catch (error) {
+          return false;
+        }
+      },
+      status: 'checking'
+    },
+    {
       name: 'React Components',
       category: 'Frontend',
       check: async () => {
@@ -833,10 +864,31 @@ function ComponentHealthPanel() {
       </div>
 
       {components.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          <AlertCircle className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-          <p>No components registered yet</p>
-          <p className="text-xs mt-1">Components will appear as they mount</p>
+        <div className="text-center py-8 space-y-4">
+          <AlertCircle className="w-12 h-12 mx-auto text-gray-400" />
+          <div className="text-gray-700">
+            <p className="font-medium">No components registered yet</p>
+            <p className="text-sm text-gray-500 mt-1">Components register when they mount (render on page)</p>
+          </div>
+          
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
+            <div className="font-medium text-blue-900 mb-2">🔍 To see components:</div>
+            <ol className="text-sm text-blue-800 space-y-1 ml-4 list-decimal">
+              <li>
+                Visit <a href="/" target="_blank" className="underline hover:text-blue-600">Home Page</a> 
+                <span className="text-blue-600"> (HorizontalGallery + Calculator)</span>
+              </li>
+              <li>
+                Visit <a href="/gallery" target="_blank" className="underline hover:text-blue-600">Gallery</a>
+                <span className="text-blue-600"> (Gallery component)</span>
+              </li>
+              <li>
+                Visit <a href="/contact" target="_blank" className="underline hover:text-blue-600">Contact</a>
+                <span className="text-blue-600"> (Contact form)</span>
+              </li>
+              <li>Return here - you'll see <strong>4 components registered</strong> ✅</li>
+            </ol>
+          </div>
         </div>
       ) : (
         <div className="space-y-2 max-h-80 overflow-y-auto">

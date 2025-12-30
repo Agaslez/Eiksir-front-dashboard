@@ -32,6 +32,8 @@ export default function HorizontalGallery() {
   useComponentHealth('HorizontalGallery');
   
   const [images, setImages] = useState<GalleryImage[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const baseUrl = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
   const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
 
@@ -41,25 +43,110 @@ export default function HorizontalGallery() {
 
   const fetchImages = async () => {
     try {
+      setIsLoading(true);
+      setError(null);
+      
       const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && Array.isArray(data.images)) {
-          // Backend now filters active images and returns displayOrder
-          const sortedImages = data.images
-            .filter((img: GalleryImage) => img.url)
-            .sort((a: GalleryImage, b: GalleryImage) => 
-              (a.displayOrder || 0) - (b.displayOrder || 0)
-            );
-          setImages(sortedImages);
-        }
+      
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        const errorMsg = `HorizontalGallery: HTTP ${response.status} ${response.statusText}`;
+        
+        // Report to Error Monitor
+        const monitor = (await import('@/lib/global-error-monitor')).getErrorMonitor();
+        monitor?.captureFetchError('GET', `${API_URL}/content/gallery/public`, response.status, errorText);
+        
+        setError(errorMsg);
+        setIsLoading(false);
+        return;
       }
+      
+      const data = await response.json();
+      
+      if (data.success && Array.isArray(data.images)) {
+        const sortedImages = data.images
+          .filter((img: GalleryImage) => img.url)
+          .sort((a: GalleryImage, b: GalleryImage) => 
+            (a.displayOrder || 0) - (b.displayOrder || 0)
+          );
+        
+        setImages(sortedImages);
+        
+        // Report if no images found
+        if (sortedImages.length === 0) {
+          const monitor = (await import('@/lib/global-error-monitor')).getErrorMonitor();
+          monitor?.captureError({
+            message: 'HorizontalGallery: No active images found in database',
+            type: 'manual',
+            context: {
+              endpoint: `${API_URL}/content/gallery/public`,
+              userAction: 'Loading horizontal gallery',
+              note: 'Check if images exist with isActive=true in ImageGalleryEnhanced',
+            },
+          });
+        }
+      } else {
+        const errorMsg = `Invalid response format: ${JSON.stringify(data).substring(0, 100)}`;
+        setError(errorMsg);
+        
+        const monitor = (await import('@/lib/global-error-monitor')).getErrorMonitor();
+        monitor?.captureError({
+          message: `HorizontalGallery: ${errorMsg}`,
+          type: 'fetch',
+          context: { endpoint: `${API_URL}/content/gallery/public`, response: data },
+        });
+      }
+      
+      setIsLoading(false);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       console.error('Failed to fetch images:', error);
+      setError(`Network error: ${errorMsg}`);
+      setIsLoading(false);
+      
+      // Report to Error Monitor
+      const monitor = (await import('@/lib/global-error-monitor')).getErrorMonitor();
+      monitor?.captureError({
+        message: `HorizontalGallery fetch failed: ${errorMsg}`,
+        type: 'network',
+        context: {
+          url: `${API_URL}/content/gallery/public`,
+          userAction: 'Loading horizontal gallery',
+          error: String(error),
+        },
+      });
     }
   };
 
-  // Don't render anything if no images yet
+  // Show loading state
+  if (isLoading) {
+    return (
+      <Section className="bg-black py-3 md:py-4">
+        <Container>
+          <div className="text-center text-white py-8">
+            <div className="animate-spin inline-block w-8 h-8 border-4 border-white border-t-transparent rounded-full mb-2"></div>
+            <p className="text-sm">Loading gallery...</p>
+          </div>
+        </Container>
+      </Section>
+    );
+  }
+
+  // Show error state (only in dev or for admins)
+  if (error) {
+    return (
+      <Section className="bg-black py-3 md:py-4">
+        <Container>
+          <div className="text-center text-red-400 py-4">
+            <p className="text-sm">⚠️ Gallery temporarily unavailable</p>
+            {import.meta.env.DEV && <p className="text-xs mt-1">{error}</p>}
+          </div>
+        </Container>
+      </Section>
+    );
+  }
+
+  // Don't render if no images (but reported to Error Monitor above)
   if (images.length === 0) {
     return null;
   }

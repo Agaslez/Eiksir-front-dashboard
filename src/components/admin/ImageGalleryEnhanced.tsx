@@ -19,9 +19,7 @@ const CATEGORIES = [
   { value: 'wszystkie', label: 'Wszystkie' },
   { value: 'wesela', label: 'Wesela' },
   { value: 'eventy-firmowe', label: 'Eventy firmowe' },
-  { value: 'urodziny', label: 'Urodziny' },
-  { value: 'drinki', label: 'Drinki' },
-  { value: 'zespol', label: 'Zespół' },
+  { value: 'imprezy-prywatne', label: 'Imprezy prywatne' },
 ];
 
 export default function ImageGalleryEnhanced() {

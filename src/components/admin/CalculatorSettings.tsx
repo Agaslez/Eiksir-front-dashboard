@@ -175,9 +175,13 @@ export default function CalculatorSettingsNew() {
               max="100"
               step="1"
               value={config.promoDiscount * 100}
-              onChange={(e) =>
-                setConfig({ ...config, promoDiscount: parseFloat(e.target.value) / 100 })
-              }
+              onChange={(e) => {
+                const value = parseFloat(e.target.value);
+                setConfig({ 
+                  ...config, 
+                  promoDiscount: isNaN(value) ? 0 : value / 100 
+                });
+              }}
               className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
             />
             <p className="text-xs text-white/50 mt-1">

@@ -147,7 +147,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
           exclusive: 60,
           kids: 30,
           family: 35,
-          business: 45,
+          business: 60,
         },
         addons: {
           fountain: { perGuest: 10, min: 600, max: 1200 },

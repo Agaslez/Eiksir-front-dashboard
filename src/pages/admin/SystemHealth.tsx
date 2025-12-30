@@ -151,12 +151,12 @@ export default function SystemHealthDashboard() {
       status: 'checking'
     },
     {
-      name: 'Input Validation (Zod)',
+      name: 'Input Validation Test (400 = Success)',
       category: 'Backend',
       endpoint: '/logs',
       check: async () => {
         return await performHttpCheck(
-          'Input Validation (Zod)',
+          'Input Validation Test (400 = Success)',
           `${API_URL}/logs`,
           {
             method: 'POST',
@@ -166,7 +166,8 @@ export default function SystemHealthDashboard() {
           (data, res) => res.status === 400 && data.error === 'Validation failed'
         );
       },
-      status: 'checking'
+      status: 'checking',
+      message: '✓ Validates Zod schema - intentionally sends bad data to test error handling (400 error in console is expected)'
     },
     {
       name: 'Auth Health',

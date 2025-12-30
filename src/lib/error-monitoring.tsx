@@ -229,8 +229,23 @@ export class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Send to old errorMonitor (localStorage)
     trackError(error, {
       componentStack: errorInfo.componentStack,
+    });
+    
+    // ALSO send to global-error-monitor (backend)
+    import('./global-error-monitor').then(({ getErrorMonitor }) => {
+      const monitor = getErrorMonitor();
+      monitor?.captureError({
+        type: 'error',
+        message: error.message,
+        stack: error.stack,
+        context: {
+          componentStack: errorInfo.componentStack,
+          errorBoundary: true,
+        },
+      });
     });
   }
 

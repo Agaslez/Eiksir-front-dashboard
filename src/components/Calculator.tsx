@@ -200,7 +200,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
     : 0;
 
   // NEW: Dodatkowy barman (obowiązkowy gdy KEG)
-  const extraBarmanCost = kegSelected ? config.addons.extraBarman : 0;
+  const extraBarmanCost = kegSelected ? (config.addons.extraBarman || 0) : 0;
 
   const lemonadeCost = addons.lemonade
     ? (() => {
@@ -427,7 +427,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
                         )}
                       </span>
                     </label>
-                    {kegSelected && (
+                    {kegSelected && extraBarmanCost > 0 && (
                       <p className="text-xs text-amber-300/80 ml-6">
                         w tym: KEG {kegCost.toLocaleString('pl-PL')} zł + dodatkowy barman{' '}
                         {extraBarmanCost.toLocaleString('pl-PL')} zł

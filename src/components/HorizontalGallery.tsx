@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { useComponentHealth } from '../lib/component-health-monitor';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
@@ -28,6 +29,8 @@ interface GalleryImage {
 }
 
 export default function HorizontalGallery() {
+  useComponentHealth('HorizontalGallery');
+  
   const [images, setImages] = useState<GalleryImage[]>([]);
   const baseUrl = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
   const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;

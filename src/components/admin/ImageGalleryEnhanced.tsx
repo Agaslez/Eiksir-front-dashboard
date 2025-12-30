@@ -85,6 +85,12 @@ export default function ImageGalleryEnhanced() {
         body: formData,
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
+        alert(`Upload failed: ${errorData.error || 'Unknown error'}`);
+        return;
+      }
+
       const data = await response.json();
       if (data.success) {
         await fetchImages();
@@ -93,6 +99,7 @@ export default function ImageGalleryEnhanced() {
       }
     } catch (error) {
       console.error('Error uploading image:', error);
+      alert('Network error - check console for details');
     } finally {
       setUploading(false);
     }

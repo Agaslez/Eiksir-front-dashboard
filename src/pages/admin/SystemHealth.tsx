@@ -32,19 +32,7 @@ const performHttpCheck = async (
       data = null;
     }
     
-    if (!res.ok) {
-      if (check) {
-        check.error = {
-          statusCode: res.status,
-          statusText: res.statusText,
-          responseBody: data,
-          fullUrl: url
-        };
-        check.message = `HTTP ${res.status}: ${res.statusText}`;
-      }
-      return false;
-    }
-    
+    // If validator exists, let it decide success/failure (even for non-ok responses)
     if (validator) {
       const isValid = validator(data, res);
       if (!isValid && check) {
@@ -57,6 +45,20 @@ const performHttpCheck = async (
         check.message = 'Response validation failed';
       }
       return isValid;
+    }
+    
+    // For non-validator checks, res.ok determines success
+    if (!res.ok) {
+      if (check) {
+        check.error = {
+          statusCode: res.status,
+          statusText: res.statusText,
+          responseBody: data,
+          fullUrl: url
+        };
+        check.message = `HTTP ${res.status}: ${res.statusText}`;
+      }
+      return false;
     }
     
     return true;

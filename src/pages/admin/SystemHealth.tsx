@@ -282,7 +282,10 @@ export default function SystemHealthDashboard() {
         if (!performance || !performance.getEntriesByType) return false;
         const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
         if (navEntries.length === 0) return false;
-        const pageLoadTime = navEntries[0].loadEventEnd - navEntries[0].startTime;
+        const nav = navEntries[0];
+        // loadEventEnd is 0 if page is still loading - wait for it
+        if (nav.loadEventEnd === 0) return false;
+        const pageLoadTime = nav.loadEventEnd - nav.startTime;
         return pageLoadTime > 0 && pageLoadTime < 5000; // Under 5 seconds
       },
       status: 'checking'

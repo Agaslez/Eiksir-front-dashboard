@@ -1,5 +1,6 @@
 import { Check, Edit2, Eye, Filter, Trash2, Upload, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { fetchWithAuth } from '../../lib/auto-healing';
 import { ELIKSIR_STYLES } from '../../lib/styles';
 
 interface UploadedImage {
@@ -47,11 +48,7 @@ export default function ImageGalleryEnhanced() {
         ? `${API_URL}/api/content/images`
         : `${API_URL}/api/content/images?category=${activeCategory}`;
         
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
-        },
-      });
+      const response = await fetchWithAuth(url);
       const data = await response.json();
       if (data.success) {
         // Sort images by display order
@@ -109,11 +106,10 @@ export default function ImageGalleryEnhanced() {
     if (!editingImage) return;
 
     try {
-      const response = await fetch(`${API_URL}/api/content/images/${editingImage.id}`, {
+      const response = await fetchWithAuth(`${API_URL}/api/content/images/${editingImage.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
         },
         body: JSON.stringify({
           title: editingImage.title,
@@ -154,11 +150,10 @@ export default function ImageGalleryEnhanced() {
     ];
 
     try {
-      const response = await fetch(`${API_URL}/api/content/images/reorder`, {
+      const response = await fetchWithAuth(`${API_URL}/api/content/images/reorder`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
         },
         body: JSON.stringify({ images: newOrder }),
       });
@@ -179,11 +174,8 @@ export default function ImageGalleryEnhanced() {
     if (!confirm('Czy na pewno chcesz usunąć to zdjęcie?')) return;
 
     try {
-      const response = await fetch(`${API_URL}/api/content/images/${filename}`, {
+      const response = await fetchWithAuth(`${API_URL}/api/content/images/${filename}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
-        },
       });
 
       if (response.ok) {

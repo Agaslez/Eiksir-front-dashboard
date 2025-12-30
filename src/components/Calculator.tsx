@@ -1,5 +1,6 @@
 import { config as appConfig } from '@/lib/config';
 import { useEffect, useState } from 'react';
+import { fetchWithRetry } from '../lib/auto-healing';
 import { OFFERS } from '../lib/content';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
@@ -74,7 +75,11 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
   const fetchConfig = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/calculator/config`);
+      const response = await fetchWithRetry(
+        `${API_URL}/api/calculator/config`,
+        undefined,
+        { maxRetries: 2 }
+      );
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.config) {

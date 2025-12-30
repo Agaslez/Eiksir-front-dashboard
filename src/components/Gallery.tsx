@@ -9,6 +9,7 @@ import {
     X
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { fetchWithRetry } from '../lib/auto-healing';
 import { trackEvent } from '../lib/error-monitoring';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
@@ -50,7 +51,16 @@ const Gallery = () => {
     const fetchImages = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`);
+        const response = await fetchWithRetry(
+          `${API_URL}/content/gallery/public?category=wszystkie`,
+          undefined,
+          {
+            maxRetries: 3,
+            onRetry: (attempt) => {
+              console.log(`Gallery fetch retry ${attempt}/3`);
+            }
+          }
+        );
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

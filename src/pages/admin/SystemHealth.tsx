@@ -159,7 +159,7 @@ export default function SystemHealthDashboard() {
           'Auth Health',
           `${API_URL}/auth/health`,
           undefined,
-          (data) => data.status === 'healthy' || data.status === 'Available' || (data.service && data.endpoints)
+          (data) => (data.success === true && data.status === 'operational') || data.status === 'healthy' || data.status === 'Available'
         );
       },
       status: 'checking'
@@ -279,9 +279,10 @@ export default function SystemHealthDashboard() {
       name: 'Page Performance',
       category: 'Frontend',
       check: async () => {
-        if (!performance || !performance.timing) return false;
-        const { loadEventEnd, navigationStart } = performance.timing;
-        const pageLoadTime = loadEventEnd - navigationStart;
+        if (!performance || !performance.getEntriesByType) return false;
+        const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+        if (navEntries.length === 0) return false;
+        const pageLoadTime = navEntries[0].loadEventEnd - navEntries[0].startTime;
         return pageLoadTime > 0 && pageLoadTime < 5000; // Under 5 seconds
       },
       status: 'checking'

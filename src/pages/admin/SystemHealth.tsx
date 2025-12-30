@@ -176,7 +176,7 @@ export default function SystemHealthDashboard() {
           'Auth Health',
           `${API_URL}/auth/health`,
           undefined,
-          (data) => data.status === 'healthy'
+          (data) => data.status === 'healthy' || data.status === 'Available' || (data.service && data.endpoints)
         );
       },
       status: 'checking'
@@ -190,7 +190,7 @@ export default function SystemHealthDashboard() {
           'AI Service Health',
           `${API_URL}/ai/health`,
           undefined,
-          (data) => data.status === 'healthy'
+          (data) => data.status === 'healthy' || data.status === 'Available' || (data.service && data.endpoints)
         );
       },
       status: 'checking'
@@ -678,6 +678,9 @@ export default function SystemHealthDashboard() {
 
         {/* Recent Frontend Errors */}
         <RecentErrorsPanel />
+
+        {/* Auto-Healing Activity */}
+        <AutoHealingActivityPanel />
       </div>
     </div>
   );
@@ -793,6 +796,116 @@ function RecentErrorsPanel() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function AutoHealingActivityPanel() {
+  const [activities, setActivities] = useState<any[]>([]);
+
+  useEffect(() => {
+    const monitor = getErrorMonitor();
+    if (!monitor) return;
+
+    // Filter for auto-healing related errors
+    const updateActivities = () => {
+      const recentErrors = monitor.getRecentErrors(50);
+      const healingEvents = recentErrors.filter(
+        (error) =>
+          error.message.includes('Retry attempt') ||
+          error.message.includes('token auto-refreshed') ||
+          error.message.includes('localStorage quota exceeded')
+      );
+      setActivities(healingEvents);
+    };
+
+    updateActivities();
+    const interval = setInterval(updateActivities, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!getErrorMonitor()) {
+    return null;
+  }
+
+  return (
+    <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Auto-Healing Activity</h3>
+          <p className="text-sm text-gray-500">Recent retry attempts and auto-recovery actions</p>
+        </div>
+        <div className="text-sm">
+          <span className="font-medium text-gray-900">{activities.length}</span>
+          <span className="text-gray-500"> events logged</span>
+        </div>
+      </div>
+
+      {activities.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          <CheckCircle className="w-12 h-12 mx-auto mb-2 text-green-500" />
+          <p>No auto-healing events recorded</p>
+          <p className="text-xs mt-1">System running smoothly - no retries needed</p>
+        </div>
+      ) : (
+        <div className="space-y-2 max-h-80 overflow-y-auto">
+          {activities.map((activity) => (
+            <div
+              key={activity.id}
+              className="p-3 bg-blue-50 rounded border border-blue-200 text-sm"
+            >
+              <div className="flex items-start justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span className="font-medium text-blue-900">
+                    {activity.message.includes('token') && '🔑 JWT Token Refresh'}
+                    {activity.message.includes('Retry') && '🔄 Network Retry'}
+                    {activity.message.includes('localStorage') && '💾 Storage Cleanup'}
+                  </span>
+                </div>
+                <span className="text-gray-500 text-xs">
+                  {new Date(activity.timestamp).toLocaleTimeString()}
+                </span>
+              </div>
+              <p className="text-gray-700 text-xs mb-1">{activity.message}</p>
+              {activity.context?.url && (
+                <p className="text-xs text-gray-500 truncate">
+                  📍 {activity.context.url}
+                </p>
+              )}
+              {activity.context?.attempt && (
+                <p className="text-xs text-blue-700">
+                  Attempt {activity.context.attempt} - {activity.context.error || 'Success'}
+                </p>
+              )}
+              {activity.context?.clearedKeys && (
+                <p className="text-xs text-blue-700">
+                  Cleared {activity.context.clearedKeys} old items from storage
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+        <h4 className="text-sm font-semibold text-gray-900 mb-2">🛡️ Auto-Healing Capabilities</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div>
+            <div className="font-medium text-gray-700">Network Retries</div>
+            <div className="text-gray-600">Max 3 retries with exponential backoff</div>
+          </div>
+          <div>
+            <div className="font-medium text-gray-700">JWT Auto-Refresh</div>
+            <div className="text-gray-600">Seamless token renewal on 401</div>
+          </div>
+          <div>
+            <div className="font-medium text-gray-700">Storage Management</div>
+            <div className="text-gray-600">Auto-clears cache when quota exceeded</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { BarChart3, Calculator, Home, Image, LogOut, Mail, User } from 'lucide-react';
+import { BarChart3, Calculator, Home, Image, LogOut, Mail, User, Activity } from 'lucide-react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { useAuth } from '../../context/AuthContext';
@@ -98,6 +98,19 @@ export default function Dashboard() {
                 >
                   <BarChart3 size={18} />
                   <span>Analytics</span>
+                </button>
+
+                <button
+                  onClick={() => navigate('/admin/health')}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-eliksir transition-all ${
+                    isActive('/admin/health') 
+                      ? 'bg-eliksir-gold text-black font-medium' 
+                      : 'text-white/70 hover:text-eliksir-gold hover:bg-white/5'
+                  }`}
+                >
+                  <Activity size={18} />
+                  <span>Health</span>
+                </button>
                 </button>
               </div>
             </div>

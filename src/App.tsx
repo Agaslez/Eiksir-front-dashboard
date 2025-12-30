@@ -30,6 +30,7 @@ const Analytics = lazy(() => import('./pages/admin/Analytics'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
 const EmailSettings = lazy(() => import('./components/admin/EmailSettings'));
 const CalculatorSettings = lazy(() => import('./components/admin/CalculatorSettings'));
+const SystemHealth = lazy(() => import('./pages/admin/SystemHealth'));
 
 
 
@@ -129,6 +130,14 @@ function App() {
               element={
                 <ProtectedRoute requiredRole="admin">
                   <CalculatorSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="health"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <SystemHealth />
                 </ProtectedRoute>
               }
             />

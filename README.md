@@ -1,6 +1,6 @@
 # 🍸 ELIKSIR - Mobilny Bar Koktajlowy Premium
 
-[![Production](https://img.shields.io/badge/Status-Production_Ready-success)](https://eliksir.onrender.com)
+[![Production](https://img.shields.io/badge/Status-Production_Ready-success)](https://eiksir-front-dashboard.vercel.app)
 [![Backend](https://img.shields.io/badge/Backend-Render-blueviolet)](https://stefano-eliksir-backend.onrender.com)
 [![Database](https://img.shields.io/badge/Database-Neon_PostgreSQL-blue)](https://neon.tech)
 
@@ -188,7 +188,7 @@ npm run test:e2e
 ## 🚀 Deployment
 
 ### **Production URLs:**
-- **Frontend:** `https://eliksir.onrender.com` (Vercel/Render)
+- **Frontend:** `https://eiksir-front-dashboard.vercel.app` (Vercel)
 - **Backend:** `https://stefano-eliksir-backend.onrender.com`
 - **Database:** Neon PostgreSQL (eu-central-1)
 

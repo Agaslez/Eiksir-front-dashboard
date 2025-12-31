@@ -51,12 +51,7 @@ const HeroEliksir = () => {
 
       {/* Animated Logo - positioned in top-left corner */}
       {ENABLE_LOGO_ANIMATION && shouldLoadVideo ? (
-        <motion.div
-          className="absolute top-4 left-0 md:top-8 md:left-0 z-20 rounded-full overflow-hidden bg-black/20"
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-        >
+        <div className="absolute top-4 left-0 md:top-8 md:left-0 z-20 rounded-full overflow-hidden bg-black/20">
           <video
             autoPlay
             loop
@@ -68,20 +63,15 @@ const HeroEliksir = () => {
           >
             <source src="/videos/logo-animation.mp4" type="video/mp4" />
           </video>
-        </motion.div>
+        </div>
       ) : (
-        <motion.div
-          className="absolute top-4 left-0 md:top-8 md:left-0 z-20 rounded-full overflow-hidden bg-black/20"
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-        >
+        <div className="absolute top-4 left-0 md:top-8 md:left-0 z-20 rounded-full overflow-hidden bg-black/20">
           <img
             src="/favicon.png"
             alt="ELIKSIR Logo"
             className="w-16 h-16 md:w-24 md:h-24 object-cover rounded-full"
           />
-        </motion.div>
+        </div>
       )}
 
       {/* Content w kontenerze */}

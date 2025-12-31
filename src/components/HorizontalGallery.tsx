@@ -11,10 +11,19 @@ const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
 // Helper function to handle both Cloudinary and local URLs
 const getImageUrl = (url: string) => {
   if (!url) return '';
-  // If already absolute URL (Cloudinary), return as is
+  
+  // If Cloudinary URL, add optimization parameters
+  if (url.includes('cloudinary.com')) {
+    // Insert transformation parameters before /upload/
+    // w_400 = width 400px, h_300 = height 300px, c_fill = crop to fill, q_auto = auto quality, f_auto = auto format
+    return url.replace('/upload/', '/upload/w_400,h_300,c_fill,q_auto,f_auto/');
+  }
+  
+  // If already absolute URL (non-Cloudinary), return as is
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;
   }
+  
   // Otherwise, prepend backend API URL
   return `${API_URL.replace('/api', '')}${url}`;
 };
@@ -178,6 +187,8 @@ export default function HorizontalGallery() {
                 src={getImageUrl(image.url)}
                 alt={image.title}
                 className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
               />
             </motion.div>
           ))}

@@ -102,7 +102,7 @@ export default function SystemHealthDashboard() {
     {
       name: 'Backend API Health',
       category: 'Backend',
-      endpoint: '/health',
+      endpoint: '/api/health',
       check: async () => {
         return await performHttpCheck('Backend API Health', `${API_URL}/health`);
       },
@@ -276,7 +276,7 @@ export default function SystemHealthDashboard() {
         // Test if backend is responding at all
         const baseUrl = config.apiUrl;
         try {
-          const response = await fetch(baseUrl.replace('/api', '') + '/health', { 
+          const response = await fetch(baseUrl + '/health', { 
             signal: AbortSignal.timeout(5000) 
           });
           return response.ok;

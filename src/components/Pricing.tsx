@@ -1,5 +1,4 @@
 // src/components/Pricing.tsx
-import { useLogger } from '@/hooks/useLogger';
 import { motion } from 'framer-motion';
 import { OFFERS } from '../lib/content';
 
@@ -12,7 +11,6 @@ export default function Pricing({
   selectedOfferId,
   onSelectOffer,
 }: PricingProps) {
-  useLogger('Pricing');
   const offersArray = Object.values(OFFERS);
 
   const handleClick = (offerId: string) => {

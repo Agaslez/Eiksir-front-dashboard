@@ -1,10 +1,8 @@
-﻿import { useLogger } from '@/hooks/useLogger';
-import { motion } from 'framer-motion';
+﻿import { motion } from 'framer-motion';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
 const StatsEliksir = () => {
-  useLogger('StatsEliksir');
   const stats = [
     { value: '500+', label: 'Obsłużonych imprez' },
     { value: '50k+', label: 'Zadowolonych gości' },

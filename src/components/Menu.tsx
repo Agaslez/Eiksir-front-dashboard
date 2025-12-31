@@ -1,4 +1,3 @@
-import { useLogger } from '@/hooks/useLogger';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
@@ -30,7 +29,6 @@ const menuItems = [
 ];
 
 export const Menu = () => {
-  useLogger('Menu');
   return (
     <Section id="menu" className="bg-gradient-to-b from-eliksir-dark to-black">
       <Container>

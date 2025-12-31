@@ -1,5 +1,4 @@
 import { config as appConfig } from '@/lib/config';
-import { useLogger } from '@/hooks/useLogger';
 import { useEffect, useState } from 'react';
 import { fetchWithRetry } from '../lib/auto-healing';
 import { useComponentHealth } from '../lib/component-health-monitor';
@@ -58,7 +57,6 @@ type CalculatorProps = {
 
 function Calculator({ onCalculate }: CalculatorProps) {
   useComponentHealth('Calculator');
-  useLogger('Calculator');
   
   const [selectedOfferId, setSelectedOfferId] =
     useState<keyof typeof OFFERS>('family');

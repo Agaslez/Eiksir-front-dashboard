@@ -1,5 +1,4 @@
 // src/components/Contact.tsx
-import { useLogger } from '@/hooks/useLogger';
 import { motion } from 'framer-motion';
 import { useState, type FormEvent } from 'react';
 import { useComponentHealth } from '../lib/component-health-monitor';
@@ -13,7 +12,6 @@ type ContactProps = {
 
 export default function Contact({ calculatorSnapshot }: ContactProps) {
   useComponentHealth('Contact');
-  useLogger('Contact');
   
   const [formData, setFormData] = useState({
     name: '',

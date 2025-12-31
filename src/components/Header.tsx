@@ -1,18 +1,16 @@
-import { useLogger } from '@/hooks/useLogger';
 import {
-    Clock,
-    Facebook,
-    Instagram,
-    MapPin,
-    Menu,
-    Phone,
-    X,
+  Clock,
+  Facebook,
+  Instagram,
+  MapPin,
+  Menu,
+  Phone,
+  X,
 } from 'lucide-react';
 import { useState } from 'react';
 import { trackEvent } from '../lib/error-monitoring';
 
 const Header = () => {
-  useLogger('Header');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [

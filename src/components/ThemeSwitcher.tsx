@@ -1,9 +1,7 @@
-import { useLogger } from '@/hooks/useLogger';
 import { useState } from 'react';
 import { themes, type ThemeName } from '../lib/theme';
 
 export function ThemeSwitcher() {
-  useLogger('ThemeSwitcher');
   // SENIOR FIX: Ładujemy stan leniwie (w funkcji).
   // Dzięki temu nie potrzebujemy useEffect i unikamy błędu "setState in effect".
   const [currentTheme, setCurrentTheme] = useState<ThemeName>(() => {

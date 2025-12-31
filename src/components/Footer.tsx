@@ -1,9 +1,7 @@
-import { useLogger } from '@/hooks/useLogger';
 import { motion } from 'framer-motion';
 import { trackEvent } from '../lib/error-monitoring';
 
 const Footer = () => {
-  useLogger('Footer');
   const currentYear = new Date().getFullYear();
 
   return (

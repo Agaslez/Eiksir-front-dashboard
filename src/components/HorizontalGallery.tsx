@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useComponentHealth } from '../lib/component-health-monitor';
-import { useLogger } from '@/hooks/useLogger';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
@@ -31,7 +30,6 @@ interface GalleryImage {
 
 export default function HorizontalGallery() {
   useComponentHealth('HorizontalGallery');
-  useLogger('HorizontalGallery');
   
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);

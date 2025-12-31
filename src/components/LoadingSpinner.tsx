@@ -1,8 +1,6 @@
-import { useLogger } from '@/hooks/useLogger';
 import React from 'react';
 
 const LoadingSpinner: React.FC = () => {
-  useLogger('LoadingSpinner');
   return (
     <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
       <div className="text-center">

@@ -1,4 +1,3 @@
-import { useLogger } from '@/hooks/useLogger';
 import { config } from '@/lib/config';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
@@ -12,7 +11,6 @@ interface AboutContent {
 }
 
 const About = () => {
-  useLogger('About');
   const [content, setContent] = useState<AboutContent>({
     heading: 'Kim jesteśmy?',
     description: 'Jesteśmy zespołem profesjonalnych barmanów z wieloletnim doświadczeniem w obsłudze wesel, eventów firmowych i imprez prywatnych. Specjalizujemy się w usłudze mobilnego baru koktajlowego premium, który realizujemy na terenie Bełchatowa, Kleszczowa, Łodzi oraz w całej Polsce.\n\nDostosowujemy się do Twoich potrzeb – od kameralnych przyjęć po duże wesela i wydarzenia korporacyjne. Oferujemy nie tylko autorskie koktajle i klasykę barmańską, ale również pełną oprawę wizualną mobilnego baru, dopasowaną do charakteru wydarzenia.\n\nELIKSIR to mobilny bar koktajlowy, który łączy profesjonalizm, estetykę i niezawodną obsługę – dzięki temu każda impreza staje się wyjątkowym doświadczeniem smakowym.',

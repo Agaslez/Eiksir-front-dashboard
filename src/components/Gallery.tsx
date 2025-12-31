@@ -20,12 +20,24 @@ const baseUrl = config.apiUrl;
 const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
 
 // Helper function to handle both Cloudinary and local URLs
-const getImageUrl = (url: string) => {
+const getImageUrl = (url: string, size: 'thumbnail' | 'lightbox' = 'thumbnail') => {
   if (!url) return '';
-  // If already absolute URL (Cloudinary), return as is
+  
+  // If Cloudinary URL, add optimization parameters
+  if (url.includes('cloudinary.com')) {
+    // Different sizes for grid thumbnails vs lightbox
+    const transform = size === 'thumbnail'
+      ? 'w_600,h_450,c_fill,q_auto,f_auto' // Grid thumbnails
+      : 'w_1200,h_900,c_limit,q_auto,f_auto'; // Lightbox (larger but still optimized)
+    
+    return url.replace('/upload/', `/upload/${transform}/`);
+  }
+  
+  // If already absolute URL (non-Cloudinary), return as is
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;
   }
+  
   // Otherwise, prepend backend API URL
   return `${API_URL.replace('/api', '')}${url}`;
 };
@@ -242,9 +254,11 @@ const Gallery = () => {
               {/* Image */}
               <div className="aspect-[4/3] overflow-hidden">
                 <img
-                  src={getImageUrl(image.url)}
+                  src={getImageUrl(image.url, 'thumbnail')}
                   alt={image.alt || image.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
 
@@ -363,7 +377,7 @@ const Gallery = () => {
 
           <div className="max-w-4xl w-full">
             <img
-              src={getImageUrl(filteredImages[selectedImage].url)}
+              src={getImageUrl(filteredImages[selectedImage].url, 'lightbox')}
               alt={filteredImages[selectedImage].alt || filteredImages[selectedImage].title}
               className="w-full h-auto max-h-[70vh] object-contain rounded-lg"
             />

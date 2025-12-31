@@ -59,8 +59,47 @@ class GlobalErrorMonitor {
       });
     });
 
+    // Intercept all fetch calls to capture HTTP errors
+    this.interceptFetch();
+
     this.isInitialized = true;
-    console.log('[GlobalErrorMonitor] Initialized - capturing errors');
+    console.log('[GlobalErrorMonitor] Initialized - capturing errors + fetch interceptor active');
+  }
+
+  /**
+   * Intercept native fetch to capture HTTP errors (400, 500, etc.)
+   */
+  private interceptFetch() {
+    const originalFetch = window.fetch;
+    
+    window.fetch = async (...args) => {
+      const [resource, config] = args;
+      const url = typeof resource === 'string' ? resource : resource.url;
+      const method = config?.method || 'GET';
+
+      try {
+        const response = await originalFetch(...args);
+
+        // Capture HTTP errors (400-599)
+        if (!response.ok) {
+          const clonedResponse = response.clone();
+          let responseText = '';
+          try {
+            responseText = await clonedResponse.text();
+          } catch {
+            responseText = '(unable to read response)';
+          }
+
+          this.captureFetchError(method, url, response.status, responseText);
+        }
+
+        return response;
+      } catch (error) {
+        // Network error (no response)
+        this.captureFetchError(method, url, 0, String(error));
+        throw error; // Re-throw to maintain normal error flow
+      }
+    };
   }
 
   /**

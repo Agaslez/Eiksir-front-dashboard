@@ -62,7 +62,7 @@ const HeroEliksir = () => {
             loop
             muted
             playsInline
-            className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-full"
+            className="w-16 h-16 md:w-24 md:h-24 object-cover rounded-full"
             poster="/favicon.png"
             preload="auto"
           >
@@ -79,7 +79,7 @@ const HeroEliksir = () => {
           <img
             src="/favicon.png"
             alt="ELIKSIR Logo"
-            className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-full"
+            className="w-16 h-16 md:w-24 md:h-24 object-cover rounded-full"
           />
         </motion.div>
       )}

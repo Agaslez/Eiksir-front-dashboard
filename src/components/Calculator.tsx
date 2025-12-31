@@ -1,6 +1,7 @@
 import { config as appConfig } from '@/lib/config';
-import { trackAddToCart, trackViewContent } from '@/lib/pixel';
 import { useEffect, useState } from 'react';
+import { fetchWithRetry } from '../lib/auto-healing';
+import { useComponentHealth } from '../lib/component-health-monitor';
 import { OFFERS } from '../lib/content';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
@@ -18,7 +19,7 @@ interface CalculatorConfig {
   addons: {
     fountain: { perGuest: number; min: number; max: number };
     keg: { pricePerKeg: number; guestsPerKeg: number };
-    extraBarman: number;
+    extraBarman: number; // NEW: Required when KEG selected
     lemonade: { base: number; blockGuests: number };
     hockery: number;
     ledLighting: number;
@@ -55,6 +56,8 @@ type CalculatorProps = {
 };
 
 function Calculator({ onCalculate }: CalculatorProps) {
+  useComponentHealth('Calculator');
+  
   const [selectedOfferId, setSelectedOfferId] =
     useState<keyof typeof OFFERS>('family');
   const [guests, setGuests] = useState(50);
@@ -67,123 +70,37 @@ function Calculator({ onCalculate }: CalculatorProps) {
   });
   const [config, setConfig] = useState<CalculatorConfig | null>(null);
   const [loading, setLoading] = useState(true);
-  const [viewContentTracked, setViewContentTracked] = useState(false);
 
   const API_URL = appConfig.apiUrl;
 
   useEffect(() => {
     fetchConfig();
-  }, []);
 
-  // Track ViewContent when calculator is first viewed (once per session)
-  useEffect(() => {
-    if (!loading && !viewContentTracked && config) {
-      trackViewContent({
-        content_name: 'Calculator - Event Pricing',
-        content_type: 'product_group',
-        content_ids: ['basic', 'premium', 'exclusive', 'kids', 'family', 'business'],
-      });
-      setViewContentTracked(true);
-    }
-  }, [loading, viewContentTracked, config]);
-
-  // Auto-refresh config every 30s
-  useEffect(() => {
-    const intervalId = setInterval(() => {
+    // Polling co 60s - aktualizuje config z dashboard
+    const interval = setInterval(() => {
       fetchConfig();
-      console.log('🔄 Calculator config auto-refresh (30s polling)');
-    }, 30000);
+    }, 60000); // 60 sekund
 
-    return () => clearInterval(intervalId);
+    return () => clearInterval(interval);
   }, []);
 
-  // Listen for manual refresh events
+  // Clamp guests when offer changes - ensure within min/max range
   useEffect(() => {
-    const handleRefresh = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail?.type === 'calculator' || customEvent.detail?.type === 'all') {
-        console.log('🔔 Calculator config refresh triggered');
-        fetchConfig();
-      }
-    };
-
-    window.addEventListener('data:refresh', handleRefresh);
-    return () => window.removeEventListener('data:refresh', handleRefresh);
-  }, []);
-
-  // Call onCalculate callback when values change (after config loads)
-  useEffect(() => {
-    if (!onCalculate || loading || !config) return;
-
     const offer = OFFERS[selectedOfferId];
-    const promoDiscount = config.promoDiscount;
-    const isKidsOffer = offer.id === 'kids';
-
-    // Calculate addon costs
-    const fountainCost = addons.fountain
-      ? Math.min(config.addons.fountain.max, Math.max(config.addons.fountain.min, guests * config.addons.fountain.perGuest))
-      : 0;
-    
-    const kegSelected = !isKidsOffer && addons.keg;
-    const kegCost = kegSelected
-      ? config.addons.keg.pricePerKeg * Math.max(1, Math.ceil(guests / config.addons.keg.guestsPerKeg))
-      : 0;
-    
-    const lemonadeCost = addons.lemonade
-      ? config.addons.lemonade.base * Math.max(1, Math.ceil(guests / config.addons.lemonade.blockGuests))
-      : 0;
-    
-    const hockeryCost = addons.hockery ? config.addons.hockery : 0;
-    const ledLightingCost = addons.ledLighting ? config.addons.ledLighting : 0;
-    const addonsPrice = fountainCost + kegCost + lemonadeCost + hockeryCost + ledLightingCost;
-
-    // Calculate package price
-    const basePackagePrice = offer.price;
-    const pricePerExtraGuest = config.pricePerExtraGuest[offer.id as keyof typeof config.pricePerExtraGuest] || 40;
-    const scaledPackagePrice = guests <= offer.minGuests
-      ? basePackagePrice
-      : basePackagePrice + (guests - offer.minGuests) * pricePerExtraGuest;
-
-    const totalBeforeDiscount = scaledPackagePrice + addonsPrice;
-    const totalAfterDiscount = Math.round(totalBeforeDiscount * (1 - promoDiscount));
-    const pricePerGuest = guests ? Math.round((totalAfterDiscount / guests) * 100) / 100 : 0;
-    
-    const estimatedCocktails = Math.round(guests * offer.drinksPerGuest);
-    // Dla kids (0%) nie ma shotów alkoholowych
-    const estimatedShots = isKidsOffer ? 0 : Math.round(guests * (offer.shotsPerGuest ?? 0.5));
-
-    const snapshot: CalculatorSnapshot = {
-      offerName: offer.name,
-      guests,
-      totalAfterDiscount,
-      pricePerGuest,
-      estimatedCocktails,
-      estimatedShots,
-      addons: {
-        fountain: addons.fountain,
-        keg: addons.keg,
-        lemonade: addons.lemonade,
-        hockery: addons.hockery,
-        ledLighting: addons.ledLighting,
-      },
-    };
-    onCalculate(snapshot);
-  }, [
-    onCalculate,
-    loading,
-    config,
-    selectedOfferId,
-    guests,
-    addons.fountain,
-    addons.keg,
-    addons.lemonade,
-    addons.hockery,
-    addons.ledLighting,
-  ]);
+    if (guests < offer.minGuests) {
+      setGuests(offer.minGuests);
+    } else if (guests > offer.maxGuests) {
+      setGuests(offer.maxGuests);
+    }
+  }, [selectedOfferId]);
 
   const fetchConfig = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/calculator/config`);
+      const response = await fetchWithRetry(
+        `${API_URL}/api/calculator/config`,
+        undefined,
+        { maxRetries: 2 }
+      );
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.config) {
@@ -192,18 +109,18 @@ function Calculator({ onCalculate }: CalculatorProps) {
       } else {
         // Fallback to defaults if API fails
         setConfig({
-          promoDiscount: 0.2,
+          promoDiscount: 0,
           pricePerExtraGuest: {
             basic: 40,
             premium: 50,
             exclusive: 60,
             kids: 30,
             family: 35,
-            business: 45,
+            business: 60,
           },
           addons: {
             fountain: { perGuest: 10, min: 600, max: 1200 },
-            keg: { pricePerKeg: 550, guestsPerKeg: 50 },
+            keg: { pricePerKeg: 800, guestsPerKeg: 50 },
             extraBarman: 400,
             lemonade: { base: 250, blockGuests: 60 },
             hockery: 200,
@@ -223,18 +140,18 @@ function Calculator({ onCalculate }: CalculatorProps) {
       console.error('Failed to fetch calculator config:', error);
       // Fallback to defaults on error
       setConfig({
-        promoDiscount: 0.2,
+        promoDiscount: 0,
         pricePerExtraGuest: {
           basic: 40,
           premium: 50,
           exclusive: 60,
           kids: 30,
           family: 35,
-          business: 45,
+          business: 60,
         },
         addons: {
           fountain: { perGuest: 10, min: 600, max: 1200 },
-          keg: { pricePerKeg: 550, guestsPerKeg: 50 },
+          keg: { pricePerKeg: 800, guestsPerKeg: 50 },
           extraBarman: 400,
           lemonade: { base: 250, blockGuests: 60 },
           hockery: 200,
@@ -254,7 +171,6 @@ function Calculator({ onCalculate }: CalculatorProps) {
     }
   };
 
-  // Early return if still loading
   if (loading || !config) {
     return (
       <Section id="kalkulator" className="bg-black border-t border-white/10">
@@ -293,6 +209,9 @@ function Calculator({ onCalculate }: CalculatorProps) {
       })()
     : 0;
 
+  // NEW: Dodatkowy barman (obowiązkowy gdy KEG)
+  const extraBarmanCost = kegSelected ? (config.addons.extraBarman || 0) : 0;
+
   const lemonadeCost = addons.lemonade
     ? (() => {
         const { base, blockGuests } = config.addons.lemonade;
@@ -305,7 +224,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const ledLightingCost = addons.ledLighting ? config.addons.ledLighting : 0;
 
   const addonsPrice =
-    fountainCost + kegCost + lemonadeCost + hockeryCost + ledLightingCost;
+    fountainCost + kegCost + extraBarmanCost + lemonadeCost + hockeryCost + ledLightingCost;
 
   // --- CENA PAKIETU (SKALOWANA Z LICZBĄ GOŚCI) ---
 
@@ -348,7 +267,8 @@ function Calculator({ onCalculate }: CalculatorProps) {
   // --- SZACOWANA LICZBA PORCJI ---
 
   const estimatedCocktails = Math.round(guests * offer.drinksPerGuest);
-  const estimatedShots = Math.round(guests * (offer.shotsPerGuest ?? 0.5));
+  // Dla kids (0%) nie ma shotów alkoholowych
+  const estimatedShots = isKidsOffer ? 0 : Math.round(guests * (offer.shotsPerGuest ?? 0.5));
 
   // --- LISTA ZAKUPÓW (skalowana z wzorca dla 50 osób) ---
 
@@ -368,6 +288,9 @@ function Calculator({ onCalculate }: CalculatorProps) {
     : Math.max(1, Math.ceil(config.shoppingList.proseccoBottles * scale50));
   const syrupsLiters = Math.max(1, Math.ceil(config.shoppingList.syrupsLiters * scale50));
   const iceKg = Math.max(4, Math.ceil(config.shoppingList.iceKg * scale50));
+
+  // Note: Removed useEffect for onCalculate to prevent infinite loop
+  // Calculator values are calculated on every render, no need to track changes
 
   return (
     <Section id="kalkulator" className="bg-black border-t border-white/10">
@@ -398,21 +321,9 @@ function Calculator({ onCalculate }: CalculatorProps) {
                   <button
                     key={o.id}
                     type="button"
-                    onClick={() => {
-                      setSelectedOfferId(o.id as keyof typeof OFFERS);
-                      
-                      // Track AddToCart when package selected
-                      if (config) {
-                        const basePrice = o.price;
-                        trackAddToCart({
-                          content_name: `Package: ${o.name}`,
-                          content_type: 'product',
-                          content_ids: [o.id],
-                          value: basePrice,
-                          currency: 'PLN',
-                        });
-                      }
-                    }}
+                    onClick={() =>
+                      setSelectedOfferId(o.id as keyof typeof OFFERS)
+                    }
                     className={`text-left border px-3 py-3 text-xs md:text-sm uppercase tracking-wider ${
                       selectedOfferId === o.id
                         ? 'border-amber-400 bg-amber-400/10 text-amber-200'
@@ -447,16 +358,16 @@ function Calculator({ onCalculate }: CalculatorProps) {
               </div>
               <input
                 type="range"
-                min={20}
-                max={150}
+                min={offer.minGuests}
+                max={offer.maxGuests}
                 value={guests}
                 onChange={(e) => setGuests(Number(e.target.value))}
                 className="w-full"
               />
               <div className="flex justify-between text-[0.7rem] text-white/40 mt-1">
-                <span>20</span>
-                <span>80</span>
-                <span>150</span>
+                <span>{offer.minGuests}</span>
+                <span>{Math.floor((offer.minGuests + offer.maxGuests) / 2)}</span>
+                <span>{offer.maxGuests}</span>
               </div>
               {guests < offer.minGuests && (
                 <p className="mt-2 text-[0.7rem] text-amber-300">
@@ -506,26 +417,34 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
                 {/* KEG tylko dla pakietów innych niż Kids */}
                 {!isKidsOffer && (
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={addons.keg}
-                      onChange={(e) =>
-                        setAddons((prev) => ({
-                          ...prev,
-                          keg: e.target.checked,
-                        }))
-                      }
-                    />
-                    <span>
-                      KEG piwa 30L z podajnikiem{' '}
-                      {kegSelected && (
-                        <span className="text-amber-300">
-                          (+{kegCost.toLocaleString('pl-PL')} zł)
-                        </span>
-                      )}
-                    </span>
-                  </label>
+                  <>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={addons.keg}
+                        onChange={(e) =>
+                          setAddons((prev) => ({
+                            ...prev,
+                            keg: e.target.checked,
+                          }))
+                        }
+                      />
+                      <span>
+                        KEG piwa 30L (z obsługą – wymaga dodatkowego barmana){' '}
+                        {kegSelected && (
+                          <span className="text-amber-300">
+                            (+{(kegCost + extraBarmanCost).toLocaleString('pl-PL')} zł)
+                          </span>
+                        )}
+                      </span>
+                    </label>
+                    {kegSelected && extraBarmanCost > 0 && (
+                      <p className="text-xs text-amber-300/80 ml-6">
+                        w tym: KEG {kegCost.toLocaleString('pl-PL')} zł + dodatkowy barman{' '}
+                        {extraBarmanCost.toLocaleString('pl-PL')} zł
+                      </p>
+                    )}
+                  </>
                 )}
 
                 {isKidsOffer && (
@@ -610,7 +529,8 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
             <div className="mb-4">
               <p className="text-xs text-white/60 mb-1 uppercase tracking-wider">
-                Szacunkowa cena pakietu + dodatki (z rabatem −{Math.round(promoDiscount * 100)}%)
+                Szacunkowa cena pakietu + dodatki
+                {promoDiscount > 0 && ` (z rabatem −${Math.round(promoDiscount * 100)}%)`}
               </p>
               <div className="flex items-baseline gap-2">
                 <span className="font-playfair text-5xl font-bold text-amber-300">
@@ -665,66 +585,78 @@ function Calculator({ onCalculate }: CalculatorProps) {
               </p>
             </div>
 
-            <div className="border-t border-white/10 pt-4 mt-4 text-sm text-white/80 space-y-2">
-              <p className="font-semibold uppercase text-xs tracking-wider text-white/60">
-                Lista zakupów (napoje + dodatki) – orientacyjnie
-              </p>
+            <div className="border-t border-white/10 pt-4 mt-4 text-sm text-white/80 space-y-4">
+              {/* SEKCJA 1: Po stronie ELIKSIR (stałe copy, bez cen) */}
+              <div>
+                <p className="font-semibold uppercase text-xs tracking-wider text-amber-300 mb-2">
+                  Po stronie ELIKSIR (w cenie pakietu)
+                </p>
+                <ul className="space-y-1 text-xs text-white/70">
+                  <li>• soki i miksery</li>
+                  <li>• syropy / puree</li>
+                  <li>• likiery barmańskie (triple sec / blue curaçao / aperol)</li>
+                  <li>• owoce i zioła</li>
+                  <li>• lód kostkowany i kruszony</li>
+                  <li>• dodatki barowe + logistyka + sprzęt</li>
+                </ul>
+              </div>
 
-              {isKidsOffer ? (
-                <>
-                  <p className="text-amber-300">
-                    • Brak alkoholu – pakiet Kids Party 0% to wyłącznie napoje
-                    bezalkoholowe.
+              {/* SEKCJA 2: Po stronie Gości (wyliczenia) */}
+              <div className="border-t border-white/20 pt-3">
+                <p className="font-semibold uppercase text-xs tracking-wider text-white/60 mb-2">
+                  Po stronie Gości – alkohol mocny (orientacyjnie)
+                </p>
+
+                {isKidsOffer ? (
+                  <p className="text-amber-300 text-xs">
+                    • Brak alkoholu – pakiet Kids Party 0% to wyłącznie napoje bezalkoholowe.
                   </p>
-                  <p>
-                    • Soki / miksery / syropy:{' '}
-                    <span className="font-semibold">
-                      ok. {syrupsLiters} L łącznie
-                    </span>
-                  </p>
-                  <p>
-                    • Lód kostkowany / kruszony:{' '}
-                    <span className="font-semibold">ok. {iceKg} kg</span>
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p>
-                    • Wódka / rum / gin:{' '}
-                    <span className="font-semibold">
-                      ok. {vodkaRumGinBottles}× 0,7 L
-                    </span>
-                  </p>
-                  <p>
-                    • Likier (brzoskwinia / inne):{' '}
-                    <span className="font-semibold">
-                      ok. {liqueurBottles}× 0,7 L
-                    </span>
-                  </p>
-                  <p>
-                    • Aperol:{' '}
-                    <span className="font-semibold">
-                      ok. {aperolBottles}× 0,7 L
-                    </span>
-                  </p>
-                  <p>
-                    • Prosecco:{' '}
-                    <span className="font-semibold">
-                      ok. {proseccoBottles}× 0,75 L
-                    </span>
-                  </p>
-                  <p>
-                    • Soki / miksery / syropy:{' '}
-                    <span className="font-semibold">
-                      ok. {syrupsLiters} L łącznie
-                    </span>
-                  </p>
-                  <p>
-                    • Lód kostkowany / kruszony:{' '}
-                    <span className="font-semibold">ok. {iceKg} kg</span>
-                  </p>
-                </>
-              )}
+                ) : (
+                  <div className="space-y-1 text-xs">
+                    <p>
+                      • Wódka / rum / gin:{' '}
+                      <span className="font-semibold">ok. {vodkaRumGinBottles}× 0,7 L</span>
+                    </p>
+                    <p>
+                      • Likier (brzoskwinia / inne):{' '}
+                      <span className="font-semibold">ok. {liqueurBottles}× 0,7 L</span>
+                    </p>
+                    <p>
+                      • Aperol:{' '}
+                      <span className="font-semibold">ok. {aperolBottles}× 0,7 L</span>
+                    </p>
+                    <p>
+                      • Prosecco:{' '}
+                      <span className="font-semibold">ok. {proseccoBottles}× 0,75 L</span>
+                    </p>
+                  </div>
+                )}
+
+                <p className="text-[0.7rem] text-amber-300/80 mt-2 italic">
+                  ⚠️ Ilości są orientacyjne i dotyczą spożycia przy barze.<br />
+                  Nie obejmują alkoholu serwowanego na stołach.
+                </p>
+              </div>
+
+              {/* OPEN BAR / ALL-IN Info Box */}
+              <div className="border border-amber-500/30 bg-amber-500/5 rounded-lg p-3 mt-3">
+                <p className="text-xs font-semibold text-amber-300 mb-1">
+                  💡 OPEN BAR / ALL-IN
+                </p>
+                <p className="text-[0.7rem] text-white/70">
+                  ELIKSIR może zająć się zakupem, logistyką i zabezpieczeniem alkoholu.
+                  Opcja dostępna za dopłatą i po indywidualnych ustaleniach.
+                </p>
+              </div>
+
+              {/* Dopiski operacyjne */}
+              <div className="text-[0.65rem] text-white/50 space-y-1 mt-3 border-t border-white/10 pt-3">
+                <p>• Barman obsługuje wyłącznie strefę baru (brak obsługi stołów).</p>
+                <p>• Szkło zbierane – brak serwisu kelnerskiego.</p>
+                <p>• Alkohol premium (np. whisky/tequila) – wycena indywidualna.</p>
+                <p>• Przedłużenie: +400–500 zł / godz. / barman (wg ustaleń).</p>
+                <p>• Powyżej 80 gości może być wymagany dodatkowy barman (wg ustaleń).</p>
+              </div>
 
               <p className="text-[0.75rem] text-white/50 mt-2">
                 Po wysłaniu formularza kontaktowego możemy przesłać Ci tę listę

@@ -1,5 +1,6 @@
 import { Check, Edit2, Eye, Filter, Trash2, Upload, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { fetchWithAuth } from '../../lib/auto-healing';
 import { ELIKSIR_STYLES } from '../../lib/styles';
 
 interface UploadedImage {
@@ -18,9 +19,7 @@ const CATEGORIES = [
   { value: 'wszystkie', label: 'Wszystkie' },
   { value: 'wesela', label: 'Wesela' },
   { value: 'eventy-firmowe', label: 'Eventy firmowe' },
-  { value: 'urodziny', label: 'Urodziny' },
-  { value: 'drinki', label: 'Drinki' },
-  { value: 'zespol', label: 'Zespół' },
+  { value: 'imprezy-prywatne', label: 'Imprezy prywatne' },
 ];
 
 export default function ImageGalleryEnhanced() {
@@ -47,11 +46,7 @@ export default function ImageGalleryEnhanced() {
         ? `${API_URL}/api/content/images`
         : `${API_URL}/api/content/images?category=${activeCategory}`;
         
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
-        },
-      });
+      const response = await fetchWithAuth(url);
       const data = await response.json();
       if (data.success) {
         // Sort images by display order
@@ -85,6 +80,12 @@ export default function ImageGalleryEnhanced() {
         body: formData,
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
+        alert(`Upload failed: ${errorData.error || 'Unknown error'}`);
+        return;
+      }
+
       const data = await response.json();
       if (data.success) {
         await fetchImages();
@@ -93,6 +94,7 @@ export default function ImageGalleryEnhanced() {
       }
     } catch (error) {
       console.error('Error uploading image:', error);
+      alert('Network error - check console for details');
     } finally {
       setUploading(false);
     }
@@ -102,11 +104,10 @@ export default function ImageGalleryEnhanced() {
     if (!editingImage) return;
 
     try {
-      const response = await fetch(`${API_URL}/api/content/images/${editingImage.id}`, {
+      const response = await fetchWithAuth(`${API_URL}/api/content/images/${editingImage.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
         },
         body: JSON.stringify({
           title: editingImage.title,
@@ -120,10 +121,13 @@ export default function ImageGalleryEnhanced() {
         await fetchImages();
         setEditingImage(null);
         alert('✅ Zdjęcie zaktualizowane!');
+      } else {
+        // Show backend error details
+        alert(`❌ Błąd: ${data.error || 'Nieznany błąd'}\n${data.details || ''}`);
       }
     } catch (error) {
       console.error('Error updating image:', error);
-      alert('❌ Błąd podczas aktualizacji');
+      alert(`❌ Błąd podczas aktualizacji: ${error instanceof Error ? error.message : 'Nieznany błąd'}`);
     }
   };
 
@@ -146,14 +150,11 @@ export default function ImageGalleryEnhanced() {
       { id: image2.id, order: currentIndex }
     ];
 
-    console.log('Reordering:', newOrder); // Debug
-
     try {
-      const response = await fetch(`${API_URL}/api/content/images/reorder`, {
+      const response = await fetchWithAuth(`${API_URL}/api/content/images/reorder`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
         },
         body: JSON.stringify({ images: newOrder }),
       });
@@ -174,11 +175,8 @@ export default function ImageGalleryEnhanced() {
     if (!confirm('Czy na pewno chcesz usunąć to zdjęcie?')) return;
 
     try {
-      const response = await fetch(`${API_URL}/api/content/images/${filename}`, {
+      const response = await fetchWithAuth(`${API_URL}/api/content/images/${filename}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
-        },
       });
 
       if (response.ok) {

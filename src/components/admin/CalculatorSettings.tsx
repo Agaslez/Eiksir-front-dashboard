@@ -21,6 +21,7 @@ interface CalculatorConfig {
       pricePerKeg: number;
       guestsPerKeg: number;
     };
+    extraBarman: number;
     lemonade: {
       base: number;
       blockGuests: number;
@@ -40,14 +41,14 @@ interface CalculatorConfig {
 
 export default function CalculatorSettingsNew() {
   const [config, setConfig] = useState<CalculatorConfig>({
-    promoDiscount: 0.2,
+    promoDiscount: 0,
     pricePerExtraGuest: {
       basic: 40,
       premium: 50,
       exclusive: 60,
       kids: 30,
       family: 35,
-      business: 45,
+      business: 60,
     },
     addons: {
       fountain: {
@@ -56,9 +57,10 @@ export default function CalculatorSettingsNew() {
         max: 1200,
       },
       keg: {
-        pricePerKeg: 550,
+        pricePerKeg: 800,
         guestsPerKeg: 50,
       },
+      extraBarman: 400,
       lemonade: {
         base: 250,
         blockGuests: 60,
@@ -77,7 +79,8 @@ export default function CalculatorSettingsNew() {
   });
 
   const [saving, setSaving] = useState(false);
-  const API_URL = config.apiUrl;
+  const [discountEnabled, setDiscountEnabled] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   useEffect(() => {
     fetchConfig();
@@ -92,7 +95,28 @@ export default function CalculatorSettingsNew() {
       });
       const data = await response.json();
       if (data.success && data.config) {
-        setConfig(data.config);
+        // CRITICAL: Merge with default config to ensure all fields exist
+        // This handles cases where DB has old config missing new fields like extraBarman
+        const mergedConfig = {
+          ...config, // Start with defaults
+          ...data.config, // Override with DB values
+          addons: {
+            ...config.addons, // Default addons
+            ...data.config.addons, // DB addons
+          },
+          pricePerExtraGuest: {
+            ...config.pricePerExtraGuest, // Default prices
+            ...data.config.pricePerExtraGuest, // DB prices
+          },
+          shoppingList: {
+            ...config.shoppingList, // Default shopping list
+            ...data.config.shoppingList, // DB shopping list
+          },
+        };
+        
+        setConfig(mergedConfig);
+        // Set checkbox based on whether discount is active
+        setDiscountEnabled(mergedConfig.promoDiscount > 0);
       }
     } catch (error) {
       console.error('Error fetching calculator config:', error);
@@ -102,19 +126,74 @@ export default function CalculatorSettingsNew() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      // CRITICAL: Ensure ALL fields are present (merge with defaults)
+      // This prevents "Required" errors when fields are missing from state
+      const defaultConfig = {
+        promoDiscount: 0,
+        pricePerExtraGuest: {
+          basic: 40,
+          premium: 50,
+          exclusive: 60,
+          kids: 30,
+          family: 35,
+          business: 60,
+        },
+        addons: {
+          fountain: { perGuest: 10, min: 600, max: 1200 },
+          keg: { pricePerKeg: 800, guestsPerKeg: 50 },
+          extraBarman: 400,
+          lemonade: { base: 250, blockGuests: 60 },
+          hockery: 200,
+          ledLighting: 500,
+        },
+        shoppingList: {
+          vodkaRumGinBottles: 5,
+          liqueurBottles: 2,
+          aperolBottles: 2,
+          proseccoBottles: 5,
+          syrupsLiters: 12,
+          iceKg: 8,
+        },
+      };
+
+      // Merge with defaults to ensure all fields exist
+      const configToSave = {
+        ...defaultConfig,
+        ...config,
+        promoDiscount: discountEnabled ? config.promoDiscount : 0,
+        addons: {
+          ...defaultConfig.addons,
+          ...config.addons,
+        },
+        pricePerExtraGuest: {
+          ...defaultConfig.pricePerExtraGuest,
+          ...config.pricePerExtraGuest,
+        },
+        shoppingList: {
+          ...defaultConfig.shoppingList,
+          ...config.shoppingList,
+        },
+      };
+
+      console.log('🔍 Wysyłam config:', JSON.stringify(configToSave, null, 2));
+
       const response = await fetch(`${API_URL}/api/calculator/config`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
         },
-        body: JSON.stringify(config),
+        body: JSON.stringify(configToSave),
       });
 
       if (response.ok) {
         alert('✅ Konfiguracja kalkulatora zapisana!');
+        // Refresh config to show updated values
+        fetchConfig();
       } else {
-        alert('❌ Błąd podczas zapisywania');
+        const errorData = await response.json();
+        console.error('❌ Backend error:', errorData);
+        alert(`❌ Błąd podczas zapisywania: ${JSON.stringify(errorData)}`);
       }
     } catch (error) {
       console.error('Error saving config:', error);
@@ -161,6 +240,27 @@ export default function CalculatorSettingsNew() {
       <div className="bg-neutral-900 border border-white/10 p-6 rounded-lg">
         <h3 className="text-xl font-semibold text-white mb-4">Zniżka Promocyjna</h3>
         <div className="grid gap-4">
+          {/* Checkbox - włącz/wyłącz rabat */}
+          <div className="flex items-center gap-3 p-4 bg-neutral-800/50 rounded border border-white/5">
+            <input
+              type="checkbox"
+              id="discount-enabled"
+              checked={discountEnabled}
+              onChange={(e) => {
+                setDiscountEnabled(e.target.checked);
+                // If disabling, set discount to 0
+                if (!e.target.checked) {
+                  setConfig({ ...config, promoDiscount: 0 });
+                }
+              }}
+              className="w-5 h-5 text-amber-500 bg-neutral-700 border-white/20 rounded focus:ring-amber-500 focus:ring-2"
+            />
+            <label htmlFor="discount-enabled" className="text-white font-medium cursor-pointer">
+              Włącz rabat promocyjny
+            </label>
+          </div>
+
+          {/* Pole numeryczne - aktywne tylko gdy checkbox zaznaczony */}
           <div>
             <label className="block text-sm text-white/70 mb-2">
               Rabat (%) - wyświetlany jako -20% itp.
@@ -170,14 +270,21 @@ export default function CalculatorSettingsNew() {
               min="0"
               max="100"
               step="1"
-              value={config.promoDiscount * 100}
-              onChange={(e) =>
-                setConfig({ ...config, promoDiscount: parseFloat(e.target.value) / 100 })
-              }
-              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+              disabled={!discountEnabled}
+              value={discountEnabled ? (isNaN(config.promoDiscount * 100) ? 0 : config.promoDiscount * 100) : 0}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value);
+                setConfig({ 
+                  ...config, 
+                  promoDiscount: isNaN(value) ? 0 : value / 100 
+                });
+              }}
+              className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <p className="text-xs text-white/50 mt-1">
-              Aktualna wartość: {(config.promoDiscount * 100).toFixed(0)}%
+              {discountEnabled 
+                ? `Aktualna wartość: ${isNaN(config.promoDiscount) ? 0 : (config.promoDiscount * 100).toFixed(0)}%`
+                : 'Rabat wyłączony - użytkownicy nie zobaczą zniżki'}
             </p>
           </div>
         </div>
@@ -326,6 +433,32 @@ export default function CalculatorSettingsNew() {
         </div>
         <p className="text-xs text-white/50 mt-2">
           Liczba beczek: ceil(goście / {config.addons.keg.guestsPerKeg}) × {config.addons.keg.pricePerKeg} zł
+        </p>
+      </div>
+
+      {/* Dodatki - Extra Barman (KEG) */}
+      <div className="bg-neutral-900 border border-white/10 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">👨‍🍳 Dodatkowy barman (KEG)</h3>
+        <div>
+          <label className="block text-sm text-white/70 mb-2">Koszt stały (zł)</label>
+          <input
+            type="number"
+            min="0"
+            value={config.addons.extraBarman}
+            onChange={(e) =>
+              setConfig({
+                ...config,
+                addons: {
+                  ...config.addons,
+                  extraBarman: parseInt(e.target.value) || 0,
+                },
+              })
+            }
+            className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+          />
+        </div>
+        <p className="text-xs text-white/50 mt-2">
+          ⚠️ Obowiązkowy dodatkowy barman gdy zaznaczony KEG piwa. Koszt dodawany automatycznie.
         </p>
       </div>
 

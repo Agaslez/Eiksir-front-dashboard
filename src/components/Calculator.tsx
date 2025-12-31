@@ -1,4 +1,5 @@
 import { config as appConfig } from '@/lib/config';
+import { trackAddToCart, trackViewContent } from '@/lib/pixel';
 import { useEffect, useState } from 'react';
 import { OFFERS } from '../lib/content';
 import { Container } from './layout/Container';
@@ -17,6 +18,7 @@ interface CalculatorConfig {
   addons: {
     fountain: { perGuest: number; min: number; max: number };
     keg: { pricePerKeg: number; guestsPerKeg: number };
+    extraBarman: number;
     lemonade: { base: number; blockGuests: number };
     hockery: number;
     ledLighting: number;
@@ -65,12 +67,119 @@ function Calculator({ onCalculate }: CalculatorProps) {
   });
   const [config, setConfig] = useState<CalculatorConfig | null>(null);
   const [loading, setLoading] = useState(true);
+  const [viewContentTracked, setViewContentTracked] = useState(false);
 
   const API_URL = appConfig.apiUrl;
 
   useEffect(() => {
     fetchConfig();
   }, []);
+
+  // Track ViewContent when calculator is first viewed (once per session)
+  useEffect(() => {
+    if (!loading && !viewContentTracked && config) {
+      trackViewContent({
+        content_name: 'Calculator - Event Pricing',
+        content_type: 'product_group',
+        content_ids: ['basic', 'premium', 'exclusive', 'kids', 'family', 'business'],
+      });
+      setViewContentTracked(true);
+    }
+  }, [loading, viewContentTracked, config]);
+
+  // Auto-refresh config every 30s
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetchConfig();
+      console.log('🔄 Calculator config auto-refresh (30s polling)');
+    }, 30000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // Listen for manual refresh events
+  useEffect(() => {
+    const handleRefresh = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.type === 'calculator' || customEvent.detail?.type === 'all') {
+        console.log('🔔 Calculator config refresh triggered');
+        fetchConfig();
+      }
+    };
+
+    window.addEventListener('data:refresh', handleRefresh);
+    return () => window.removeEventListener('data:refresh', handleRefresh);
+  }, []);
+
+  // Call onCalculate callback when values change (after config loads)
+  useEffect(() => {
+    if (!onCalculate || loading || !config) return;
+
+    const offer = OFFERS[selectedOfferId];
+    const promoDiscount = config.promoDiscount;
+    const isKidsOffer = offer.id === 'kids';
+
+    // Calculate addon costs
+    const fountainCost = addons.fountain
+      ? Math.min(config.addons.fountain.max, Math.max(config.addons.fountain.min, guests * config.addons.fountain.perGuest))
+      : 0;
+    
+    const kegSelected = !isKidsOffer && addons.keg;
+    const kegCost = kegSelected
+      ? config.addons.keg.pricePerKeg * Math.max(1, Math.ceil(guests / config.addons.keg.guestsPerKeg))
+      : 0;
+    
+    const lemonadeCost = addons.lemonade
+      ? config.addons.lemonade.base * Math.max(1, Math.ceil(guests / config.addons.lemonade.blockGuests))
+      : 0;
+    
+    const hockeryCost = addons.hockery ? config.addons.hockery : 0;
+    const ledLightingCost = addons.ledLighting ? config.addons.ledLighting : 0;
+    const addonsPrice = fountainCost + kegCost + lemonadeCost + hockeryCost + ledLightingCost;
+
+    // Calculate package price
+    const basePackagePrice = offer.price;
+    const pricePerExtraGuest = config.pricePerExtraGuest[offer.id as keyof typeof config.pricePerExtraGuest] || 40;
+    const scaledPackagePrice = guests <= offer.minGuests
+      ? basePackagePrice
+      : basePackagePrice + (guests - offer.minGuests) * pricePerExtraGuest;
+
+    const totalBeforeDiscount = scaledPackagePrice + addonsPrice;
+    const totalAfterDiscount = Math.round(totalBeforeDiscount * (1 - promoDiscount));
+    const pricePerGuest = guests ? Math.round((totalAfterDiscount / guests) * 100) / 100 : 0;
+    
+    const estimatedCocktails = Math.round(guests * offer.drinksPerGuest);
+    // Dla kids (0%) nie ma shotów alkoholowych
+    const estimatedShots = isKidsOffer ? 0 : Math.round(guests * (offer.shotsPerGuest ?? 0.5));
+
+    const snapshot: CalculatorSnapshot = {
+      offerName: offer.name,
+      guests,
+      totalAfterDiscount,
+      pricePerGuest,
+      estimatedCocktails,
+      estimatedShots,
+      addons: {
+        fountain: addons.fountain,
+        keg: addons.keg,
+        lemonade: addons.lemonade,
+        hockery: addons.hockery,
+        ledLighting: addons.ledLighting,
+      },
+    };
+    onCalculate(snapshot);
+  }, [
+    onCalculate,
+    loading,
+    config,
+    selectedOfferId,
+    guests,
+    addons.fountain,
+    addons.keg,
+    addons.lemonade,
+    addons.hockery,
+    addons.ledLighting,
+  ]);
 
   const fetchConfig = async () => {
     try {
@@ -95,6 +204,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
           addons: {
             fountain: { perGuest: 10, min: 600, max: 1200 },
             keg: { pricePerKeg: 550, guestsPerKeg: 50 },
+            extraBarman: 400,
             lemonade: { base: 250, blockGuests: 60 },
             hockery: 200,
             ledLighting: 500,
@@ -125,6 +235,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
         addons: {
           fountain: { perGuest: 10, min: 600, max: 1200 },
           keg: { pricePerKeg: 550, guestsPerKeg: 50 },
+          extraBarman: 400,
           lemonade: { base: 250, blockGuests: 60 },
           hockery: 200,
           ledLighting: 500,
@@ -143,6 +254,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
     }
   };
 
+  // Early return if still loading
   if (loading || !config) {
     return (
       <Section id="kalkulator" className="bg-black border-t border-white/10">
@@ -257,9 +369,6 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const syrupsLiters = Math.max(1, Math.ceil(config.shoppingList.syrupsLiters * scale50));
   const iceKg = Math.max(4, Math.ceil(config.shoppingList.iceKg * scale50));
 
-  // Note: Removed useEffect for onCalculate to prevent infinite loop
-  // Calculator values are calculated on every render, no need to track changes
-
   return (
     <Section id="kalkulator" className="bg-black border-t border-white/10">
       <Container>
@@ -289,9 +398,21 @@ function Calculator({ onCalculate }: CalculatorProps) {
                   <button
                     key={o.id}
                     type="button"
-                    onClick={() =>
-                      setSelectedOfferId(o.id as keyof typeof OFFERS)
-                    }
+                    onClick={() => {
+                      setSelectedOfferId(o.id as keyof typeof OFFERS);
+                      
+                      // Track AddToCart when package selected
+                      if (config) {
+                        const basePrice = o.price;
+                        trackAddToCart({
+                          content_name: `Package: ${o.name}`,
+                          content_type: 'product',
+                          content_ids: [o.id],
+                          value: basePrice,
+                          currency: 'PLN',
+                        });
+                      }
+                    }}
                     className={`text-left border px-3 py-3 text-xs md:text-sm uppercase tracking-wider ${
                       selectedOfferId === o.id
                         ? 'border-amber-400 bg-amber-400/10 text-amber-200'
@@ -530,13 +651,16 @@ function Calculator({ onCalculate }: CalculatorProps) {
                   {estimatedCocktails} porcji
                 </span>
               </p>
-              <p>
-                • Shoty: ok.{' '}
-                <span className="font-semibold">{estimatedShots} porcji</span>
-              </p>
+              {!isKidsOffer && (
+                <p>
+                  • Shoty: ok.{' '}
+                  <span className="font-semibold">{estimatedShots} porcji</span>
+                </p>
+              )}
               <p className="text-[0.75rem] text-white/50">
-                Założenie kalkulacji: {offer.drinksPerGuest} koktajlu / osobę
-                oraz {offer.shotsPerGuest ?? 0.5} shota / osobę (dla tego
+                Założenie kalkulacji: {offer.drinksPerGuest} {isKidsOffer ? 'mocktaila' : 'koktajlu'} / osobę
+                {!isKidsOffer && `
+                oraz ${offer.shotsPerGuest ?? 0.5} shota / osobę`} (dla tego
                 pakietu).
               </p>
             </div>

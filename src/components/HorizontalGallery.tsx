@@ -55,19 +55,43 @@ export default function HorizontalGallery() {
       setIsLoading(true);
       setError(null);
       
-      const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`);
+      // Retry logic for cold starts (Render.com can take 30s to wake up)
+      let response;
+      let lastError;
+      const maxRetries = 3;
       
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => '');
-        const errorMsg = `HorizontalGallery: HTTP ${response.status} ${response.statusText}`;
-        
-        // Report to Error Monitor
-        const monitor = (await import('@/lib/global-error-monitor')).getErrorMonitor();
-        monitor?.captureFetchError('GET', `${API_URL}/content/gallery/public`, response.status, errorText);
-        
-        setError(errorMsg);
-        setIsLoading(false);
-        return;
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+          
+          response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`, {
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (response.ok) {
+            break; // Success, exit retry loop
+          }
+          
+          lastError = `HTTP ${response.status}`;
+          
+          if (attempt < maxRetries) {
+            // Wait before retry (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+          }
+        } catch (err) {
+          lastError = err instanceof Error ? err.message : 'Network error';
+          
+          if (attempt < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+          }
+        }
+      }
+      
+      if (!response || !response.ok) {
+        throw new Error(lastError || 'Failed after retries');
       }
       
       const data = await response.json();
@@ -127,14 +151,15 @@ export default function HorizontalGallery() {
     }
   };
 
-  // Show loading state
+  // Show loading state with info about potential cold start
   if (isLoading) {
     return (
       <Section className="bg-black py-3 md:py-4">
         <Container>
           <div className="text-center text-white py-8">
             <div className="animate-spin inline-block w-8 h-8 border-4 border-white border-t-transparent rounded-full mb-2"></div>
-            <p className="text-sm">Loading gallery...</p>
+            <p className="text-sm">Ładowanie galerii...</p>
+            <p className="text-xs text-white/60 mt-1">Może potrwać do 30s przy pierwszym uruchomieniu</p>
           </div>
         </Container>
       </Section>

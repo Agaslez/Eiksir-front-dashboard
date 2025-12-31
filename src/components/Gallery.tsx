@@ -1,4 +1,5 @@
 import { config } from '@/lib/config';
+import { useLogger } from '@/hooks/useLogger';
 import {
     ChevronLeft,
     ChevronRight,

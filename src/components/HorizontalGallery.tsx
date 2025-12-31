@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useComponentHealth } from '../lib/component-health-monitor';
+import { useLogger } from '@/hooks/useLogger';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 

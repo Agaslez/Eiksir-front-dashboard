@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import { Briefcase, Cake, Crown, Sparkles, Users, Wine } from 'lucide-react';
 import { OFFERS } from '../lib/content';
+import { useLogger } from '@/hooks/useLogger';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 

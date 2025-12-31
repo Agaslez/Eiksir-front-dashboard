@@ -1,4 +1,5 @@
 import { config as appConfig } from '@/lib/config';
+import { useLogger } from '@/hooks/useLogger';
 import { useEffect, useState } from 'react';
 import { fetchWithRetry } from '../lib/auto-healing';
 import { useComponentHealth } from '../lib/component-health-monitor';

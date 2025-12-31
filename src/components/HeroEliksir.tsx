@@ -1,11 +1,15 @@
 ﻿import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ELIKSIR_STYLES } from '../lib/styles';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
+// Feature flag - ustaw na false aby wrócić do statycznego logo
+const ENABLE_LOGO_ANIMATION = true;
+
 const HeroEliksir = () => {
   const ref = useRef<HTMLElement>(null);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -14,6 +18,19 @@ const HeroEliksir = () => {
 
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+
+  useEffect(() => {
+    if (!ENABLE_LOGO_ANIMATION) return;
+
+    // Load video only on desktop or fast connection (4G)
+    const isDesktop = window.innerWidth > 768;
+    const connection = (navigator as any).connection;
+    const isFastConnection = !connection || connection.effectiveType === '4g';
+
+    if (isDesktop || isFastConnection) {
+      setShouldLoadVideo(true);
+    }
+  }, []);
 
   return (
     <Section
@@ -41,6 +58,41 @@ const HeroEliksir = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
         >
+          {/* Animated Logo - with fallback to static image */}
+          {ENABLE_LOGO_ANIMATION && shouldLoadVideo ? (
+            <motion.div
+              className="mb-8"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-48 h-48 md:w-64 md:h-64 mx-auto object-contain"
+                poster="/favicon.png"
+                preload="auto"
+              >
+                <source src="/videos/logo-animation.mp4" type="video/mp4" />
+              </video>
+            </motion.div>
+          ) : (
+            <motion.div
+              className="mb-8"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              <img
+                src="/favicon.png"
+                alt="ELIKSIR Logo"
+                className="w-48 h-48 md:w-64 md:h-64 mx-auto object-contain"
+              />
+            </motion.div>
+          )}
+
           <p className={`${ELIKSIR_STYLES.caption} mb-6`}>
             Mobilny Bar Koktajlowy Premium
           </p>

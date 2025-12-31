@@ -88,11 +88,11 @@ const HeroEliksir = () => {
             Mobilny Bar Koktajlowy Premium
           </p>
 
-          <img 
-            src="/eliksir-logo-text.png" 
-            alt="ELIKSIR" 
-            className="w-full max-w-2xl h-auto mb-6 px-4"
-          />
+          <h1 className="font-playfair text-8xl md:text-9xl lg:text-10xl font-bold mb-6">
+            <span className="bg-gradient-to-r from-eliksir-gold via-eliksir-goldLight to-eliksir-gold bg-clip-text text-transparent">
+              ELIKSIR
+            </span>
+          </h1>
 
           <div className={ELIKSIR_STYLES.dividerShort} />
 

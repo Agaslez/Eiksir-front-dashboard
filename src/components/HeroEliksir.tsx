@@ -49,6 +49,41 @@ const HeroEliksir = () => {
       <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-eliksir-gold/10 rounded-full blur-3xl" />
       <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-eliksir-gold/5 rounded-full blur-3xl" />
 
+      {/* Animated Logo - positioned in top-left corner */}
+      {ENABLE_LOGO_ANIMATION && shouldLoadVideo ? (
+        <motion.div
+          className="absolute top-4 left-4 md:top-8 md:left-8 z-20"
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-32 h-32 md:w-48 md:h-48 object-contain"
+            poster="/favicon.png"
+            preload="auto"
+          >
+            <source src="/videos/logo-animation.mp4" type="video/mp4" />
+          </video>
+        </motion.div>
+      ) : (
+        <motion.div
+          className="absolute top-4 left-4 md:top-8 md:left-8 z-20"
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
+          <img
+            src="/favicon.png"
+            alt="ELIKSIR Logo"
+            className="w-32 h-32 md:w-48 md:h-48 object-contain"
+          />
+        </motion.div>
+      )}
+
       {/* Content w kontenerze */}
       <Container className="relative z-10">
         <motion.div
@@ -58,40 +93,6 @@ const HeroEliksir = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
         >
-          {/* Animated Logo - with fallback to static image */}
-          {ENABLE_LOGO_ANIMATION && shouldLoadVideo ? (
-            <motion.div
-              className="mb-8"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-48 h-48 md:w-64 md:h-64 mx-auto object-contain"
-                poster="/favicon.png"
-                preload="auto"
-              >
-                <source src="/videos/logo-animation.mp4" type="video/mp4" />
-              </video>
-            </motion.div>
-          ) : (
-            <motion.div
-              className="mb-8"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              <img
-                src="/favicon.png"
-                alt="ELIKSIR Logo"
-                className="w-48 h-48 md:w-64 md:h-64 mx-auto object-contain"
-              />
-            </motion.div>
-          )}
 
           <p className={`${ELIKSIR_STYLES.caption} mb-6`}>
             Mobilny Bar Koktajlowy Premium

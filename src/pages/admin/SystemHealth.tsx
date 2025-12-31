@@ -257,12 +257,13 @@ export default function SystemHealthDashboard() {
       category: 'External',
       check: async () => {
         try {
-          // Test fetching a known Cloudinary image
-          const response = await fetch('https://res.cloudinary.com/demo/image/upload/sample.jpg', {
-            method: 'HEAD',
-            mode: 'no-cors'
+          // Test our Cloudinary by fetching gallery images
+          const response = await fetch(`${config.apiUrl}/content/gallery/public?category=wszystkie`, {
+            signal: AbortSignal.timeout(5000)
           });
-          return true; // If no error, Cloudinary CDN is accessible
+          if (!response.ok) return false;
+          const data = await response.json();
+          return data.success && Array.isArray(data.images) && data.images.length > 0;
         } catch {
           return false;
         }

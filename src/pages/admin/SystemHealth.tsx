@@ -111,7 +111,7 @@ export default function SystemHealthDashboard() {
     {
       name: 'Calculator Config API',
       category: 'Backend',
-      endpoint: '/calculator/config',
+      endpoint: '/api/calculator/config',
       check: async () => {
         return await performHttpCheck(
           'Calculator Config API',
@@ -125,7 +125,7 @@ export default function SystemHealthDashboard() {
     {
       name: 'Gallery API (Public)',
       category: 'Backend',
-      endpoint: '/content/gallery/public',
+      endpoint: '/api/content/gallery/public',
       check: async () => {
         return await performHttpCheck(
           'Gallery API (Public)',
@@ -139,7 +139,7 @@ export default function SystemHealthDashboard() {
     {
       name: 'Content Sections API',
       category: 'Backend',
-      endpoint: '/content/sections',
+      endpoint: '/api/content/sections',
       check: async () => {
         return await performHttpCheck(
           'Content Sections API',
@@ -153,7 +153,7 @@ export default function SystemHealthDashboard() {
     {
       name: 'Auth Health',
       category: 'Backend',
-      endpoint: '/auth/health',
+      endpoint: '/api/auth/health',
       check: async () => {
         return await performHttpCheck(
           'Auth Health',
@@ -167,7 +167,7 @@ export default function SystemHealthDashboard() {
     {
       name: 'AI Service Health',
       category: 'Backend',
-      endpoint: '/ai/health',
+      endpoint: '/api/ai/health',
       check: async () => {
         return await performHttpCheck(
           'AI Service Health',
@@ -181,7 +181,7 @@ export default function SystemHealthDashboard() {
     {
       name: 'Database Connection',
       category: 'Database',
-      endpoint: '/calculator/config',
+      endpoint: '/api/calculator/config',
       check: async () => {
         return await performHttpCheck('Database Connection', `${API_URL}/calculator/config`);
       },
@@ -190,7 +190,7 @@ export default function SystemHealthDashboard() {
     {
       name: 'Database Query Performance',
       category: 'Database',
-      endpoint: '/content/gallery/public',
+      endpoint: '/api/content/gallery/public',
       check: async () => {
         const start = Date.now();
         const result = await performHttpCheck(
@@ -205,7 +205,7 @@ export default function SystemHealthDashboard() {
     {
       name: 'Gallery Data Available',
       category: 'Frontend',
-      endpoint: '/content/gallery/public',
+      endpoint: '/api/content/gallery/public',
       check: async () => {
         try {
           const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`);
@@ -257,13 +257,27 @@ export default function SystemHealthDashboard() {
       category: 'External',
       check: async () => {
         try {
-          // Test our Cloudinary by fetching gallery images
-          const response = await fetch(`${config.apiUrl}/content/gallery/public?category=wszystkie`, {
+          // First, get cloud_name from backend health check
+          const healthResponse = await fetch(`${API_URL}/health`, {
             signal: AbortSignal.timeout(5000)
           });
-          if (!response.ok) return false;
-          const data = await response.json();
-          return data.success && Array.isArray(data.images) && data.images.length > 0;
+          if (!healthResponse.ok) return false;
+          
+          const healthData = await healthResponse.json();
+          const cloudName = healthData.components?.cloudinary?.cloud_name;
+          
+          if (!cloudName) return false;
+          
+          // Now ping real Cloudinary CDN with our cloud_name
+          // Use a HEAD request to check if CDN is accessible (faster than GET)
+          const cdnResponse = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/sample.json`, {
+            method: 'HEAD',
+            signal: AbortSignal.timeout(5000)
+          });
+          
+          // CDN is healthy if it responds (even with 404 for non-existent resource)
+          // We just want to confirm the CDN is reachable
+          return cdnResponse.status === 200 || cdnResponse.status === 404;
         } catch {
           return false;
         }
@@ -275,9 +289,8 @@ export default function SystemHealthDashboard() {
       category: 'External',
       check: async () => {
         // Test if backend is responding at all
-        const baseUrl = config.apiUrl;
         try {
-          const response = await fetch(baseUrl + '/health', { 
+          const response = await fetch(`${API_URL}/health`, { 
             signal: AbortSignal.timeout(5000) 
           });
           return response.ok;

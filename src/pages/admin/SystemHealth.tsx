@@ -773,6 +773,23 @@ function RecentErrorsPanel() {
         </div>
       )}
 
+      {/* Info Banner */}
+      <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <h4 className="text-sm font-semibold text-blue-900 mb-1">🛡️ Automatic Error Capture Active</h4>
+            <p className="text-sm text-blue-800">
+              Fetch interceptor captures <strong>ALL HTTP errors</strong> (400, 500, network failures). 
+              Unhandled exceptions and promise rejections are also logged.
+            </p>
+            <p className="text-xs text-blue-700 mt-2">
+              💡 Try saving something in Dashboard - if it fails with 400, you'll see it here within 10 seconds.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Error List */}
       {errors.length === 0 ? (
         <div className="text-center py-8 text-gray-500">

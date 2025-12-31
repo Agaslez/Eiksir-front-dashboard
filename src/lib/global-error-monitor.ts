@@ -76,9 +76,25 @@ class GlobalErrorMonitor {
       const [resource, config] = args;
       const url = typeof resource === 'string' ? resource : resource.url;
       const method = config?.method || 'GET';
+      const startTime = Date.now();
 
       try {
         const response = await originalFetch(...args);
+        const duration = Date.now() - startTime;
+
+        // Log API call with performance metrics
+        try {
+          const { getLogger } = await import('./logger');
+          getLogger().logApiCall(
+            method,
+            url,
+            response.status,
+            duration,
+            !response.ok ? response.statusText : undefined
+          );
+        } catch {
+          // Logger not available yet
+        }
 
         // Capture HTTP errors (400-599)
         if (!response.ok) {
@@ -95,6 +111,16 @@ class GlobalErrorMonitor {
 
         return response;
       } catch (error) {
+        const duration = Date.now() - startTime;
+        
+        // Log network error
+        try {
+          const { getLogger } = await import('./logger');
+          getLogger().logApiCall(method, url, 0, duration, String(error));
+        } catch {
+          // Logger not available
+        }
+
         // Network error (no response)
         this.captureFetchError(method, url, 0, String(error));
         throw error; // Re-throw to maintain normal error flow

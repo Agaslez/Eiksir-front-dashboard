@@ -52,7 +52,7 @@ const HeroEliksir = () => {
       {/* Animated Logo - positioned in top-left corner */}
       {ENABLE_LOGO_ANIMATION && shouldLoadVideo ? (
         <motion.div
-          className="absolute top-4 left-4 md:top-8 md:left-8 z-20"
+          className="absolute top-4 left-0 md:top-8 md:left-0 z-20 rounded-full overflow-hidden bg-black/20"
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
@@ -62,7 +62,7 @@ const HeroEliksir = () => {
             loop
             muted
             playsInline
-            className="w-32 h-32 md:w-48 md:h-48 object-contain"
+            className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-full"
             poster="/favicon.png"
             preload="auto"
           >
@@ -71,7 +71,7 @@ const HeroEliksir = () => {
         </motion.div>
       ) : (
         <motion.div
-          className="absolute top-4 left-4 md:top-8 md:left-8 z-20"
+          className="absolute top-4 left-0 md:top-8 md:left-0 z-20 rounded-full overflow-hidden bg-black/20"
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
@@ -79,7 +79,7 @@ const HeroEliksir = () => {
           <img
             src="/favicon.png"
             alt="ELIKSIR Logo"
-            className="w-32 h-32 md:w-48 md:h-48 object-contain"
+            className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-full"
           />
         </motion.div>
       )}

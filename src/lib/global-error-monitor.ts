@@ -74,9 +74,19 @@ class GlobalErrorMonitor {
     
     window.fetch = async (...args) => {
       const [resource, config] = args;
-      const url = typeof resource === 'string' ? resource : resource.url;
+      const url = typeof resource === 'string' 
+        ? resource 
+        : resource instanceof Request 
+          ? resource.url 
+          : resource.toString();
       const method = config?.method || 'GET';
       const startTime = Date.now();
+
+      // CRITICAL: Skip logging for /api/logs to prevent infinite loop
+      const isLogEndpoint = url.includes('/api/logs');
+      if (isLogEndpoint) {
+        return originalFetch(...args);
+      }
 
       try {
         const response = await originalFetch(...args);

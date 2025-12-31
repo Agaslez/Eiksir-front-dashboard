@@ -95,9 +95,28 @@ export default function CalculatorSettingsNew() {
       });
       const data = await response.json();
       if (data.success && data.config) {
-        setConfig(data.config);
+        // CRITICAL: Merge with default config to ensure all fields exist
+        // This handles cases where DB has old config missing new fields like extraBarman
+        const mergedConfig = {
+          ...config, // Start with defaults
+          ...data.config, // Override with DB values
+          addons: {
+            ...config.addons, // Default addons
+            ...data.config.addons, // DB addons
+          },
+          pricePerExtraGuest: {
+            ...config.pricePerExtraGuest, // Default prices
+            ...data.config.pricePerExtraGuest, // DB prices
+          },
+          shoppingList: {
+            ...config.shoppingList, // Default shopping list
+            ...data.config.shoppingList, // DB shopping list
+          },
+        };
+        
+        setConfig(mergedConfig);
         // Set checkbox based on whether discount is active
-        setDiscountEnabled(data.config.promoDiscount > 0);
+        setDiscountEnabled(mergedConfig.promoDiscount > 0);
       }
     } catch (error) {
       console.error('Error fetching calculator config:', error);
@@ -107,10 +126,53 @@ export default function CalculatorSettingsNew() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // If discount not enabled, force it to 0
+      // CRITICAL: Ensure ALL fields are present (merge with defaults)
+      // This prevents "Required" errors when fields are missing from state
+      const defaultConfig = {
+        promoDiscount: 0,
+        pricePerExtraGuest: {
+          basic: 40,
+          premium: 50,
+          exclusive: 60,
+          kids: 30,
+          family: 35,
+          business: 60,
+        },
+        addons: {
+          fountain: { perGuest: 10, min: 600, max: 1200 },
+          keg: { pricePerKeg: 800, guestsPerKeg: 50 },
+          extraBarman: 400,
+          lemonade: { base: 250, blockGuests: 60 },
+          hockery: 200,
+          ledLighting: 500,
+        },
+        shoppingList: {
+          vodkaRumGinBottles: 5,
+          liqueurBottles: 2,
+          aperolBottles: 2,
+          proseccoBottles: 5,
+          syrupsLiters: 12,
+          iceKg: 8,
+        },
+      };
+
+      // Merge with defaults to ensure all fields exist
       const configToSave = {
+        ...defaultConfig,
         ...config,
         promoDiscount: discountEnabled ? config.promoDiscount : 0,
+        addons: {
+          ...defaultConfig.addons,
+          ...config.addons,
+        },
+        pricePerExtraGuest: {
+          ...defaultConfig.pricePerExtraGuest,
+          ...config.pricePerExtraGuest,
+        },
+        shoppingList: {
+          ...defaultConfig.shoppingList,
+          ...config.shoppingList,
+        },
       };
 
       console.log('🔍 Wysyłam config:', JSON.stringify(configToSave, null, 2));

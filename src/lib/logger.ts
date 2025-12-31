@@ -62,7 +62,8 @@ class Logger {
   private correlationId: string;
 
   constructor(backendUrl: string) {
-    this.backendUrl = backendUrl;
+    // Remove trailing /api if present to avoid double /api/api/logs
+    this.backendUrl = backendUrl.replace(/\/api$/, '');
     this.sessionId = this.generateId();
     this.correlationId = this.generateId();
 
@@ -295,6 +296,7 @@ class Logger {
    */
   private async sendToBackend(entry: LogEntry) {
     try {
+      // Ensure single /api/logs (backendUrl already trimmed in constructor)
       const response = await fetch(`${this.backendUrl}/api/logs`, {
         method: 'POST',
         headers: {

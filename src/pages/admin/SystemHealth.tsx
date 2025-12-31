@@ -248,7 +248,7 @@ export default function SystemHealthDashboard() {
       name: 'Google Analytics',
       category: 'External',
       check: async () => {
-        return typeof window.gtag === 'function';
+        return typeof (window as any).gtag === 'function';
       },
       status: 'checking'
     },
@@ -323,7 +323,7 @@ export default function SystemHealthDashboard() {
     },
     {
       name: 'robots.txt',
-      category: 'SEO',
+      category: 'External',
       check: async () => {
         try {
           const response = await fetch('/robots.txt');
@@ -337,7 +337,7 @@ export default function SystemHealthDashboard() {
     },
     {
       name: 'sitemap.xml',
-      category: 'SEO',
+      category: 'External',
       check: async () => {
         try {
           const response = await fetch('/sitemap.xml');
@@ -351,7 +351,7 @@ export default function SystemHealthDashboard() {
     },
     {
       name: 'Open Graph Tags',
-      category: 'SEO',
+      category: 'External',
       check: async () => {
         const ogTitle = document.querySelector('meta[property="og:title"]');
         const ogDescription = document.querySelector('meta[property="og:description"]');
@@ -362,7 +362,7 @@ export default function SystemHealthDashboard() {
     },
     {
       name: 'JSON-LD Schema',
-      category: 'SEO',
+      category: 'External',
       check: async () => {
         const jsonLdScript = document.querySelector('script[type="application/ld+json"]');
         if (!jsonLdScript) return false;

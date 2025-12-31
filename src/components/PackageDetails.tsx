@@ -198,7 +198,7 @@ export default function PackageDetails() {
             {
               name: 'Fontanna czekolady',
               desc: 'Belgijska czekolada z owocami',
-              price: 'od 400 zł',
+              price: 'od 600 zł',
             },
             {
               name: 'Stacja lemoniad',

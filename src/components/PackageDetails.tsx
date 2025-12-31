@@ -64,6 +64,7 @@ const PACKAGE_DETAILS = {
 };
 
 export default function PackageDetails() {
+  useLogger('PackageDetails');
   return (
     <Section className="bg-gradient-to-b from-black to-neutral-950">
       {/* TYTUŁ W KONTENERZE */}

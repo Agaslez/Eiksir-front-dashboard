@@ -30,6 +30,7 @@ interface GalleryImage {
 
 export default function HorizontalGallery() {
   useComponentHealth('HorizontalGallery');
+  useLogger('HorizontalGallery');
   
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);

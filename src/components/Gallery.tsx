@@ -43,6 +43,7 @@ interface GalleryImage {
 
 const Gallery = () => {
   useComponentHealth('Gallery');
+  useLogger('Gallery');
   
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState('wszystkie');

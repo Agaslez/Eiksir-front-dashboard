@@ -57,6 +57,7 @@ type CalculatorProps = {
 
 function Calculator({ onCalculate }: CalculatorProps) {
   useComponentHealth('Calculator');
+  useLogger('Calculator');
   
   const [selectedOfferId, setSelectedOfferId] =
     useState<keyof typeof OFFERS>('family');

@@ -1,5 +1,5 @@
-﻿import { Calendar, Users, Wine, Music, Sparkles, Award } from 'lucide-react';
-import { motion } from 'framer-motion';
+﻿import { motion } from 'framer-motion';
+import { Award, Calendar, Music, Sparkles, Users, Wine } from 'lucide-react';
 
 const services = [
   {
@@ -121,6 +121,7 @@ const packages = [
 ];
 
 export default function UslugiEventowe() {
+  useLogger('UslugiEventowe');
   return (
     <section id="uslugi" className="section-padding bg-eliksir-dark">
       <div className="container-padding">

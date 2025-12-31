@@ -1,3 +1,4 @@
+import { useLogger } from '@/hooks/useLogger';
 import {
     Award,
     Calendar,
@@ -10,6 +11,7 @@ import {
 import { trackEvent } from '../lib/error-monitoring';
 
 const CTA = () => {
+  useLogger('CTA');
   const handleContactClick = (method: string) => {
     trackEvent('cta_contact_click', { method });
 

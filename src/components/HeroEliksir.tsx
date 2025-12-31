@@ -1,10 +1,12 @@
-﻿import { motion, useScroll, useTransform } from 'framer-motion';
+﻿import { useLogger } from '@/hooks/useLogger';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import { ELIKSIR_STYLES } from '../lib/styles';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
 const HeroEliksir = () => {
+  useLogger('HeroEliksir');
   const ref = useRef<HTMLElement>(null);
 
   const { scrollYProgress } = useScroll({

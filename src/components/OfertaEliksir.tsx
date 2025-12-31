@@ -218,6 +218,7 @@ const cocktailsData = {
 };
 
 export default function OfertaEliksir() {
+  useLogger('OfertaEliksir');
   const [activeCategory, setActiveCategory] = useState('sygnaturowe');
   const [selectedCocktail, setSelectedCocktail] = useState<any>(null);
 

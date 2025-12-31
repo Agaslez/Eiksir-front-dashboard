@@ -1,7 +1,9 @@
+import { useLogger } from '@/hooks/useLogger';
 import { Facebook, Instagram, Mail, MapPin, Phone } from 'lucide-react';
 import { Container } from './layout/Container';
 
 export default function FooterEliksir() {
+  useLogger('FooterEliksir');
   const menuLinks = [
     { name: 'Strona Główna', href: '#hero' },
     { name: 'Oferta', href: '#oferta' },

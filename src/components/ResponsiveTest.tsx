@@ -1,7 +1,8 @@
-﻿import React from 'react';
+﻿import { useLogger } from '@/hooks/useLogger';
 import { ELIKSIR_STYLES } from '../lib/styles';
 
 const ResponsiveTest = () => {
+  useLogger('ResponsiveTest');
   const breakpoints = [
     { name: 'Mobile', width: '640px', class: 'w-full max-w-md' },
     { name: 'Tablet', width: '768px', class: 'w-full max-w-lg' },

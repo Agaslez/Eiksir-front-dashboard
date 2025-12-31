@@ -1,3 +1,4 @@
+import { useLogger } from '@/hooks/useLogger';
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +9,7 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
+  useLogger('ProtectedRoute');
   const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 

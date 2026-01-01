@@ -43,12 +43,26 @@ export default function HorizontalGallery() {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const baseUrl = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
   const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
 
   useEffect(() => {
     fetchImages();
   }, []);
+
+  // Auto-retry every 60s if failed (max 3 auto-retries)
+  useEffect(() => {
+    if (error && retryCount < 3) {
+      const timer = setTimeout(() => {
+        console.log(`HorizontalGallery: Auto-retry #${retryCount + 1}`);
+        setRetryCount(prev => prev + 1);
+        fetchImages();
+      }, 60000); // 60s
+
+      return () => clearTimeout(timer);
+    }
+  }, [error, retryCount]);
 
   const fetchImages = async () => {
     try {
@@ -166,23 +180,44 @@ export default function HorizontalGallery() {
     );
   }
 
-  // Show error state (only in dev or for admins)
+  // Show error state with retry button
   if (error) {
     return (
       <Section className="bg-black py-3 md:py-4">
         <Container>
           <div className="text-center text-red-400 py-4">
-            <p className="text-sm">⚠️ Gallery temporarily unavailable</p>
+            <p className="text-sm">⚠️ Galeria tymczasowo niedostępna</p>
             {import.meta.env.DEV && <p className="text-xs mt-1">{error}</p>}
+            <button
+              onClick={() => fetchImages()}
+              className="mt-2 px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-500 rounded-lg text-xs transition-colors"
+            >
+              🔄 Spróbuj ponownie
+            </button>
           </div>
         </Container>
       </Section>
     );
   }
 
-  // Don't render if no images (but reported to Error Monitor above)
+  // Show placeholder if no images (with retry button)
   if (images.length === 0) {
-    return null;
+    return (
+      <Section className="bg-black py-3 md:py-4">
+        <Container>
+          <div className="text-center text-white/60 py-4">
+            <p className="text-sm">📸 Brak obrazów w galerii</p>
+            <p className="text-xs mt-1">Dodaj zdjęcia w panelu admina (ImageGalleryEnhanced)</p>
+            <button
+              onClick={() => fetchImages()}
+              className="mt-2 px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-500 rounded-lg text-xs transition-colors"
+            >
+              🔄 Odśwież galerię
+            </button>
+          </div>
+        </Container>
+      </Section>
+    );
   }
 
   return (

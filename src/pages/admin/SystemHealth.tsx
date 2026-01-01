@@ -311,6 +311,67 @@ export default function SystemHealthDashboard() {
       status: 'checking'
     },
     {
+      name: 'HorizontalGallery Component',
+      category: 'Frontend',
+      endpoint: '/api/content/gallery/public?category=wszystkie',
+      check: async () => {
+        try {
+          // Check if component health monitor exists
+          const componentHealth = (window as any).__componentHealthMonitor;
+          
+          // Test API endpoint that HorizontalGallery uses
+          const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`, {
+            signal: AbortSignal.timeout(10000)
+          });
+          
+          if (!response.ok) {
+            const check = (window as any).__healthChecks?.find((c: HealthCheck) => c.name === 'HorizontalGallery Component');
+            if (check) {
+              check.message = `API returned ${response.status}: ${response.statusText}`;
+            }
+            return false;
+          }
+          
+          const data = await response.json();
+          
+          if (!data.success || !Array.isArray(data.images)) {
+            const check = (window as any).__healthChecks?.find((c: HealthCheck) => c.name === 'HorizontalGallery Component');
+            if (check) {
+              check.message = 'Invalid response format from gallery API';
+            }
+            return false;
+          }
+          
+          if (data.images.length === 0) {
+            const check = (window as any).__healthChecks?.find((c: HealthCheck) => c.name === 'HorizontalGallery Component');
+            if (check) {
+              check.message = 'No images in database (upload in ImageGalleryEnhanced)';
+            }
+            return false;
+          }
+          
+          // Check if at least some images are active
+          const activeImages = data.images.filter((img: any) => img.isActive !== false);
+          if (activeImages.length === 0) {
+            const check = (window as any).__healthChecks?.find((c: HealthCheck) => c.name === 'HorizontalGallery Component');
+            if (check) {
+              check.message = `${data.images.length} images in DB but none are active`;
+            }
+            return false;
+          }
+          
+          return true;
+        } catch (error) {
+          const check = (window as any).__healthChecks?.find((c: HealthCheck) => c.name === 'HorizontalGallery Component');
+          if (check) {
+            check.message = `Network error: ${error instanceof Error ? error.message : 'Unknown'}`;
+          }
+          return false;
+        }
+      },
+      status: 'checking'
+    },
+    {
       name: 'Error Boundary',
       category: 'Frontend',
       check: async () => {

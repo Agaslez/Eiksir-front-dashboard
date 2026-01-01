@@ -5,6 +5,11 @@ import { expect, test } from '@playwright/test';
  * 
  * Sprawdza czy wszystkie komponenty używają tego samego centralized API configuration
  * i poprawnie łączą się z backendem.
+ * 
+ * OPTIMIZATIONS:
+ * - Reduced waitForTimeout to minimum (networkidle, domcontentloaded)
+ * - Increased timeouts for cold start tolerance (Render.com free tier)
+ * - Parallel execution with 2 workers in CI
  */
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -21,7 +26,7 @@ test.describe('API Consistency Tests', () => {
       });
 
       await page.goto(FRONTEND_URL);
-      await page.waitForTimeout(3000);
+      await page.waitForLoadState('networkidle', { timeout: 30000 });
 
       // Verify correct API endpoint was called
       expect(apiRequests.length).toBeGreaterThan(0);
@@ -33,11 +38,11 @@ test.describe('API Consistency Tests', () => {
 
     test('should display horizontal gallery', async ({ page }) => {
       await page.goto(FRONTEND_URL);
-      await page.waitForTimeout(3000);
+      await page.waitForLoadState('domcontentloaded');
 
       // Check if panorama images are visible (should be near top of page)
       const panoramaImages = page.locator('img[alt*="Eliksir"]').first();
-      await expect(panoramaImages).toBeVisible({ timeout: 10000 });
+      await expect(panoramaImages).toBeVisible({ timeout: 20000 });
     });
 
     test('should not have infinite loader', async ({ page }) => {

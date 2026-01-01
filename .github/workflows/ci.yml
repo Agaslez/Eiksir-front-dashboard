@@ -168,7 +168,10 @@ jobs:
       
       - name: Run E2E API Consistency Tests
         run: npm run test:e2e
-        timeout-minutes: 10
+        timeout-minutes: 15
+        env:
+          FRONTEND_URL: http://localhost:4173
+          BACKEND_URL: https://eliksir-backend-front-dashboard.onrender.com
       
       - name: Upload Playwright report
         if: always()

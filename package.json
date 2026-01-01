@@ -18,7 +18,8 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,md}\" --config ./.prettierrc.json",
     "type-check": "echo 'TypeScript check skipped' && exit 0",
     "validate": "npm run lint && npm run build",
-    "pre-push": "bash scripts/pre-push-validation.sh"
+    "pre-push": "bash scripts/pre-push-validation.sh",
+    "validate-schema": "node scripts/validate-schema.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

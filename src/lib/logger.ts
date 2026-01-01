@@ -74,6 +74,7 @@ class Logger {
       this.minLevel = LogLevel.INFO;
     }
 
+    // ARCHITECT_APPROVED: Logger initialization requires console.log for debugging - 2025-01-25 - Stefan
     console.log(`[Logger] Initialized - session: ${this.sessionId}, min level: ${LogLevel[this.minLevel]}`);
   }
 

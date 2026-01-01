@@ -1,11 +1,9 @@
+import { API, BACKEND_URL } from '@/lib/config';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useComponentHealth } from '../lib/component-health-monitor';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
-
-// Ensure API_URL always ends with /api
-const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
 
 // Helper function to handle both Cloudinary and local URLs
 const getImageUrl = (url: string) => {
@@ -24,7 +22,7 @@ const getImageUrl = (url: string) => {
   }
   
   // Otherwise, prepend backend API URL
-  return `${API_URL.replace('/api', '')}${url}`;
+  return `${BACKEND_URL}${url}`;
 };
 
 interface GalleryImage {
@@ -43,7 +41,6 @@ export default function HorizontalGallery() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
-  // API_URL is defined at top of file (line 8)
 
   useEffect(() => {
     fetchImages();
@@ -77,7 +74,7 @@ export default function HorizontalGallery() {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout (Render cold start)
           
-          response = await fetch(`${API_URL}/api/content/gallery/public?category=wszystkie`, {
+          response = await fetch(API.galleryPanorama, {
             signal: controller.signal
           });
           
@@ -137,7 +134,7 @@ export default function HorizontalGallery() {
             message: 'HorizontalGallery: No active images found in database',
             type: 'manual',
             context: {
-              endpoint: `${API_URL}/content/gallery/public`,
+              endpoint: API.galleryPanorama,
               userAction: 'Loading horizontal gallery',
               note: 'Check if images exist with isActive=true in ImageGalleryEnhanced',
             },
@@ -151,7 +148,7 @@ export default function HorizontalGallery() {
         monitor?.captureError({
           message: `HorizontalGallery: ${errorMsg}`,
           type: 'fetch',
-          context: { endpoint: `${API_URL}/content/gallery/public`, response: data },
+          context: { endpoint: API.galleryPanorama, response: data },
         });
       }
       
@@ -168,7 +165,7 @@ export default function HorizontalGallery() {
         message: `HorizontalGallery fetch failed: ${errorMsg}`,
         type: 'network',
         context: {
-          url: `${API_URL}/content/gallery/public`,
+          url: API.galleryPanorama,
           userAction: 'Loading horizontal gallery',
           error: String(error),
         },

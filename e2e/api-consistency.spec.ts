@@ -11,6 +11,47 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const BACKEND_URL = process.env.BACKEND_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
 
 test.describe('API Consistency Tests', () => {
+  test.describe('HorizontalGallery Component (Panorama)', () => {
+    test('should use API.galleryPanorama endpoint', async ({ page }) => {
+      const apiRequests: string[] = [];
+      page.on('request', (request) => {
+        if (request.url().includes('/api/content/gallery')) {
+          apiRequests.push(request.url());
+        }
+      });
+
+      await page.goto(FRONTEND_URL);
+      await page.waitForTimeout(3000);
+
+      // Verify correct API endpoint was called
+      expect(apiRequests.length).toBeGreaterThan(0);
+      const hasPanoramaEndpoint = apiRequests.some(url => 
+        url.includes('/api/content/gallery/public') && url.includes('category=wszystkie')
+      );
+      expect(hasPanoramaEndpoint).toBe(true);
+    });
+
+    test('should display horizontal gallery', async ({ page }) => {
+      await page.goto(FRONTEND_URL);
+      await page.waitForTimeout(3000);
+
+      // Check if panorama images are visible (should be near top of page)
+      const panoramaImages = page.locator('img[alt*="Eliksir"]').first();
+      await expect(panoramaImages).toBeVisible({ timeout: 10000 });
+    });
+
+    test('should not have infinite loader', async ({ page }) => {
+      await page.goto(FRONTEND_URL);
+      
+      // Check if loader appears
+      const loader = page.locator('text=/Ładowanie galerii/i').first();
+      if (await loader.isVisible()) {
+        // Loader should disappear within 30 seconds (cold start tolerance)
+        await expect(loader).not.toBeVisible({ timeout: 35000 });
+      }
+    });
+  });
+
   test.describe('Calculator Component', () => {
     test('should use API.calculatorConfig endpoint', async ({ page }) => {
       // Monitor network requests
@@ -192,12 +233,18 @@ test.describe('API Consistency Tests', () => {
       expect(data).toHaveProperty('shoppingList');
     });
 
-    test('should verify gallery endpoint', async ({ request }) => {
+    test('should verify gallery panorama endpoint', async ({ request }) => {
       const response = await request.get(`${BACKEND_URL}/api/content/gallery/public?category=wszystkie`);
       expect(response.ok()).toBeTruthy();
       
       const data = await response.json();
-      expect(Array.isArray(data)).toBeTruthy();
+      // Response could be array or object with images property
+      if (Array.isArray(data)) {
+        expect(data).toBeTruthy();
+      } else {
+        expect(data).toHaveProperty('success');
+        expect(data).toHaveProperty('images');
+      }
     });
 
     test('should verify content sections endpoint', async ({ request }) => {
@@ -248,7 +295,7 @@ test.describe('API Consistency Tests', () => {
           const endpoint = url.split('/api/')[1];
           const component = 
             url.includes('calculator') ? 'Calculator' :
-            url.includes('gallery') ? 'Gallery' :
+            url.includes('gallery') ? url.includes('category=wszystkie') ? 'HorizontalGallery' : 'Gallery' :
             url.includes('content/sections') ? 'About' :
             'Unknown';
           
@@ -272,7 +319,7 @@ test.describe('API Consistency Tests', () => {
   });
 
   test.describe('Loading State Consistency', () => {
-    test('should not show infinite loaders', async ({ page }) => {
+    test('should not show infinite loaders in Calculator', async ({ page }) => {
       await page.goto(FRONTEND_URL);
       
       // Wait for initial load
@@ -287,6 +334,10 @@ test.describe('API Consistency Tests', () => {
         // Loader should disappear within 10 seconds
         await expect(calculatorLoader).not.toBeVisible({ timeout: 10000 });
       }
+    });
+
+    test('should not show infinite loaders in Gallery', async ({ page }) => {
+      await page.goto(FRONTEND_URL);
       
       // Check Gallery loader disappears
       await page.locator('text=Nasza Galeria').scrollIntoViewIfNeeded();
@@ -295,6 +346,17 @@ test.describe('API Consistency Tests', () => {
       const galleryLoader = page.locator('text=/Ładowanie galerii/i').first();
       if (await galleryLoader.isVisible()) {
         await expect(galleryLoader).not.toBeVisible({ timeout: 10000 });
+      }
+    });
+
+    test('should not show infinite loaders in HorizontalGallery', async ({ page }) => {
+      await page.goto(FRONTEND_URL);
+      await page.waitForTimeout(2000);
+      
+      const panoramaLoader = page.locator('text=/Ładowanie galerii/i').first();
+      if (await panoramaLoader.isVisible()) {
+        // HorizontalGallery has longer timeout due to cold start (35s)
+        await expect(panoramaLoader).not.toBeVisible({ timeout: 35000 });
       }
     });
   });

@@ -304,8 +304,9 @@ function Calculator({ onCalculate }: CalculatorProps) {
       };
       onCalculate(snapshot);
     }
-     
-  }, [selectedOfferId, guests, addons]); // Only track user inputs, not calculated values
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedOfferId, guests, addons.fountain, addons.keg, addons.lemonade, addons.hockery, addons.ledLighting]); 
+  // Track individual addon values, not the object reference
 
   return (
     <Section id="kalkulator" className="bg-black border-t border-white/10">

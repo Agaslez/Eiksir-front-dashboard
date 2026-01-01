@@ -1,7 +1,9 @@
 import { Facebook, Instagram, Mail, MapPin, Phone } from 'lucide-react';
+import { useComponentHealth } from '../lib/component-health-monitor';
 import { Container } from './layout/Container';
 
 export default function FooterEliksir() {
+  useComponentHealth('FooterEliksir');
   const menuLinks = [
     { name: 'Strona Główna', href: '#hero' },
     { name: 'Oferta', href: '#oferta' },

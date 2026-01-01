@@ -1,6 +1,7 @@
 // src/components/PackageDetails.tsx - UPROSZCZONA WERSJA
 import { motion } from 'framer-motion';
 import { Briefcase, Cake, Crown, Sparkles, Users, Wine } from 'lucide-react';
+import { useComponentHealth } from '../lib/component-health-monitor';
 import { OFFERS } from '../lib/content';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
@@ -64,6 +65,8 @@ const PACKAGE_DETAILS = {
 };
 
 export default function PackageDetails() {
+  useComponentHealth('PackageDetails');
+  
   return (
     <Section className="bg-gradient-to-b from-black to-neutral-950">
       {/* TYTUŁ W KONTENERZE */}

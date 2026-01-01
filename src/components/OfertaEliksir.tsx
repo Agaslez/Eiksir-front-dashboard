@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Cherry, Citrus, Flame, Leaf, Sparkles, Wine } from 'lucide-react';
 import { useState } from 'react';
+import { useComponentHealth } from '../lib/component-health-monitor';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
@@ -218,6 +219,7 @@ const cocktailsData = {
 };
 
 export default function OfertaEliksir() {
+  useComponentHealth('OfertaEliksir');
   const [activeCategory, setActiveCategory] = useState('sygnaturowe');
   const [selectedCocktail, setSelectedCocktail] = useState<any>(null);
 

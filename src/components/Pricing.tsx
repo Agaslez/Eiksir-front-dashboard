@@ -1,5 +1,6 @@
 // src/components/Pricing.tsx
 import { motion } from 'framer-motion';
+import { useComponentHealth } from '../lib/component-health-monitor';
 import { OFFERS } from '../lib/content';
 
 type PricingProps = {
@@ -11,6 +12,7 @@ export default function Pricing({
   selectedOfferId,
   onSelectOffer,
 }: PricingProps) {
+  useComponentHealth('Pricing');
   const offersArray = Object.values(OFFERS);
 
   const handleClick = (offerId: string) => {

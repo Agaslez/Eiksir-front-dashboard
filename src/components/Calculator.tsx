@@ -289,24 +289,25 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const syrupsLiters = Math.max(1, Math.ceil(config.shoppingList.syrupsLiters * scale50));
   const iceKg = Math.max(4, Math.ceil(config.shoppingList.iceKg * scale50));
 
-  // Auto-fill Contact form with calculator data
-  // Only trigger when user changes selection, guests, or addons (not on every render)
+  // Prepare calculator snapshot for Contact form
+  // This will be called when user scrolls to contact or clicks "Request quote"
+  const calculatorSnapshot: CalculatorSnapshot = {
+    offerName: OFFERS[selectedOfferId].name,
+    guests,
+    totalAfterDiscount,
+    pricePerGuest,
+    estimatedCocktails,
+    estimatedShots,
+    addons,
+  };
+
+  // Send snapshot to parent on any change
   useEffect(() => {
     if (onCalculate) {
-      const snapshot: CalculatorSnapshot = {
-        offerName: OFFERS[selectedOfferId].name,
-        guests,
-        totalAfterDiscount,
-        pricePerGuest,
-        estimatedCocktails,
-        estimatedShots,
-        addons,
-      };
-      onCalculate(snapshot);
+      onCalculate(calculatorSnapshot);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedOfferId, guests, addons.fountain, addons.keg, addons.lemonade, addons.hockery, addons.ledLighting]); 
-  // Track individual addon values, not the object reference
+  }, [selectedOfferId, guests, addons.fountain, addons.keg, addons.lemonade, addons.hockery, addons.ledLighting]);
 
   return (
     <Section id="kalkulator" className="bg-black border-t border-white/10">

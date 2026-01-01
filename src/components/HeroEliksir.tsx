@@ -5,7 +5,7 @@ import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
 // Feature flag - ustaw na false aby wrócić do statycznego logo
-const ENABLE_LOGO_ANIMATION = true;
+const ENABLE_LOGO_ANIMATION = false;
 
 const HeroEliksir = () => {
   const ref = useRef<HTMLElement>(null);

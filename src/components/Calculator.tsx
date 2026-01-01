@@ -250,7 +250,128 @@ function Calculator({ onCalculate }: CalculatorProps) {
   return (
     <Section id="kalkulator" className="bg-black border-t border-white/10">
       <Container>
-        {/* ...TWÓJ UI BEZ ZMIAN... */}
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-white mb-4">Kalkulator kosztów</h2>
+            <p className="text-white/60">Sprawdź szacunkowy koszt imprezy</p>
+          </div>
+
+          <div className="bg-neutral-900 rounded-xl p-8 border border-white/10">
+            {/* Package Selection */}
+            <div className="mb-8">
+              <label className="block text-white mb-4 font-semibold">Wybierz pakiet:</label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {Object.entries(OFFERS).map(([key, offer]) => (
+                  <button
+                    key={key}
+                    onClick={() => setSelectedOfferId(key as keyof typeof OFFERS)}
+                    className={`p-4 rounded-lg border-2 transition-all ${
+                      selectedOfferId === key
+                        ? 'border-amber-400 bg-amber-400/10'
+                        : 'border-white/10 hover:border-white/30'
+                    }`}
+                  >
+                    <div className="text-white font-semibold mb-1">{offer.name}</div>
+                    <div className="text-amber-400 text-sm">{offer.price.toLocaleString('pl-PL')} PLN</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Guests */}
+            <div className="mb-8">
+              <label className="block text-white mb-4 font-semibold">
+                Liczba gości: <span className="text-amber-400">{guests}</span>
+              </label>
+              <input
+                type="range"
+                min={offer.minGuests}
+                max={offer.maxGuests}
+                value={guests}
+                onChange={(e) => setGuests(Number(e.target.value))}
+                className="w-full"
+              />
+              <div className="flex justify-between text-white/40 text-sm mt-2">
+                <span>{offer.minGuests}</span>
+                <span>{offer.maxGuests}</span>
+              </div>
+            </div>
+
+            {/* Addons */}
+            <div className="mb-8">
+              <label className="block text-white mb-4 font-semibold">Dodatki:</label>
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={addons.fountain}
+                    onChange={(e) => setAddons({ ...addons, fountain: e.target.checked })}
+                    className="w-5 h-5"
+                  />
+                  <span className="text-white">Fontanna alkoholowa ({fountainCost} PLN)</span>
+                </label>
+                {!isKidsOffer && (
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={addons.keg}
+                      onChange={(e) => setAddons({ ...addons, keg: e.target.checked })}
+                      className="w-5 h-5"
+                    />
+                    <span className="text-white">Beczka piwa ({kegCost} PLN)</span>
+                  </label>
+                )}
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={addons.lemonade}
+                    onChange={(e) => setAddons({ ...addons, lemonade: e.target.checked })}
+                    className="w-5 h-5"
+                  />
+                  <span className="text-white">Lemoniada ({lemonadeCost} PLN)</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={addons.hockery}
+                    onChange={(e) => setAddons({ ...addons, hockery: e.target.checked })}
+                    className="w-5 h-5"
+                  />
+                  <span className="text-white">Hokery ({hockeryCost} PLN)</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={addons.ledLighting}
+                    onChange={(e) => setAddons({ ...addons, ledLighting: e.target.checked })}
+                    className="w-5 h-5"
+                  />
+                  <span className="text-white">Oświetlenie LED ({ledLightingCost} PLN)</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Summary */}
+            <div className="bg-black/50 rounded-lg p-6 border border-amber-400/30">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-white/60">Koszt całkowity:</span>
+                <span className="text-3xl font-bold text-amber-400">
+                  {totalAfterDiscount.toLocaleString('pl-PL')} PLN
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-white/60">Cena za osobę:</span>
+                <span className="text-white">
+                  {Math.round(pricePerGuest).toLocaleString('pl-PL')} PLN
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-sm mt-2">
+                <span className="text-white/60">Szacowana liczba drinków:</span>
+                <span className="text-white">{estimatedCocktails}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </Container>
     </Section>
   );

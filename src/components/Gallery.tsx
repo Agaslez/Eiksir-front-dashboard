@@ -1,12 +1,12 @@
 import { API, BACKEND_URL } from '@/lib/config';
 import {
-    ChevronLeft,
-    ChevronRight,
-    Heart,
-    Maximize2,
-    RefreshCw,
-    Share2,
-    X
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  Maximize2,
+  RefreshCw,
+  Share2,
+  X
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { fetchWithRetry } from '../lib/auto-healing';
@@ -232,7 +232,7 @@ const Gallery = () => {
           <button
             onClick={async () => {
               setLoading(true);
-              const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`);
+              const response = await fetch(API.galleryPanorama);
               
               // ZAWSZE pobieramy raw text — nawet przy 429/500
               const raw = await response.text();

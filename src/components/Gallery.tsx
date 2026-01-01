@@ -1,4 +1,4 @@
-import { config } from '@/lib/config';
+import { API, BACKEND_URL } from '@/lib/config';
 import {
     ChevronLeft,
     ChevronRight,
@@ -14,9 +14,6 @@ import { useComponentHealth } from '../lib/component-health-monitor';
 import { trackEvent } from '../lib/error-monitoring';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
-
-// Ensure API_URL always ends with /api
-const API_URL = config.apiUrl;
 
 // Helper function to handle both Cloudinary and local URLs
 const getImageUrl = (url: string, size: 'thumbnail' | 'lightbox' = 'thumbnail') => {
@@ -37,8 +34,8 @@ const getImageUrl = (url: string, size: 'thumbnail' | 'lightbox' = 'thumbnail') 
     return url;
   }
   
-  // Otherwise, prepend backend API URL
-  return `${API_URL.replace('/api', '')}${url}`;
+  // Otherwise, prepend backend URL
+  return `${BACKEND_URL}${url}`;
 };
 
 interface GalleryImage {
@@ -66,7 +63,7 @@ const Gallery = () => {
       try {
         setLoading(true);
         const response = await fetchWithRetry(
-          `${API_URL}/api/content/gallery/public?category=wszystkie`,
+          API.galleryPanorama,
           undefined,
           {
             maxRetries: 3,
@@ -85,6 +82,7 @@ const Gallery = () => {
         } catch {
           console.error('Invalid JSON from /gallery/public:', raw.substring(0, 100));
           setGalleryImages([]);
+          setLoading(false);
           return;
         }
         
@@ -92,6 +90,7 @@ const Gallery = () => {
         if (!response.ok || !data.success) {
           console.warn('Gallery API returned error:', data);
           setGalleryImages([]);
+          setLoading(false);
           return;
         }
         

@@ -1,4 +1,4 @@
-import { config as appConfig } from '@/lib/config';
+import { API } from '@/lib/config';
 import { useEffect, useMemo, useState } from 'react';
 import { fetchWithRetry } from '../lib/auto-healing';
 import { useComponentHealth } from '../lib/component-health-monitor';
@@ -70,8 +70,6 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const [config, setConfig] = useState<CalculatorConfig | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = appConfig.apiUrl;
-
   const DEFAULT_CONFIG: CalculatorConfig = {
     promoDiscount: 0,
     pricePerExtraGuest: {
@@ -103,7 +101,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const fetchConfig = async () => {
     try {
       const response = await fetchWithRetry(
-        `${API_URL}/api/calculator/config`,
+        API.calculatorConfig,
         undefined,
         { maxRetries: 2 }
       );
@@ -116,12 +114,14 @@ function Calculator({ onCalculate }: CalculatorProps) {
       } catch {
         console.error("Invalid JSON from /config:", raw);
         setConfig(DEFAULT_CONFIG);
+        setLoading(false);
         return;
       }
 
       if (!data || !data.config) {
         console.warn("Missing config in API response");
         setConfig(DEFAULT_CONFIG);
+        setLoading(false);
         return;
       }
 

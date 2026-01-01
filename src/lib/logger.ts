@@ -313,6 +313,11 @@ class Logger {
         }),
       });
 
+      // Skip retry dla 404/429 - nie spamujemy backendu
+      if (response.status === 404 || response.status === 429) {
+        return; // Silent return, no warning
+      }
+
       if (!response.ok) {
         console.warn('[Logger] Backend returned non-ok:', response.status);
       }

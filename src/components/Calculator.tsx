@@ -147,45 +147,18 @@ function Calculator({ onCalculate }: CalculatorProps) {
     if (guests > offer.maxGuests) setGuests(offer.maxGuests);
   }, [selectedOfferId]);
 
-  // 🔥 ABSOLUTNY GUARD — musi być NA SAMEJ GÓRZE
-  if (loading || !config) {
-    return (
-      <Section id="kalkulator" className="bg-black border-t border-white/10">
-        <Container>
-          <div className="text-center py-20">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-amber-500 border-r-transparent"></div>
-            <p className="text-white/60 mt-4">Ładowanie kalkulatora...</p>
-          </div>
-        </Container>
-      </Section>
-    );
-  }
+  // 🔥 USE EFFECTIVE CONFIG (fallback to defaults) — NO CONDITIONAL RETURNS BEFORE HOOKS
+  const effectiveConfig = config ?? DEFAULT_CONFIG;
 
-  if (
-    !config.addons ||
-    !config.shoppingList ||
-    !config.pricePerExtraGuest
-  ) {
-    return (
-      <Section id="kalkulator" className="bg-black border-t border-white/10">
-        <Container>
-          <div className="text-center py-20 text-white/70">
-            Ładowanie konfiguracji kalkulatora...
-          </div>
-        </Container>
-      </Section>
-    );
-  }
-
-  // --- OBLICZENIA (bezpieczne, bo guard już zadziałał) ---
+  // --- OBLICZENIA (używamy effectiveConfig zamiast config) ---
 
   const offer = OFFERS[selectedOfferId];
-  const promoDiscount = config.promoDiscount;
+  const promoDiscount = effectiveConfig.promoDiscount;
   const isKidsOffer = offer.id === 'kids';
 
   const fountainCost = addons.fountain
     ? (() => {
-        const { perGuest, min, max } = config.addons.fountain;
+        const { perGuest, min, max } = effectiveConfig.addons.fountain;
         const value = guests * perGuest;
         return Math.min(max, Math.max(min, value));
       })()
@@ -195,24 +168,24 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
   const kegCost = kegSelected
     ? (() => {
-        const { pricePerKeg, guestsPerKeg } = config.addons.keg;
+        const { pricePerKeg, guestsPerKeg } = effectiveConfig.addons.keg;
         const kegs = Math.max(1, Math.ceil(guests / guestsPerKeg));
         return pricePerKeg * kegs;
       })()
     : 0;
 
-  const extraBarmanCost = kegSelected ? (config.addons.extraBarman || 0) : 0;
+  const extraBarmanCost = kegSelected ? (effectiveConfig.addons.extraBarman || 0) : 0;
 
   const lemonadeCost = addons.lemonade
     ? (() => {
-        const { base, blockGuests } = config.addons.lemonade;
+        const { base, blockGuests } = effectiveConfig.addons.lemonade;
         const blocks = Math.max(1, Math.ceil(guests / blockGuests));
         return base * blocks;
       })()
     : 0;
 
-  const hockeryCost = addons.hockery ? config.addons.hockery : 0;
-  const ledLightingCost = addons.ledLighting ? config.addons.ledLighting : 0;
+  const hockeryCost = addons.hockery ? effectiveConfig.addons.hockery : 0;
+  const ledLightingCost = addons.ledLighting ? effectiveConfig.addons.ledLighting : 0;
 
   const addonsPrice =
     fountainCost + kegCost + extraBarmanCost + lemonadeCost + hockeryCost + ledLightingCost;
@@ -232,18 +205,18 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
   const vodkaRumGinBottles = isKidsOffer
     ? 0
-    : Math.max(1, Math.ceil(config.shoppingList.vodkaRumGinBottles * scale50));
+    : Math.max(1, Math.ceil(effectiveConfig.shoppingList.vodkaRumGinBottles * scale50));
   const liqueurBottles = isKidsOffer
     ? 0
-    : Math.max(1, Math.ceil(config.shoppingList.liqueurBottles * scale50));
+    : Math.max(1, Math.ceil(effectiveConfig.shoppingList.liqueurBottles * scale50));
   const aperolBottles = isKidsOffer
     ? 0
-    : Math.max(1, Math.ceil(config.shoppingList.aperolBottles * scale50));
+    : Math.max(1, Math.ceil(effectiveConfig.shoppingList.aperolBottles * scale50));
   const proseccoBottles = isKidsOffer
     ? 0
-    : Math.max(1, Math.ceil(config.shoppingList.proseccoBottles * scale50));
-  const syrupsLiters = Math.max(1, Math.ceil(config.shoppingList.syrupsLiters * scale50));
-  const iceKg = Math.max(4, Math.ceil(config.shoppingList.iceKg * scale50));
+    : Math.max(1, Math.ceil(effectiveConfig.shoppingList.proseccoBottles * scale50));
+  const syrupsLiters = Math.max(1, Math.ceil(effectiveConfig.shoppingList.syrupsLiters * scale50));
+  const iceKg = Math.max(4, Math.ceil(effectiveConfig.shoppingList.iceKg * scale50));
 
   const calculatorSnapshot: CalculatorSnapshot = useMemo(() => ({
     offerName: OFFERS[selectedOfferId].name,
@@ -253,11 +226,25 @@ function Calculator({ onCalculate }: CalculatorProps) {
     estimatedCocktails,
     estimatedShots,
     addons,
-  }), [selectedOfferId, guests, addons]);
+  }), [selectedOfferId, guests, totalAfterDiscount, pricePerGuest, estimatedCocktails, estimatedShots, addons]);
 
   useEffect(() => {
     if (onCalculate) onCalculate(calculatorSnapshot);
   }, [calculatorSnapshot, onCalculate]);
+
+  // --- LOADER W JSX (zamiast warunkowych returnów) ---
+  if (loading) {
+    return (
+      <Section id="kalkulator" className="bg-black border-t border-white/10">
+        <Container>
+          <div className="text-center py-20">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-amber-500 border-r-transparent"></div>
+            <p className="text-white/60 mt-4">Ładowanie kalkulatora...</p>
+          </div>
+        </Container>
+      </Section>
+    );
+  }
 
   // --- UI ---
   return (

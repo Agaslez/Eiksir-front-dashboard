@@ -124,23 +124,12 @@ const Gallery = () => {
     { id: 'imprezy-prywatne', label: 'Imprezy prywatne' },
   ];
 
-  const filteredImages =
-    activeCategory === 'wszystkie'
-      ? galleryImages
-      : galleryImages.filter((img) => img.category === activeCategory);
-
-  if (loading) {
-    return (
-      <Section id="galeria" className="bg-black">
-        <Container>
-          <div className="text-center py-20">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-amber-500 border-r-transparent"></div>
-            <p className="text-white/60 mt-4">Ładowanie galerii...</p>
-          </div>
-        </Container>
-      </Section>
-    );
-  }
+  // 🔥 SAFE FILTERING — zawsze sprawdzaj czy galleryImages istnieje
+  const filteredImages = Array.isArray(galleryImages) 
+    ? (activeCategory === 'wszystkie'
+        ? galleryImages
+        : galleryImages.filter((img) => img.category === activeCategory))
+    : [];
 
   const handlePrev = () => {
     if (selectedImage !== null) {
@@ -185,6 +174,20 @@ const Gallery = () => {
     }
     trackEvent('gallery_share', { imageId: image.id });
   };
+
+  // --- LOADER W JSX (po wszystkich hookach) ---
+  if (loading) {
+    return (
+      <Section id="galeria" className="bg-black">
+        <Container>
+          <div className="text-center py-20">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-amber-500 border-r-transparent"></div>
+            <p className="text-white/60 mt-4">Ładowanie galerii...</p>
+          </div>
+        </Container>
+      </Section>
+    );
+  }
 
   return (
     <Section id="galeria" className="bg-black">
@@ -273,7 +276,8 @@ const Gallery = () => {
 
         {/* Gallery Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredImages.map((image, index) => (
+          {Array.isArray(filteredImages) && filteredImages.length > 0 ? (
+            filteredImages.map((image, index) => (
             <div
               key={image.id}
               className="group relative overflow-hidden rounded-xl bg-gray-900 border border-gray-800 hover:border-amber-500/50 transition-all duration-300 cursor-pointer"
@@ -356,7 +360,12 @@ const Gallery = () => {
                 </button>
               </div>
             </div>
-          ))}
+          ))
+          ) : (
+            <div className="col-span-full text-center py-20 text-white/60">
+              <p>Brak zdjęć w tej kategorii</p>
+            </div>
+          )}
         </div>
 
         {/* Stats - w kontenerze */}

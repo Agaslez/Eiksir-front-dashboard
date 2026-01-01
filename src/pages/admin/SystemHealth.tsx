@@ -257,28 +257,37 @@ export default function SystemHealthDashboard() {
       category: 'External',
       check: async () => {
         try {
-          // First, get cloud_name from backend health check
+          // Backend already validates Cloudinary connection - use that instead of direct ping
+          // This avoids 401 errors from protected Cloudinary endpoints
           const healthResponse = await fetch(`${API_URL}/health`, {
             signal: AbortSignal.timeout(5000)
           });
+          
           if (!healthResponse.ok) return false;
           
           const healthData = await healthResponse.json();
+          
+          // Check if backend successfully connected to Cloudinary
+          const cloudinaryStatus = healthData.components?.cloudinary?.status;
           const cloudName = healthData.components?.cloudinary?.cloud_name;
           
-          if (!cloudName) return false;
+          if (cloudinaryStatus !== 'healthy' || !cloudName) {
+            const check = (window as any).__healthChecks?.find((c: HealthCheck) => c.name === 'Cloudinary CDN');
+            if (check) {
+              check.message = cloudinaryStatus === 'unhealthy' 
+                ? 'Backend reports Cloudinary configuration issue'
+                : 'Cloud name not found in backend health check';
+            }
+            return false;
+          }
           
-          // Now ping real Cloudinary CDN with our cloud_name
-          // Use a HEAD request to check if CDN is accessible (faster than GET)
-          const cdnResponse = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/sample.json`, {
-            method: 'HEAD',
-            signal: AbortSignal.timeout(5000)
-          });
-          
-          // CDN is healthy if it responds (even with 404 for non-existent resource)
-          // We just want to confirm the CDN is reachable
-          return cdnResponse.status === 200 || cdnResponse.status === 404;
-        } catch {
+          // Backend confirmed Cloudinary is configured and working
+          return true;
+        } catch (error) {
+          const check = (window as any).__healthChecks?.find((c: HealthCheck) => c.name === 'Cloudinary CDN');
+          if (check) {
+            check.message = `Network error: ${error instanceof Error ? error.message : 'Unknown'}`;
+          }
           return false;
         }
       },

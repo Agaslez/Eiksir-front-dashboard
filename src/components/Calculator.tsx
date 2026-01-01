@@ -111,11 +111,11 @@ function Calculator({ onCalculate }: CalculatorProps) {
         setConfig({
           promoDiscount: 0,
           pricePerExtraGuest: {
-            basic: 40,
+            basic: 50,
             premium: 50,
             exclusive: 60,
-            kids: 30,
-            family: 35,
+            kids: 40,
+            family: 45,
             business: 60,
           },
           addons: {

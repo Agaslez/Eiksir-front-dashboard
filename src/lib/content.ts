@@ -107,6 +107,7 @@ export const OFFERS: Record<string, Offer> = {
     maxGuests: 50,
     hours: 5,
     drinksPerGuest: 3, // średnio 3 koktajle / osoba
+    shotsPerGuest: 0.5, // opcjonalny shot bar
     features: [
       'Barman',
       'Szkło koktajlowe i 0%',
@@ -162,6 +163,7 @@ export const OFFERS: Record<string, Offer> = {
     maxGuests: 40,
     hours: 3,
     drinksPerGuest: 2.5,
+    shotsPerGuest: 0, // brak alkoholu
     features: [
       'Mocktaile w kolorach tęczy',
       'Stacja lemoniad',
@@ -178,6 +180,7 @@ export const OFFERS: Record<string, Offer> = {
     maxGuests: 60,
     hours: 4,
     drinksPerGuest: 2.5,
+    shotsPerGuest: 0.3, // mniej shotów (rodzinny charakter)
     features: [
       'Łagodne koktajle z niższą zawartością alkoholu',
       'Duży udział napojów 0% dla kierowców',
@@ -193,6 +196,7 @@ export const OFFERS: Record<string, Offer> = {
     maxGuests: 100,
     hours: 4,
     drinksPerGuest: 2.5,
+    shotsPerGuest: 0.5, // opcjonalny shot bar
     features: [
       'Karta dopasowana do profilu wydarzenia',
       'Możliwość stacji kawowej / lemoniad',

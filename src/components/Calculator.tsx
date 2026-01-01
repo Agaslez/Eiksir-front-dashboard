@@ -1,10 +1,9 @@
-import { API } from '@/lib/config';
 import { useEffect, useMemo, useState } from 'react';
 import { fetchWithRetry } from '../lib/auto-healing';
 import { useComponentHealth } from '../lib/component-health-monitor';
 import { OFFERS } from '../lib/content';
 import { Container } from './layout/Container';
-import { Section } from './layout/Section';
+import { Section } from './layout/Section';zajmij sie 
 
 interface CalculatorConfig {
   promoDiscount: number;

@@ -1,4 +1,4 @@
-import { config } from '@/lib/config';
+import { API } from '@/lib/config';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Container } from './layout/Container';
@@ -21,9 +21,7 @@ const About = () => {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const API_URL = config.apiUrl;
-        
-        const response = await fetch(`${API_URL}/api/content/sections`);
+        const response = await fetch(API.contentSections);
         
         // Bezpieczny parse - backend może zwrócić HTML przy 429/500
         const raw = await response.text();

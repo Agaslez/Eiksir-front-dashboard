@@ -290,7 +290,9 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const iceKg = Math.max(4, Math.ceil(config.shoppingList.iceKg * scale50));
 
   // Prepare calculator snapshot for Contact form
-  // Memoized with individual addon values to prevent infinite loop (React #310 fix)
+  // Memoized with ONLY primitive dependencies (React #310 fix)
+  // totalAfterDiscount, pricePerGuest, etc. are DERIVED from selectedOfferId/guests/addons
+  // so we DON'T include them in deps array (causes infinite loop)
   const calculatorSnapshot: CalculatorSnapshot = useMemo(() => ({
     offerName: OFFERS[selectedOfferId].name,
     guests,
@@ -298,14 +300,8 @@ function Calculator({ onCalculate }: CalculatorProps) {
     pricePerGuest,
     estimatedCocktails,
     estimatedShots,
-    addons: {
-      fountain: addons.fountain,
-      keg: addons.keg,
-      lemonade: addons.lemonade,
-      hockery: addons.hockery,
-      ledLighting: addons.ledLighting,
-    },
-  }), [selectedOfferId, guests, totalAfterDiscount, pricePerGuest, estimatedCocktails, estimatedShots, addons.fountain, addons.keg, addons.lemonade, addons.hockery, addons.ledLighting]);
+    addons,
+  }), [selectedOfferId, guests, addons]);
 
   // Send snapshot to parent on any change
   useEffect(() => {

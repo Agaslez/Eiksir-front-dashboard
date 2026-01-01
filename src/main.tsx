@@ -8,8 +8,7 @@ import { initErrorMonitor } from './lib/global-error-monitor';
 import { initLogger } from './lib/logger';
 
 // Initialize monitoring systems BEFORE React renders
-const baseUrl = config.apiUrl;
-const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+const API_URL = config.apiUrl;
 
 // 1. Initialize Logger (professional logging)
 initLogger(API_URL);

@@ -5,8 +5,7 @@ import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
 // Ensure API_URL always ends with /api
-const baseUrl = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
-const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
 
 // Helper function to handle both Cloudinary and local URLs
 const getImageUrl = (url: string) => {
@@ -44,8 +43,7 @@ export default function HorizontalGallery() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
-  const baseUrl = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
-  const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+  const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
 
   useEffect(() => {
     fetchImages();
@@ -79,7 +77,7 @@ export default function HorizontalGallery() {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout (Render cold start)
           
-          response = await fetch(`${API_URL}/api/content/gallery/public?category=wszystkie`, {
+          response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`, {
             signal: controller.signal
           });
           

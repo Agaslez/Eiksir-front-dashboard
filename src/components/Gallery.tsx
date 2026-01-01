@@ -16,8 +16,7 @@ import { Container } from './layout/Container';
 import { Section } from './layout/Section';
 
 // Ensure API_URL always ends with /api
-const baseUrl = config.apiUrl;
-const API_URL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+const API_URL = config.apiUrl;
 
 // Helper function to handle both Cloudinary and local URLs
 const getImageUrl = (url: string, size: 'thumbnail' | 'lightbox' = 'thumbnail') => {
@@ -67,7 +66,7 @@ const Gallery = () => {
       try {
         setLoading(true);
         const response = await fetchWithRetry(
-          `${API_URL}/api/content/gallery/public?category=wszystkie`,
+          `${API_URL}/content/gallery/public?category=wszystkie`,
           undefined,
           {
             maxRetries: 3,

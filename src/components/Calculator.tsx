@@ -304,7 +304,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
       };
       onCalculate(snapshot);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [selectedOfferId, guests, addons]); // Only track user inputs, not calculated values
 
   return (

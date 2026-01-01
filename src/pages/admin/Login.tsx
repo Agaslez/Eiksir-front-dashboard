@@ -70,9 +70,6 @@ export default function Login() {
                 placeholder="admin@eliksir-bar.pl"
                 style={{ color: '#FFFFFF' }}
               />
-              <p className="mt-1 text-xs text-white/40">
-                Wpisz: {email || 'admin@eliksir-bar.pl'}
-              </p>
             </div>
 
             {/* Password Input with visibility toggle */}
@@ -98,31 +95,6 @@ export default function Login() {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              <div className="mt-1 flex justify-between items-center">
-                <p className="text-xs text-white/40">
-                  {showPassword && password ? `Hasło: ${password}` : 'Kliknij ikonę aby zobaczyć'}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-xs text-eliksir-gold hover:text-eliksir-goldLight transition-colors"
-                >
-                  {showPassword ? 'Ukryj' : 'Pokaż'}
-                </button>
-              </div>
-            </div>
-
-            {/* Test credentials reminder */}
-            <div className="p-4 bg-eliksir-gold/10 border border-eliksir-gold/20 rounded-eliksir">
-              <p className="text-sm text-eliksir-gold font-medium mb-1">
-                🔐 Dane testowe:
-              </p>
-              <p className="text-xs text-white/70">
-                Email: <span className="text-eliksir-gold">admin@eliksir-bar.pl</span>
-              </p>
-              <p className="text-xs text-white/70">
-                Hasło: <span className="text-eliksir-gold">Admin123!</span>
-              </p>
             </div>
 
             {/* Submit Button */}

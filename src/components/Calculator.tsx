@@ -290,6 +290,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const iceKg = Math.max(4, Math.ceil(config.shoppingList.iceKg * scale50));
 
   // Auto-fill Contact form with calculator data
+  // Only trigger when user changes selection, guests, or addons (not on every render)
   useEffect(() => {
     if (onCalculate) {
       const snapshot: CalculatorSnapshot = {
@@ -303,7 +304,8 @@ function Calculator({ onCalculate }: CalculatorProps) {
       };
       onCalculate(snapshot);
     }
-  }, [selectedOfferId, guests, addons, totalAfterDiscount, pricePerGuest, estimatedCocktails, estimatedShots, onCalculate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedOfferId, guests, addons]); // Only track user inputs, not calculated values
 
   return (
     <Section id="kalkulator" className="bg-black border-t border-white/10">

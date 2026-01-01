@@ -966,29 +966,19 @@ function ComponentHealthPanel() {
 
       {components.length === 0 ? (
         <div className="text-center py-8 space-y-4">
-          <AlertCircle className="w-12 h-12 mx-auto text-gray-400" />
+          <RefreshCw className="w-12 h-12 mx-auto text-blue-500 animate-spin" />
           <div className="text-gray-700">
-            <p className="font-medium">No components registered yet</p>
-            <p className="text-sm text-gray-500 mt-1">Components register when they mount (render on page)</p>
+            <p className="font-medium">Loading components...</p>
+            <p className="text-sm text-gray-500 mt-1">Auto-discovering React components</p>
           </div>
           
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
-            <div className="font-medium text-blue-900 mb-2">🔍 To see components:</div>
-            <ol className="text-sm text-blue-800 space-y-1 ml-4 list-decimal">
-              <li>
-                Visit <a href="/" target="_blank" className="underline hover:text-blue-600">Home Page</a> 
-                <span className="text-blue-600"> (HorizontalGallery + Calculator)</span>
-              </li>
-              <li>
-                Visit <a href="/gallery" target="_blank" className="underline hover:text-blue-600">Gallery</a>
-                <span className="text-blue-600"> (Gallery component)</span>
-              </li>
-              <li>
-                Visit <a href="/contact" target="_blank" className="underline hover:text-blue-600">Contact</a>
-                <span className="text-blue-600"> (Contact form)</span>
-              </li>
-              <li>Return here - you'll see <strong>4 components registered</strong> ✅</li>
-            </ol>
+          {/* Hidden iframes to trigger component mounts */}
+          <iframe src="/" style={{ display: 'none' }} title="preload-home" />
+          <iframe src="/gallery" style={{ display: 'none' }} title="preload-gallery" />
+          <iframe src="/contact" style={{ display: 'none' }} title="preload-contact" />
+          
+          <div className="text-xs text-gray-400 mt-4">
+            Expected: HorizontalGallery, Calculator, Gallery, Contact
           </div>
         </div>
       ) : (

@@ -16,7 +16,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,md}\" --config ./.prettierrc.json",
-    "type-check": "echo 'TypeScript check skipped' && exit 0"
+    "type-check": "echo 'TypeScript check skipped' && exit 0",
+    "validate": "npm run lint && npm run build",
+    "pre-push": "bash scripts/pre-push-validation.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

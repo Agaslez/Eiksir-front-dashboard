@@ -43,7 +43,7 @@ export default function HorizontalGallery() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
-  const API_URL = import.meta.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
+  // API_URL is defined at top of file (line 8)
 
   useEffect(() => {
     fetchImages();
@@ -77,7 +77,7 @@ export default function HorizontalGallery() {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout (Render cold start)
           
-          response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`, {
+          response = await fetch(`${API_URL}/api/content/gallery/public?category=wszystkie`, {
             signal: controller.signal
           });
           

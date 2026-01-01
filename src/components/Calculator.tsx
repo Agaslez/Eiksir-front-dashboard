@@ -97,18 +97,18 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const DEFAULT_CONFIG = {
     promoDiscount: 0,
     pricePerExtraGuest: {
-      basic: 50,
+      basic: 40,
       premium: 50,
       exclusive: 60,
-      kids: 40,
-      family: 45,
+      kids: 30,
+      family: 35,
       business: 60,
     },
     addons: {
       fountain: { perGuest: 10, min: 600, max: 1200 },
-      keg: { pricePerKeg: 800, guestsPerKeg: 50 },
+      keg: { pricePerKeg: 500, guestsPerKeg: 50 },
       extraBarman: 400,
-      lemonade: { base: 250, blockGuests: 60 },
+      lemonade: { base: 300, blockGuests: 60 },
       hockery: 200,
       ledLighting: 500,
     },
@@ -132,12 +132,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
       const raw = await response.text();
 
-      if (!response.ok) {
-        console.error("Config fetch failed:", response.status, raw);
-        setConfig(DEFAULT_CONFIG);
-        return;
-      }
-
+      // NIE sprawdzamy !response.ok - 429 to normalna odpowiedź HTTP
       let data;
       try {
         data = JSON.parse(raw);

@@ -76,21 +76,26 @@ const Gallery = () => {
           }
         );
         
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        // Bezpieczny parse - backend może zwrócić HTML przy 429/500
+        // ZAWSZE pobieramy raw text — nawet przy 429/500
         const raw = await response.text();
+        
         let data;
         try {
           data = JSON.parse(raw);
         } catch {
           console.error('Invalid JSON from /gallery/public:', raw.substring(0, 100));
-          throw new Error('Invalid JSON response');
+          setGalleryImages([]);
+          return;
         }
         
-        if (data.success && Array.isArray(data.images)) {
+        // Jeśli backend zwrócił błąd (np. 429), ale JSON się sparsował
+        if (!response.ok || !data.success) {
+          console.warn('Gallery API returned error:', data);
+          setGalleryImages([]);
+          return;
+        }
+        
+        if (Array.isArray(data.images)) {
           // Backend now filters active images and returns displayOrder
           const sortedImages = data.images
             .filter((img: GalleryImage) => img.url)
@@ -226,15 +231,34 @@ const Gallery = () => {
             onClick={async () => {
               setLoading(true);
               const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`);
-              const data = await response.json();
-              if (data.success) {
-                const sortedImages = data.images
-                  .filter((img: GalleryImage) => img.url)
-                  .sort((a: GalleryImage, b: GalleryImage) => 
-                    (a.displayOrder || 0) - (b.displayOrder || 0)
-                  );
-                setGalleryImages(sortedImages);
+              
+              // ZAWSZE pobieramy raw text — nawet przy 429/500
+              const raw = await response.text();
+              
+              let data;
+              try {
+                data = JSON.parse(raw);
+              } catch {
+                console.error("Invalid JSON from refresh /gallery/public:", raw.substring(0, 100));
+                setGalleryImages([]);
+                setLoading(false);
+                return;
               }
+              
+              // Jeśli backend zwrócił błąd (np. 429), ale JSON się sparsował
+              if (!response.ok || !data.success) {
+                console.warn("Gallery refresh API returned error:", data);
+                setGalleryImages([]);
+                setLoading(false);
+                return;
+              }
+              
+              const sortedImages = data.images
+                .filter((img: GalleryImage) => img.url)
+                .sort((a: GalleryImage, b: GalleryImage) => 
+                  (a.displayOrder || 0) - (b.displayOrder || 0)
+                );
+              setGalleryImages(sortedImages);
               setLoading(false);
               trackEvent('gallery_refresh', { category: activeCategory });
             }}

@@ -102,18 +102,23 @@ export default function HorizontalGallery() {
         }
       }
       
-      if (!response || !response.ok) {
-        throw new Error(lastError || 'Failed after retries');
+      if (!response) {
+        setError(lastError || "No response");
+        setIsLoading(false);
+        return;
       }
       
-      // Bezpieczny parse - backend może zwrócić HTML przy 429/500
+      // Bezpieczny parse - backend może zwrócić HTML/tekst przy 429/500
+      // NIE rzucamy błędu przy !response.ok - 429 to normalna odpowiedź HTTP
       const raw = await response.text();
       let data;
       try {
         data = JSON.parse(raw);
       } catch {
         console.error('Invalid JSON from /gallery/public:', raw.substring(0, 100));
-        throw new Error('Invalid JSON response');
+        setError('Invalid JSON response');
+        setIsLoading(false);
+        return;
       }
       
       if (data.success && Array.isArray(data.images)) {

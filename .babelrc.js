@@ -1,6 +1,6 @@
 module.exports = {
   presets: [
-    ['@babel/preset-typescript', { jsx Transform: 'react-jsx' }],
+    ['@babel/preset-typescript', { jsxTransform: 'react-jsx' }],
     '@babel/preset-react',
   ],
   plugins: [

@@ -5,8 +5,8 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  // TUTA: Dodano src/__tests__ do ignorowanych
-  { ignores: ['dist', 'src/__tests__'] },
+  // Ignorowane pliki: dist, testy, konfiguracja babel
+  { ignores: ['dist', 'src/__tests__', '.babelrc.js'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
@@ -20,7 +20,7 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true, allowExportNames: ['useAuth'] }],
       
       // Wyłączamy restrykcyjne reguły
       '@typescript-eslint/no-explicit-any': 'off',

@@ -72,8 +72,8 @@ test.describe('API Consistency Tests', () => {
       // Scroll to Calculator section
       await page.locator('#kalkulator').scrollIntoViewIfNeeded();
       
-      // Wait for Calculator to load
-      await page.waitForTimeout(2000);
+      // Wait for Calculator API call
+      await page.waitForResponse(resp => resp.url().includes('/api/calculator'));
 
       // Verify correct API endpoint was called
       expect(apiRequests.length).toBeGreaterThan(0);
@@ -127,7 +127,7 @@ test.describe('API Consistency Tests', () => {
 
       await page.goto(FRONTEND_URL);
       await page.locator('#kalkulator').scrollIntoViewIfNeeded();
-      await page.waitForTimeout(3000);
+      await expect(page.locator('text=Pakiet')).toBeVisible({ timeout: 10000 });
 
       // Filter out Cloudinary tracking warnings (external, not our code)
       const relevantErrors = consoleErrors.filter(
@@ -149,7 +149,7 @@ test.describe('API Consistency Tests', () => {
 
       await page.goto(FRONTEND_URL);
       await page.locator('text=Nasza Galeria').scrollIntoViewIfNeeded();
-      await page.waitForTimeout(2000);
+      await page.waitForResponse(resp => resp.url().includes('/api/content/gallery'));
 
       // Verify correct API endpoint was called
       expect(apiRequests.length).toBeGreaterThan(0);
@@ -162,10 +162,10 @@ test.describe('API Consistency Tests', () => {
     test('should display gallery images', async ({ page }) => {
       await page.goto(FRONTEND_URL);
       await page.locator('text=Nasza Galeria').scrollIntoViewIfNeeded();
-      await page.waitForTimeout(3000);
-
-      // Check if gallery grid is visible
+      
+      // Wait for images to load
       const images = page.locator('img[alt*="Eliksir"]');
+      await images.first().waitFor({ state: 'visible', timeout: 15000 });
       const count = await images.count();
       
       // Should have at least some images
@@ -175,13 +175,12 @@ test.describe('API Consistency Tests', () => {
     test('should filter gallery categories', async ({ page }) => {
       await page.goto(FRONTEND_URL);
       await page.locator('text=Nasza Galeria').scrollIntoViewIfNeeded();
-      await page.waitForTimeout(2000);
-
+      
       // Click on different categories if available
       const allButton = page.locator('text=Wszystkie');
       if (await allButton.isVisible()) {
         await allButton.click();
-        await page.waitForTimeout(1000);
+        await page.waitForLoadState('networkidle');
         
         // Verify images are still visible
         const images = page.locator('img[alt*="Eliksir"]');
@@ -200,7 +199,7 @@ test.describe('API Consistency Tests', () => {
       });
 
       await page.goto(FRONTEND_URL);
-      await page.waitForTimeout(2000);
+      await page.waitForResponse(resp => resp.url().includes('/api/content/sections'));
 
       // Verify correct API endpoint was called
       expect(apiRequests.length).toBeGreaterThan(0);
@@ -275,13 +274,13 @@ test.describe('API Consistency Tests', () => {
       
       // Scroll through all major sections
       await page.locator('#kalkulator').scrollIntoViewIfNeeded();
-      await page.waitForTimeout(1000);
+      await expect(page.locator('#kalkulator')).toBeVisible();
       
       await page.locator('text=Nasza Galeria').scrollIntoViewIfNeeded();
-      await page.waitForTimeout(1000);
+      await expect(page.locator('text=Nasza Galeria')).toBeVisible();
       
       await page.locator('text=/Kim jesteśmy/i').scrollIntoViewIfNeeded();
-      await page.waitForTimeout(1000);
+      await expect(page.locator('text=/Kim jesteśmy/i')).toBeVisible();
 
       // Filter out external errors
       const relevantErrors = consoleErrors.filter(
@@ -312,7 +311,7 @@ test.describe('API Consistency Tests', () => {
       });
 
       await page.goto(FRONTEND_URL);
-      await page.waitForTimeout(5000);
+      await page.waitForLoadState('networkidle', { timeout: 30000 });
 
       // Verify all components use the same BACKEND_URL
       for (const [component, urls] of apiRequests.entries()) {
@@ -326,13 +325,11 @@ test.describe('API Consistency Tests', () => {
   test.describe('Loading State Consistency', () => {
     test('should not show infinite loaders in Calculator', async ({ page }) => {
       await page.goto(FRONTEND_URL);
-      
-      // Wait for initial load
-      await page.waitForTimeout(2000);
+      await page.waitForLoadState('domcontentloaded');
       
       // Check Calculator loader disappears
       await page.locator('#kalkulator').scrollIntoViewIfNeeded();
-      await page.waitForTimeout(2000);
+      await expect(page.locator('#kalkulator')).toBeVisible();
       
       const calculatorLoader = page.locator('text=/Ładowanie|Loading/i').first();
       if (await calculatorLoader.isVisible()) {
@@ -346,7 +343,7 @@ test.describe('API Consistency Tests', () => {
       
       // Check Gallery loader disappears
       await page.locator('text=Nasza Galeria').scrollIntoViewIfNeeded();
-      await page.waitForTimeout(2000);
+      await expect(page.locator('text=Nasza Galeria')).toBeVisible();
       
       const galleryLoader = page.locator('text=/Ładowanie galerii/i').first();
       if (await galleryLoader.isVisible()) {
@@ -356,7 +353,7 @@ test.describe('API Consistency Tests', () => {
 
     test('should not show infinite loaders in HorizontalGallery', async ({ page }) => {
       await page.goto(FRONTEND_URL);
-      await page.waitForTimeout(2000);
+      await page.waitForLoadState('domcontentloaded');
       
       const panoramaLoader = page.locator('text=/Ładowanie galerii/i').first();
       if (await panoramaLoader.isVisible()) {
@@ -370,8 +367,12 @@ test.describe('API Consistency Tests', () => {
 test.describe('Performance & Error Handling', () => {
   test('should handle API timeout gracefully', async ({ page }) => {
     // Simulate slow network
+    let requestDelayed = false;
     await page.route('**/api/calculator/config', async (route) => {
-      await page.waitForTimeout(3000);
+      if (!requestDelayed) {
+        requestDelayed = true;
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
       await route.continue();
     });
 
@@ -382,7 +383,7 @@ test.describe('Performance & Error Handling', () => {
     await expect(page.locator('text=/Ładowanie|Loading/i').first()).toBeVisible();
     
     // Should eventually load or show error (not infinite loader)
-    await page.waitForTimeout(5000);
+    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
   });
 
   test('should handle 404 API errors gracefully', async ({ page }) => {
@@ -403,9 +404,8 @@ test.describe('Performance & Error Handling', () => {
 
     await page.goto(FRONTEND_URL);
     await page.locator('#kalkulator').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(2000);
 
     // Should not crash - should use fallback data
-    await expect(page.locator('text=Pakiet')).toBeVisible();
+    await expect(page.locator('text=Pakiet')).toBeVisible({ timeout: 10000 });
   });
 });

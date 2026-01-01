@@ -94,6 +94,34 @@ function Calculator({ onCalculate }: CalculatorProps) {
     }
   }, [selectedOfferId]);
 
+  const DEFAULT_CONFIG = {
+    promoDiscount: 0,
+    pricePerExtraGuest: {
+      basic: 50,
+      premium: 50,
+      exclusive: 60,
+      kids: 40,
+      family: 45,
+      business: 60,
+    },
+    addons: {
+      fountain: { perGuest: 10, min: 600, max: 1200 },
+      keg: { pricePerKeg: 800, guestsPerKeg: 50 },
+      extraBarman: 400,
+      lemonade: { base: 250, blockGuests: 60 },
+      hockery: 200,
+      ledLighting: 500,
+    },
+    shoppingList: {
+      vodkaRumGinBottles: 5,
+      liqueurBottles: 2,
+      aperolBottles: 2,
+      proseccoBottles: 5,
+      syrupsLiters: 12,
+      iceKg: 8,
+    },
+  };
+
   const fetchConfig = async () => {
     try {
       const response = await fetchWithRetry(
@@ -101,71 +129,35 @@ function Calculator({ onCalculate }: CalculatorProps) {
         undefined,
         { maxRetries: 2 }
       );
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.config) {
-          setConfig(data.config);
-        }
-      } else {
-        // Fallback to defaults if API fails
-        setConfig({
-          promoDiscount: 0,
-          pricePerExtraGuest: {
-            basic: 50,
-            premium: 50,
-            exclusive: 60,
-            kids: 40,
-            family: 45,
-            business: 60,
-          },
-          addons: {
-            fountain: { perGuest: 10, min: 600, max: 1200 },
-            keg: { pricePerKeg: 800, guestsPerKeg: 50 },
-            extraBarman: 400,
-            lemonade: { base: 250, blockGuests: 60 },
-            hockery: 200,
-            ledLighting: 500,
-          },
-          shoppingList: {
-            vodkaRumGinBottles: 5,
-            liqueurBottles: 2,
-            aperolBottles: 2,
-            proseccoBottles: 5,
-            syrupsLiters: 12,
-            iceKg: 8,
-          },
-        });
+
+      const raw = await response.text();
+
+      if (!response.ok) {
+        console.error("Config fetch failed:", response.status, raw);
+        setConfig(DEFAULT_CONFIG);
+        return;
       }
+
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        console.error("Invalid JSON from /config:", raw);
+        setConfig(DEFAULT_CONFIG);
+        return;
+      }
+
+      if (!data || !data.config) {
+        console.warn("Missing config in API response");
+        setConfig(DEFAULT_CONFIG);
+        return;
+      }
+
+      setConfig(data.config);
+
     } catch (error) {
-      console.error('Failed to fetch calculator config:', error);
-      // Fallback to defaults on error
-      setConfig({
-        promoDiscount: 0,
-        pricePerExtraGuest: {
-          basic: 40,
-          premium: 50,
-          exclusive: 60,
-          kids: 30,
-          family: 35,
-          business: 60,
-        },
-        addons: {
-          fountain: { perGuest: 10, min: 600, max: 1200 },
-          keg: { pricePerKeg: 800, guestsPerKeg: 50 },
-          extraBarman: 400,
-          lemonade: { base: 250, blockGuests: 60 },
-          hockery: 200,
-          ledLighting: 500,
-        },
-        shoppingList: {
-          vodkaRumGinBottles: 5,
-          liqueurBottles: 2,
-          aperolBottles: 2,
-          proseccoBottles: 5,
-          syrupsLiters: 12,
-          iceKg: 8,
-        },
-      });
+      console.error("Failed to fetch calculator config:", error);
+      setConfig(DEFAULT_CONFIG);
     } finally {
       setLoading(false);
     }
@@ -178,6 +170,24 @@ function Calculator({ onCalculate }: CalculatorProps) {
           <div className="text-center py-20">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-amber-500 border-r-transparent"></div>
             <p className="text-white/60 mt-4">Ładowanie kalkulatora...</p>
+          </div>
+        </Container>
+      </Section>
+    );
+  }
+
+  // Guard przed renderem - chroni przed React #310 gdy config jest niekompletny
+  if (
+    !config ||
+    !config.addons ||
+    !config.shoppingList ||
+    !config.pricePerExtraGuest
+  ) {
+    return (
+      <Section id="kalkulator" className="bg-black border-t border-white/10">
+        <Container>
+          <div className="text-center py-20 text-white/70">
+            Ładowanie konfiguracji kalkulatora...
           </div>
         </Container>
       </Section>
@@ -308,6 +318,24 @@ function Calculator({ onCalculate }: CalculatorProps) {
     if (!onCalculate) return;
     onCalculate(calculatorSnapshot);
   }, [calculatorSnapshot, onCalculate]);
+
+  // Guard: jeśli config niekompletny, pokaż loader
+  if (
+    !config ||
+    !config.addons ||
+    !config.shoppingList ||
+    !config.pricePerExtraGuest
+  ) {
+    return (
+      <Section id="kalkulator" className="bg-black border-t border-white/10">
+        <Container>
+          <div className="text-center py-20 text-white/70">
+            Ładowanie konfiguracji kalkulatora...
+          </div>
+        </Container>
+      </Section>
+    );
+  }
 
   return (
     <Section id="kalkulator" className="bg-black border-t border-white/10">

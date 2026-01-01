@@ -106,7 +106,15 @@ export default function HorizontalGallery() {
         throw new Error(lastError || 'Failed after retries');
       }
       
-      const data = await response.json();
+      // Bezpieczny parse - backend może zwrócić HTML przy 429/500
+      const raw = await response.text();
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        console.error('Invalid JSON from /gallery/public:', raw.substring(0, 100));
+        throw new Error('Invalid JSON response');
+      }
       
       if (data.success && Array.isArray(data.images)) {
         const sortedImages = data.images

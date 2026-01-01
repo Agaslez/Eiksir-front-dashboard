@@ -24,7 +24,16 @@ const About = () => {
         const API_URL = config.apiUrl;
         
         const response = await fetch(`${API_URL}/api/content/sections`);
-        const data = await response.json();
+        
+        // Bezpieczny parse - backend może zwrócić HTML przy 429/500
+        const raw = await response.text();
+        let data;
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          console.error('Invalid JSON from /content/sections:', raw.substring(0, 100));
+          return; // Użyj fallback content
+        }
         
         if (data.success) {
           const aboutSection = data.sections.find((s: any) => s.id === 'about');

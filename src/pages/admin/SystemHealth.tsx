@@ -104,7 +104,7 @@ export default function SystemHealthDashboard() {
       category: 'Backend',
       endpoint: '/api/health',
       check: async () => {
-        return await performHttpCheck('Backend API Health', `${API_URL}/health`);
+        return await performHttpCheck('Backend API Health', `${API_URL}/api/health`);
       },
       status: 'checking'
     },
@@ -115,7 +115,7 @@ export default function SystemHealthDashboard() {
       check: async () => {
         return await performHttpCheck(
           'Calculator Config API',
-          `${API_URL}/calculator/config`,
+          `${API_URL}/api/calculator/config`,
           undefined,
           (data) => data.success && data.config
         );
@@ -129,7 +129,7 @@ export default function SystemHealthDashboard() {
       check: async () => {
         return await performHttpCheck(
           'Gallery API (Public)',
-          `${API_URL}/content/gallery/public?category=wszystkie`,
+          `${API_URL}/api/content/gallery/public?category=wszystkie`,
           undefined,
           (data) => data.success && Array.isArray(data.images)
         );
@@ -143,7 +143,7 @@ export default function SystemHealthDashboard() {
       check: async () => {
         return await performHttpCheck(
           'Content Sections API',
-          `${API_URL}/content/sections`,
+          `${API_URL}/api/content/sections`,
           undefined,
           (data) => data.success && Array.isArray(data.sections)
         );
@@ -157,7 +157,7 @@ export default function SystemHealthDashboard() {
       check: async () => {
         return await performHttpCheck(
           'Auth Health',
-          `${API_URL}/auth/health`,
+          `${API_URL}/api/auth/health`,
           undefined,
           (data) => (data.success === true && data.status === 'operational') || data.status === 'healthy' || data.status === 'Available'
         );
@@ -171,7 +171,7 @@ export default function SystemHealthDashboard() {
       check: async () => {
         return await performHttpCheck(
           'AI Service Health',
-          `${API_URL}/ai/health`,
+          `${API_URL}/api/ai/health`,
           undefined,
           (data) => data.status === 'healthy' || data.status === 'Available' || (data.service && data.endpoints)
         );
@@ -183,7 +183,7 @@ export default function SystemHealthDashboard() {
       category: 'Database',
       endpoint: '/api/calculator/config',
       check: async () => {
-        return await performHttpCheck('Database Connection', `${API_URL}/calculator/config`);
+        return await performHttpCheck('Database Connection', `${API_URL}/api/calculator/config`);
       },
       status: 'checking'
     },
@@ -195,7 +195,7 @@ export default function SystemHealthDashboard() {
         const start = Date.now();
         const result = await performHttpCheck(
           'Database Query Performance',
-          `${API_URL}/content/gallery/public?category=wszystkie`
+          `${API_URL}/api/content/gallery/public?category=wszystkie`
         );
         const duration = Date.now() - start;
         return result && duration < 2000; // Should respond within 2 seconds
@@ -208,7 +208,7 @@ export default function SystemHealthDashboard() {
       endpoint: '/api/content/gallery/public',
       check: async () => {
         try {
-          const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`);
+          const response = await fetch(`${API_URL}/api/content/gallery/public?category=wszystkie`);
           if (!response.ok) return false;
           
           const data = await response.json();
@@ -259,7 +259,7 @@ export default function SystemHealthDashboard() {
         try {
           // Backend already validates Cloudinary connection - use that instead of direct ping
           // This avoids 401 errors from protected Cloudinary endpoints
-          const healthResponse = await fetch(`${API_URL}/health`, {
+          const healthResponse = await fetch(`${API_URL}/api/health`, {
             signal: AbortSignal.timeout(5000)
           });
           
@@ -299,7 +299,7 @@ export default function SystemHealthDashboard() {
       check: async () => {
         // Test if backend is responding at all
         try {
-          const response = await fetch(`${API_URL}/health`, { 
+          const response = await fetch(`${API_URL}/api/health`, { 
             signal: AbortSignal.timeout(5000) 
           });
           return response.ok;
@@ -329,7 +329,7 @@ export default function SystemHealthDashboard() {
           const componentHealth = (window as any).__componentHealthMonitor;
           
           // Test API endpoint that HorizontalGallery uses
-          const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`, {
+          const response = await fetch(`${API_URL}/api/content/gallery/public?category=wszystkie`, {
             signal: AbortSignal.timeout(10000)
           });
           

@@ -67,7 +67,7 @@ const Gallery = () => {
       try {
         setLoading(true);
         const response = await fetchWithRetry(
-          `${API_URL}/content/gallery/public?category=wszystkie`,
+          `${API_URL}/api/content/gallery/public?category=wszystkie`,
           undefined,
           {
             maxRetries: 3,

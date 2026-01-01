@@ -1,5 +1,5 @@
 import { config as appConfig } from '@/lib/config';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { fetchWithRetry } from '../lib/auto-healing';
 import { useComponentHealth } from '../lib/component-health-monitor';
 import { OFFERS } from '../lib/content';
@@ -290,24 +290,28 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const iceKg = Math.max(4, Math.ceil(config.shoppingList.iceKg * scale50));
 
   // Prepare calculator snapshot for Contact form
-  // This will be called when user scrolls to contact or clicks "Request quote"
-  const calculatorSnapshot: CalculatorSnapshot = {
+  // Memoized with individual addon values to prevent infinite loop (React #310 fix)
+  const calculatorSnapshot: CalculatorSnapshot = useMemo(() => ({
     offerName: OFFERS[selectedOfferId].name,
     guests,
     totalAfterDiscount,
     pricePerGuest,
     estimatedCocktails,
     estimatedShots,
-    addons,
-  };
+    addons: {
+      fountain: addons.fountain,
+      keg: addons.keg,
+      lemonade: addons.lemonade,
+      hockery: addons.hockery,
+      ledLighting: addons.ledLighting,
+    },
+  }), [selectedOfferId, guests, totalAfterDiscount, pricePerGuest, estimatedCocktails, estimatedShots, addons.fountain, addons.keg, addons.lemonade, addons.hockery, addons.ledLighting]);
 
   // Send snapshot to parent on any change
   useEffect(() => {
-    if (onCalculate) {
-      onCalculate(calculatorSnapshot);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedOfferId, guests, addons.fountain, addons.keg, addons.lemonade, addons.hockery, addons.ledLighting]);
+    if (!onCalculate) return;
+    onCalculate(calculatorSnapshot);
+  }, [calculatorSnapshot, onCalculate]);
 
   return (
     <Section id="kalkulator" className="bg-black border-t border-white/10">

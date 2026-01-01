@@ -79,7 +79,7 @@ export default function HorizontalGallery() {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout (Render cold start)
           
-          response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`, {
+          response = await fetch(`${API_URL}/api/content/gallery/public?category=wszystkie`, {
             signal: controller.signal
           });
           

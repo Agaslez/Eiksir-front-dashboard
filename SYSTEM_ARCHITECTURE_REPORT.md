@@ -2688,6 +2688,47 @@ Coverage:
 
 ---
 
+## 📝 PROTOKÓŁ DECYZJI - E2E TESTS OPTIMIZATION
+
+**Data:** 2026-01-02  
+**Decyzja #001:** E2E Tests Timeout Resolution  
+**Zatwierdzony przez:** Stefan Pitek (Architekt)
+
+### **Problem:**
+E2E testy timeout'ują po 15 minut (GitHub Actions limit). Backend verification wykonuje się 23x (raz per test), co powoduje ogromne opóźnienie:
+- 23 tests × ~40s verification = ~920s (15.3 min)
+- Backend na Render.com (free tier) ma cold start delay
+- Każdy test czeka dodatkowo 8-90s na load
+
+### **Rozwiązanie zaakceptowane: OPCJA 3+ (Hybrid)**
+
+**Implementacja:**
+1. **Global Setup** - jedna weryfikacja backendu przed wszystkimi testami
+2. **Parallel Workers** - 4 workers (było 2) = 2x szybsze
+3. **Optimize Waits** - usunięcie redundantnych waitForTimeout(8000)
+
+**Matematyka:**
+```
+Przed: 15+ min (TIMEOUT)
+Po: ~70s (1.2 min)
+Savings: 93% time reduction
+```
+
+**Roadmap alignment:**
+- ✅ Phase 2: CI/CD Optimization - ostatni brakujący element
+- ✅ Playwright best practice (official docs)
+- ✅ Scalable: 50 testów = nadal <2 min
+- ✅ Single Source of Truth: jedna globalna weryfikacja
+
+**Impact:**
+- Priority: CRITICAL (odblokowuje CI/CD)
+- Benefit: CI/CD z RED (timeout) → GREEN (<2 min)
+- Risk: Bardzo niskie (industry standard pattern)
+
+**Status:** ✅ ZAAKCEPTOWANE - implementacja w toku
+
+---
+
 ## 🧪 TESTY <a name="tests"></a>
 
 ### **Frontend Tests** ⚠️ PODSTAWOWE

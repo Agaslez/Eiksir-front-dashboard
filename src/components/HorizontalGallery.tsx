@@ -126,6 +126,13 @@ export default function HorizontalGallery() {
             (a.displayOrder || 0) - (b.displayOrder || 0)
           );
         
+        // ARCHITECT_APPROVED: Debug logging to diagnose panorama gallery visibility issue - 2026-01-02 - Stefan
+        console.log('🖼️ HorizontalGallery loaded:', {
+          totalImages: data.images.length,
+          filteredImages: sortedImages.length,
+          firstImage: sortedImages[0]?.url,
+        });
+        
         setImages(sortedImages);
         
         // Report if no images found

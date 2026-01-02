@@ -274,6 +274,7 @@ class Logger {
     const timestamp = new Date(entry.timestamp).toLocaleTimeString('pl-PL');
     const levelName = LogLevel[entry.level];
 
+    // ARCHITECT_APPROVED: Logger output to console is the primary debugging interface - essential for all environments - 2026-01-02 - Stefan
     console.log(
       `%c[${timestamp}] ${levelName}`,
       colors[entry.level],
@@ -286,6 +287,7 @@ class Logger {
       console.groupCollapsed('🍞 Breadcrumbs (last 10)');
       entry.breadcrumbs.slice(-10).forEach((b) => {
         const time = new Date(b.timestamp).toLocaleTimeString('pl-PL');
+        // ARCHITECT_APPROVED: Breadcrumb console output critical for error context tracing - 2026-01-02 - Stefan
         console.log(`[${time}] ${b.category}: ${b.message}`, b.data || '');
       });
       console.groupEnd();

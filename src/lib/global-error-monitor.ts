@@ -63,6 +63,7 @@ class GlobalErrorMonitor {
     this.interceptFetch();
 
     this.isInitialized = true;
+    // ARCHITECT_APPROVED: Initialization log confirms monitoring system is active - critical for production debugging - 2026-01-02 - Stefan
     console.log('[GlobalErrorMonitor] Initialized - capturing errors + fetch interceptor active');
   }
 

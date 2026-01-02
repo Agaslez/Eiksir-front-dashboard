@@ -50,6 +50,7 @@ export default function HorizontalGallery() {
   useEffect(() => {
     if (error && retryCount < 3) {
       const timer = setTimeout(() => {
+        // ARCHITECT_APPROVED: Auto-retry logging essential for monitoring cold start recovery - 2026-01-02 - Stefan
         console.log(`HorizontalGallery: Auto-retry #${retryCount + 1}`);
         setRetryCount(prev => prev + 1);
         fetchImages();

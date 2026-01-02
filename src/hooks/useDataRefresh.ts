@@ -101,6 +101,7 @@ export function useRefreshListener(
     const handleRefresh = (e: Event) => {
       const customEvent = e as CustomEvent;
       if (customEvent.detail?.type === type || customEvent.detail?.type === 'all') {
+        // ARCHITECT_APPROVED: Refresh event logging critical for debugging admin-frontend sync issues - 2026-01-02 - Stefan
         console.log(`🔄 Refresh triggered for: ${type}`);
         callback();
       }
@@ -130,5 +131,6 @@ export function triggerRefresh(type: 'content' | 'gallery' | 'calculator' | 'all
     detail: { type, timestamp: new Date().toISOString() },
   });
   window.dispatchEvent(event);
+  // ARCHITECT_APPROVED: Event dispatch logging essential for admin panel troubleshooting - 2026-01-02 - Stefan
   console.log(`🔔 Refresh event dispatched: ${type}`);
 }

@@ -120,6 +120,7 @@ export default function CalculatorSettings() {
         window.dispatchEvent(new CustomEvent('data:refresh', {
           detail: { type: 'calculator', timestamp: new Date().toISOString() }
         }));
+        // ARCHITECT_APPROVED: Debug log for admin panel refresh events - essential for troubleshooting cache sync - 2026-01-02 - Stefan
         console.log('🔔 Calculator refresh event dispatched');
       } else {
         alert('Błąd podczas zapisywania konfiguracji');

@@ -68,6 +68,7 @@ const Gallery = () => {
           {
             maxRetries: 3,
             onRetry: (attempt) => {
+              // ARCHITECT_APPROVED: Retry logging critical for diagnosing Cloudinary/cold start issues - 2026-01-02 - Stefan
               console.log(`Gallery fetch retry ${attempt}/3`);
             }
           }

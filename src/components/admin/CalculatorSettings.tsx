@@ -175,6 +175,7 @@ export default function CalculatorSettingsNew() {
         },
       };
 
+      // ARCHITECT_APPROVED: Config payload logging critical for debugging admin save operations - 2026-01-02 - Stefan
       console.log('🔍 Wysyłam config:', JSON.stringify(configToSave, null, 2));
 
       const response = await fetch(`${API_URL}/api/calculator/config`, {

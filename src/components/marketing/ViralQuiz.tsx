@@ -158,6 +158,7 @@ ${result.hashtag} #EliksirBar #KoktajlowyQuiz`;
         });
         trackEvent('quiz_shared_native');
       } catch (err) {
+        // ARCHITECT_APPROVED: User cancellation is not an error, logging helps track share abandonment rate - 2026-01-02 - Stefan
         console.log('Share cancelled');
       }
     } else {

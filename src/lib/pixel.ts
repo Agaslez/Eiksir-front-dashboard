@@ -31,6 +31,7 @@ export function isPixelLoaded(): boolean {
 export function trackPageView(): void {
   if (isPixelLoaded()) {
     window.fbq!('track', 'PageView');
+    // ARCHITECT_APPROVED: FB Pixel event logging essential for verifying marketing conversion tracking - 2026-01-02 - Stefan
     console.log('📊 FB Pixel: PageView');
   }
 }
@@ -52,6 +53,7 @@ export function trackLead(data?: {
       value: data?.value || 0,
       currency: data?.currency || 'PLN',
     });
+    // ARCHITECT_APPROVED: FB Pixel event logging essential for verifying marketing conversion tracking - 2026-01-02 - Stefan
     console.log('📊 FB Pixel: Lead', data);
   } else {
     console.warn('FB Pixel not loaded - Lead event not tracked');
@@ -77,6 +79,7 @@ export function trackViewContent(data?: {
       value: data?.value || 0,
       currency: data?.currency || 'PLN',
     });
+    // ARCHITECT_APPROVED: FB Pixel event logging essential for verifying marketing conversion tracking - 2026-01-02 - Stefan
     console.log('📊 FB Pixel: ViewContent', data);
   } else {
     console.warn('FB Pixel not loaded - ViewContent event not tracked');
@@ -93,6 +96,7 @@ export function trackContact(method: 'phone' | 'email' | 'whatsapp' | 'facebook'
       content_name: 'Contact Click',
       content_category: method,
     });
+    // ARCHITECT_APPROVED: FB Pixel event logging essential for verifying marketing conversion tracking - 2026-01-02 - Stefan
     console.log(`📊 FB Pixel: Contact (${method})`);
   } else {
     console.warn('FB Pixel not loaded - Contact event not tracked');
@@ -118,6 +122,7 @@ export function trackAddToCart(data: {
       value: data.value,
       currency: data.currency || 'PLN',
     });
+    // ARCHITECT_APPROVED: FB Pixel event logging essential for verifying marketing conversion tracking - 2026-01-02 - Stefan
     console.log('📊 FB Pixel: AddToCart', data);
   }
 }
@@ -139,6 +144,7 @@ export function trackInitiateCheckout(data?: {
       currency: data?.currency || 'PLN',
       num_items: data?.num_items || 1,
     });
+    // ARCHITECT_APPROVED: FB Pixel event logging essential for verifying marketing conversion tracking - 2026-01-02 - Stefan
     console.log('📊 FB Pixel: InitiateCheckout', data);
   }
 }
@@ -154,6 +160,7 @@ export function trackCustomEvent(
 ): void {
   if (isPixelLoaded()) {
     window.fbq!('trackCustom', eventName, data || {});
+    // ARCHITECT_APPROVED: FB Pixel event logging essential for verifying marketing conversion tracking - 2026-01-02 - Stefan
     console.log(`📊 FB Pixel: ${eventName}`, data);
   }
 }

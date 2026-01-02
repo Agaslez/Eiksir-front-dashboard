@@ -166,6 +166,25 @@ jobs:
             sleep 2
           done
       
+      - name: Warm up backend (Render.com cold start)
+        run: |
+          echo "🔥 Warming up backend..."
+          for i in {1..3}; do
+            echo "Attempt $i/3: Health check..."
+            if curl -f -m 60 https://eliksir-backend-front-dashboard.onrender.com/api/health 2>/dev/null; then
+              echo "✅ Backend is warm and responsive"
+              break
+            fi
+            echo "⏳ Backend still cold, retrying in 15s..."
+            sleep 15
+          done
+          
+          echo "🔥 Preloading critical endpoints..."
+          curl -f -m 30 https://eliksir-backend-front-dashboard.onrender.com/api/calculator/config 2>/dev/null || echo "Calculator endpoint warming..."
+          curl -f -m 30 https://eliksir-backend-front-dashboard.onrender.com/api/content/gallery/public?category=wszystkie 2>/dev/null || echo "Gallery endpoint warming..."
+          curl -f -m 30 https://eliksir-backend-front-dashboard.onrender.com/api/content/sections 2>/dev/null || echo "Content endpoint warming..."
+          echo "✅ Backend warmup complete"
+      
       - name: Run E2E API Consistency Tests
         run: npm run test:e2e
         timeout-minutes: 15

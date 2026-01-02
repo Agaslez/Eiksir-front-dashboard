@@ -1,12 +1,12 @@
 import { API, BACKEND_URL } from '@/lib/config';
 import {
-  ChevronLeft,
-  ChevronRight,
-  Heart,
-  Maximize2,
-  RefreshCw,
-  Share2,
-  X
+    ChevronLeft,
+    ChevronRight,
+    Heart,
+    Maximize2,
+    RefreshCw,
+    Share2,
+    X
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { fetchWithRetry } from '../lib/auto-healing';

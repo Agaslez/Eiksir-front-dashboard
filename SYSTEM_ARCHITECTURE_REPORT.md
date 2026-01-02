@@ -1396,7 +1396,69 @@ console.log('📊 FB Pixel: PageView');
 
 ### **Integracja z CI/CD**
 
-#### **GitHub Actions Workflow**
+#### **GitHub Actions Workflows**
+
+**1. GIT-Cerber (Guardian Validation)** ✅ **DEPLOYED 2026-01-02**
+**Lokalizacja:** `eliksir-frontend/.github/workflows/git-cerber.yml`
+
+```yaml
+jobs:
+  guardian-schema-validation:  # FIRST STEP (Fast Fail)
+    - node scripts/validate-schema.mjs
+    - continue-on-error: true  # SOFT MODE (warns, doesn't block)
+    - timeout: 3 minutes
+    - Auto-comments on PR violations
+  
+  performance-budget:
+    - npm run build
+    - Check bundle size (<500KB)
+    - continue-on-error: true  # SOFT MODE
+  
+  cerber-summary:
+    - Aggregate validation results
+    - Display status summary
+```
+
+**Benefits:**
+- ✅ Defense in Depth: local pre-commit + CI/CD (no bypass)
+- ✅ Soft mode: gradual rollout, warns but doesn't block
+- ✅ Fast fail: schema check runs first (<1 min)
+- ✅ Informative: detailed violation messages + fix suggestions
+
+**To enable strict mode (future):**
+```yaml
+# Change in git-cerber.yml:
+continue-on-error: false  # Will block merges on violations
+```
+
+---
+
+**2. Cerber Health Monitor** ✅ **DEPLOYED 2026-01-02**
+**Lokalizacja:** `.github/workflows/cerber-health-monitor.yml`
+
+```yaml
+on:
+  workflow_run:  # After backend deployment
+  schedule:      # Every 30 minutes
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  cerber-health-check:
+    - curl https://eliksir-backend.onrender.com/api/health
+    - Parse Cerber 2.1 diagnostics
+    - Auto-create GitHub issue on critical failures
+    - continue-on-error: true  # MONITORING ONLY
+```
+
+**Benefits:**
+- ✅ Proactive issue detection (every 30 min)
+- ✅ Automated incident reporting
+- ✅ Visibility into backend health trends
+- ✅ Zero maintenance (auto-creates issues)
+
+---
+
+**3. Frontend CI (Existing)**
 **Lokalizacja:** `eliksir-frontend/.github/workflows/ci.yml`
 
 ```yaml
@@ -1409,11 +1471,10 @@ jobs:
   
   e2e-tests:
     - npm run test:e2e   # Playwright E2E (23 testy)
-                         # Sprawdza zgodność z ARCHITECTURE_SYSTEM_SCHEMA.md
 ```
 
 **E2E Tests weryfikują:**
-- ✅ Wszystkie API endpoints działają (z SYSTEM_COMPLETE_DOCUMENTATION.md)
+- ✅ Wszystkie API endpoints działają
 - ✅ Komponenty używają API z lib/config.ts
 - ✅ Backend health check zwraca healthy
 - ✅ Calculator pobiera config z /api/calculator/config

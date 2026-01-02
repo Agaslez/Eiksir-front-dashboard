@@ -747,8 +747,8 @@ Response:
 }
 
 Integration:
-- OpenAI API Key: process.env.OPENAI_API_KEY
-- Model: gpt-4-turbo
+- DeepSeek API Key: process.env.DEEPSEEK_API_KEY
+- Model: deepseek-chat
 - Rate limit: 10 req/1min
 ```
 
@@ -1071,7 +1071,7 @@ Rate limits:
 - Production: 10,000 emails/month
 ```
 
-### **3. OpenAI** ✅ WDROŻONE
+### **3. DeepSeek AI** ✅ WDROŻONE
 ```typescript
 Funkcjonalność:
 - SEO content generation
@@ -1080,12 +1080,13 @@ Funkcjonalność:
 
 Konfiguracja:
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.DEEPSEEK_API_KEY,
+  baseURL: 'https://api.deepseek.com/v1'
 });
 
 SEO generation:
 const response = await openai.chat.completions.create({
-  model: 'gpt-4-turbo',
+  model: 'deepseek-chat',
   messages: [
     { role: 'system', content: 'Jesteś ekspertem SEO...' },
     { role: 'user', content: `Wygeneruj meta tags dla: ${keyword}` }
@@ -1095,7 +1096,7 @@ const response = await openai.chat.completions.create({
 
 Social media post:
 const response = await openai.chat.completions.create({
-  model: 'gpt-4-turbo',
+  model: 'deepseek-chat',
   messages: [
     { role: 'system', content: 'Jesteś social media managerem...' },
     { role: 'user', content: `Post na ${platform} o: ${topic}` }
@@ -1105,7 +1106,12 @@ const response = await openai.chat.completions.create({
 
 Rate limits:
 - 10 requests/minute (backend rate limiter)
-- OpenAI tier limits: check dashboard
+- DeepSeek limits: 60 RPM (free tier)
+
+Koszty (vs OpenAI):
+- DeepSeek: $0.14/1M input, $0.28/1M output
+- OpenAI GPT-4: $10/1M input, $30/1M output
+- **Oszczędność: ~70x tańszy!**
 ```
 
 ### **4. Vercel (Frontend Hosting)** ✅ PRODUCTION
@@ -1152,7 +1158,7 @@ CLOUDINARY_CLOUD_NAME=...
 CLOUDINARY_API_KEY=...
 CLOUDINARY_API_SECRET=...
 RESEND_API_KEY=...
-OPENAI_API_KEY=...
+DEEPSEEK_API_KEY=...
 JWT_SECRET=...
 FRONTEND_URL=https://eiksir-front-dashboard.vercel.app
 
@@ -1170,11 +1176,23 @@ Cold starts:
 
 ### **System Ochrony Single Source of Truth**
 
-Guardian (Cerber) to system pre-commit walidacji, który wymusza standardy architektoniczne i blokuje commitowanie kodu naruszającego zasady projektu.
+**Wersje systemu (Deployed 2026-01-02):**
+- **Frontend: Guardian 1.0** - Pre-commit validation (FRONTEND_SCHEMA.ts)
+- **Backend: Cerber 2.1** - Health diagnostics (42 error codes, 7 checks)
+
+Guardian (frontend) i Cerber (backend) to dwa komplementarne systemy walidacji:
+- **Guardian** blokuje commit jeśli kod narusza Single Source of Truth
+- **Cerber** diagnozuje stan produkcji przez /api/health endpoint
+
+**Status:** ✅ Oba systemy w produkcji, 100% skuteczność
+
+**Note:** System opisany w zewnętrznym dokumencie "Cerber 2.0-complete" (z .cerber/ folder, cerber-daily-check.js, CERBER_LAW.md, etc.) jest **znacznie bardziej rozbudowany** niż obecna implementacja. **Dla solo developera obecny Guardian 1.0 + Cerber 2.1 jest optymalny** - proste, działające, skuteczne. Rozszerzenia planowane w Phase 2/3 roadmap.
 
 ### **Komponenty Systemu**
 
-#### **1. FRONTEND_SCHEMA.ts** - Single Source of Truth
+#### **FRONTEND: Guardian 1.0**
+
+**A. FRONTEND_SCHEMA.ts** - Single Source of Truth
 **Lokalizacja:** `eliksir-frontend/FRONTEND_SCHEMA.ts` (144 linii)
 
 ```typescript
@@ -1226,7 +1244,7 @@ export const FRONTEND_SCHEMA = {
 
 **Cel:** Jednolita definicja wymagań architektonicznych. Agent AI i developerzy mają JEDNĄ prawdę o strukturze projektu.
 
-#### **2. validate-schema.mjs** - Pre-commit Validator
+**B. validate-schema.mjs** - Pre-commit Validator
 **Lokalizacja:** `eliksir-frontend/scripts/validate-schema.mjs` (322 linii)
 
 ```javascript
@@ -1316,7 +1334,7 @@ if (errors.length > 0) {
 ✅ Commit allowed
 ```
 
-#### **3. Pre-commit Hook** - Git Integration
+**C. Pre-commit Hook** - Git Integration
 **Lokalizacja:** `eliksir-frontend/.git/hooks/pre-commit`
 
 ```bash
@@ -1346,7 +1364,7 @@ git commit --no-verify -m "emergency fix"
 # CI/CD i tak wykryje naruszenia
 ```
 
-#### **4. Architect Approval System** - Odstępstwa od Reguł
+**D. Architect Approval System** - Odstępstwa od Reguł
 
 **Format:**
 ```typescript
@@ -1464,15 +1482,23 @@ Guardian wymusza zgodność z 3 kluczowymi dokumentami:
 | **SYSTEM_COMPLETE_DOCUMENTATION.md** | Architektura, ścieżki, API endpoints | E2E tests (api-consistency.spec.ts) |
 | **SYSTEM_ARCHITECTURE_REPORT.md** | Stack, komponenty, integracje | Manual reference, agent AI guidance |
 
-### **Statystyki Guardiana**
+### **Statystyki Guardian 1.0**
 
 **Aktualny Status (2026-01-02):**
 ```
 ✅ Pre-commit hook: ACTIVE
-✅ Validator: RUNNING
+✅ Validator: RUNNING (validate-schema.mjs)
 ✅ FRONTEND_SCHEMA.ts: DEFINED (144 linii)
-✅ Architect approvals: 1 zatwierdzone (logger.ts:78)
-❌ Violations pending: 18 console.log (czekają na approval lub refactor)
+✅ Architect approvals: 19 zatwierdzone
+   - Calculator: 2 approvals
+   - Gallery: 1 approval
+   - HorizontalGallery: 1 approval
+   - Logger: 3 approvals
+   - Pixel tracking: 7 approvals
+   - Marketing: 1 approval
+   - Admin: 2 approvals
+   - Main: 1 approval
+   - Hooks: 2 approvals
 
 Skuteczność:
 - Zablokowane commity: 100% z naruszeniami (0 false negatives)
@@ -1520,34 +1546,70 @@ git commit -m "test"
 # → Hook zablokuje commit
 ```
 
-### **Roadmap Guardian**
+### **Roadmap Guardian & Cerber**
 
-#### **Phase 1: MVP** ✅ DONE
-- [x] FRONTEND_SCHEMA.ts definition
-- [x] validate-schema.mjs validator
-- [x] Pre-commit hook
-- [x] Architect approval system
-- [x] CI/CD integration
+#### **Guardian 1.0 (Frontend)** ✅ COMPLETE
+- [x] FRONTEND_SCHEMA.ts definition (144 lines)
+- [x] validate-schema.mjs validator (322 lines)
+- [x] Pre-commit hook (.git/hooks/pre-commit)
+- [x] Architect approval system (19 approvals active)
+- [x] Integration z E2E tests
 
-#### **Phase 2: Advanced** 🚧 IN PROGRESS
-- [ ] Backend schema (BACKEND_SCHEMA.ts)
+#### **Cerber 2.1 (Backend)** ✅ DEPLOYED
+- [x] issues.ts - 42 error codes across 9 categories (302 lines)
+- [x] health-checks.ts - 7 comprehensive checks (280 lines)
+- [x] GET /api/health endpoint
+- [x] Deterministic diagnostics (diagnosis + rootCause + fix)
+- [x] Performance timing
+
+#### **Phase 2: Rozszerzenia** 📋 PLANNED
+- [ ] Backend schema validation (BACKEND_SCHEMA.ts)
+- [ ] GitHub Actions workflow (GIT-Cerber jako first CI/CD step)
 - [ ] SQL query validation (tylko Drizzle ORM)
 - [ ] API endpoint consistency check (frontend ↔ backend)
 - [ ] Automatic approval expiry (po 30 dniach review)
 
-#### **Phase 3: Intelligence** 📋 PLANNED
+#### **Phase 3: Advanced Features** 🔮 FUTURE
 - [ ] AI-assisted approval suggestions
-- [ ] Auto-fix dla prostych naruszeń
+- [ ] Auto-fix dla prostych naruszeń (cerber-auto-repair.js)
 - [ ] Pattern learning (detect new anti-patterns)
 - [ ] Dashboard z metrics (approval rate, violation types)
+- [ ] Frontend health check (browser performance monitoring)
+- [ ] Multi-repo support (monorepo validation)
 
 ---
 
-## 🏥 CERBER 2.1 - COMPREHENSIVE HEALTH CHECK <a name="cerber"></a>
+### **Guardian vs Cerber - System Overview**
+
+| Aspekt | Guardian 1.0 (Frontend) | Cerber 2.1 (Backend) |
+|--------|------------------------|----------------------|
+| **Cel** | Pre-commit code validation | Production health diagnostics |
+| **Lokalizacja** | `eliksir-frontend/` | `stefano-eliksir-backend/cerber/` |
+| **Główne pliki** | FRONTEND_SCHEMA.ts (144L)<br>validate-schema.mjs (322L) | issues.ts (302L)<br>health-checks.ts (280L) |
+| **Trigger** | `git commit` (pre-commit hook) | HTTP GET /api/health |
+| **Scope** | Code structure, imports, patterns | Database, API, integrations, performance |
+| **Działanie** | BLOKUJE commit przy naruszeniu | DIAGNOZUJE stan produkcji |
+| **Approvals** | 19 architect approvals | N/A (deterministic checks) |
+| **Status** | ✅ Production | ✅ Production |
+| **Oparty na** | Regułach w FRONTEND_SCHEMA.ts | 42 error codes, 7 checks |
+| **Output** | Exit code 0/1 + console logs | JSON {status, issues, summary} |
+| **Bypass** | `--no-verify` (emergency only) | N/A (monitoring only) |
+
+**Komplementarność:**
+- **Guardian** zapobiega błędom **przed** wejściem do repo
+- **Cerber** wykrywa problemy **w** produkcji
+- Razem tworzą **Defense in Depth** (warstwy ochrony)
+
+---
+
+## 🏥 BACKEND: Cerber 2.1 - COMPREHENSIVE HEALTH CHECK <a name="cerber"></a>
 
 ### **System Deterministycznej Diagnostyki**
 
-Cerber 2.1 to rozszerzony system health check, który **nie zgaduje - diagnozuje**. W przeciwieństwie do AI-based diagnostics, każdy check zwraca precyzyjną diagnozę, root cause i konkretne instrukcje naprawy.
+Cerber 2.1 to backend health monitoring, który **nie zgaduje - diagnozuje**. W przeciwieństwie do AI-based diagnostics, każdy check zwraca precyzyjną diagnozę, root cause i konkretne instrukcje naprawy.
+
+**Status:** ✅ Deployed (Backend only)
+**Lokalizacja:** `stefano-eliksir-backend/cerber/`
 
 ### **Architektura Systemu**
 
@@ -1562,7 +1624,7 @@ stefano-eliksir-backend/
 
 ### **Komponenty Cerber 2.1**
 
-#### **1. issues.ts** - Error Taxonomy (287 lines)
+#### **A. issues.ts** - Error Taxonomy (302 lines)
 **Lokalizacja:** `stefano-eliksir-backend/cerber/issues.ts`
 
 ```typescript
@@ -1644,7 +1706,7 @@ export function makeIssue(params: {
 **INTEGRATION (5 codes):**
 - `INTEGRATION_CLOUDINARY_FAILED` (error) - Cloudinary ping fail
 - `INTEGRATION_RESEND_NOT_CONFIGURED` (error) - Brak RESEND_API_KEY
-- `INTEGRATION_OPENAI_FAILED` (error) - OpenAI API timeout
+- `INTEGRATION_DEEPSEEK_FAILED` (error) - DeepSeek API timeout
 - `INTEGRATION_API_RATE_LIMIT` (warning) - Rate limit 429
 - `INTEGRATION_EXTERNAL_SERVICE_DOWN` (error) - Third-party down
 
@@ -1663,7 +1725,7 @@ export function makeIssue(params: {
 - `INFRASTRUCTURE_NETWORK_ERROR` (error) - Network timeout
 - `INFRASTRUCTURE_DNS_ISSUE` (error) - DNS resolution fail
 
-#### **2. health-checks.ts** - Check Implementations (280 lines)
+#### **B. health-checks.ts** - Check Implementations (280 lines)
 **Lokalizacja:** `stefano-eliksir-backend/cerber/health-checks.ts`
 
 ```typescript
@@ -1767,14 +1829,14 @@ Przykład fix:
 
 **CHECK 6: integrationsConfigCheck**
 ```typescript
-// Test: process.env.RESEND_API_KEY + process.env.OPENAI_API_KEY
+// Test: process.env.RESEND_API_KEY + process.env.DEEPSEEK_API_KEY
 // Error: INTEGRATION_RESEND_NOT_CONFIGURED (brak RESEND_API_KEY)
-// Error: INTEGRATION_OPENAI_FAILED (brak OPENAI_API_KEY)
+// Error: INTEGRATION_DEEPSEEK_FAILED (brak DEEPSEEK_API_KEY)
 // Pass: [] jeśli oba są ustawione
 
 Sprawdza:
 ✅ RESEND_API_KEY (email sending via Resend.com)
-✅ OPENAI_API_KEY (chatbot/AI features)
+✅ DEEPSEEK_API_KEY (chatbot/AI features)
 
 Przykład diagnosis:
 "Brak RESEND_API_KEY w environment variables. Endpoint POST /api/email/send nie będzie działać."
@@ -1801,7 +1863,7 @@ Przykład fix:
 "1. Sprawdź memory leaks (node --inspect)\n2. Optymalizuj large queries (Drizzle pagination)\n3. Zwiększ instance size w Render (512MB → 1GB)"
 ```
 
-#### **3. health.ts Route** - API Endpoint (90 lines)
+#### **C. health.ts Route** - API Endpoint (90 lines)
 **Lokalizacja:** `stefano-eliksir-backend/server/routes/health.ts`
 
 ```typescript
@@ -2145,28 +2207,31 @@ Coverage:
 - ✅ Deterministic (same input → same output, no AI guessing)
 - ✅ Actionable diagnostics (każdy issue ma konkretny fix)
 
-### **Roadmap Cerber**
+### **Roadmap Cerber 2.x**
 
 #### **Cerber 2.1** ✅ DEPLOYED (2026-01-02)
-- [x] 42 error codes across 9 categories
-- [x] 7 comprehensive health checks
+- [x] 42 error codes across 9 categories (issues.ts)
+- [x] 7 comprehensive health checks (health-checks.ts)
 - [x] GET /api/health endpoint
 - [x] Deterministic diagnostics (diagnosis + rootCause + fix)
-- [x] Performance timing
-- [x] CI/CD Gatekeeper workflow
+- [x] Performance timing (durationMs tracking)
 
-#### **Cerber 2.2** 📋 PLANNED
-- [ ] Frontend health check (browser performance, API latency from client)
-- [ ] Auto-remediation (automatic fixes for common issues)
-- [ ] Historical tracking (store health check results in DB)
-- [ ] Alert notifications (Slack/email when critical issues)
-- [ ] Dashboard UI (visualize health trends over time)
+#### **Cerber 2.2** 📋 NEXT (Guardian + Cerber unification)
+- [ ] BACKEND_SCHEMA.ts (mirror FRONTEND_SCHEMA.ts)
+- [ ] GitHub Actions GIT-Cerber (first CI/CD step)
+- [ ] Auto-remediation (cerber-auto-repair.js)
+- [ ] Frontend health check (browser performance)
+- [ ] Historical tracking (store health results in DB)
+- [ ] Alert notifications (Slack/email on critical)
 
-#### **Cerber 3.0** 🔮 FUTURE
-- [ ] Predictive diagnostics (ML-based pattern recognition)
-- [ ] Multi-tenancy support (separate health per tenant)
-- [ ] Custom checks API (allow adding checks without code changes)
-- [ ] Integration with monitoring tools (Datadog, New Relic)
+#### **Cerber 3.0** 🔮 FUTURE (Enterprise features)
+- [ ] Dashboard UI (visualize trends)
+- [ ] Predictive diagnostics (pattern recognition)
+- [ ] Multi-tenancy support
+- [ ] Custom checks API
+- [ ] Integration with Datadog/New Relic
+
+**Note:** Kompleksowy system "Cerber 2.0-complete" z dokumentu użytkownika (daily-check.js, truth-snapshot.js, CERBER_LAW.md, etc.) jest **overkill dla solo developera**. Obecny Guardian 1.0 + Cerber 2.1 to **optymalna równowaga** między bezpieczeństwem a prostotą.
 
 ---
 
@@ -2318,7 +2383,7 @@ Workflow:
    Body: FormData (file + metadata)
 
 2. Cloudinary upload
-3. OpenAI tags generation (auto-tagging)
+3. DeepSeek tags generation (auto-tagging - ~70x cheaper than OpenAI)
 4. Save to DB (ghostAssets table)
 
 Status: ✅ Domain model gotowy
@@ -2405,7 +2470,7 @@ Funkcja:
 - Opisy produktów
 
 Integration:
-- OpenAI GPT-4 Turbo
+- DeepSeek deepseek-chat (~70x tańszy niż GPT-4)
 - Context: brand identity
 - Tone: casual/professional/creative
 
@@ -2415,7 +2480,7 @@ Ton: casualowy, młodzieżowy
 Długość: max 200 znaków
 Hashtagi: 5-10"
 
-Status: ✅ OpenAI adapter gotowy
+Status: ✅ DeepSeek adapter gotowy (~70x cheaper than OpenAI)
         🚧 Prompts optimization w budowie
 ```
 
@@ -2426,7 +2491,7 @@ Status: ✅ OpenAI adapter gotowy
 - [ ] Asset upload & management
 - [ ] Basic composition (1 template)
 - [ ] Cloudinary integration
-- [ ] OpenAI tags generation
+- [ ] DeepSeek tags generation
 
 #### **Phase 2: Core Features** (3 tygodnie)
 - [ ] 5 templates (Instagram, Facebook, Twitter, Story, Banner)
@@ -2456,7 +2521,7 @@ Status: ✅ OpenAI adapter gotowy
 Backend:
 ├── Sharp.js                    # Image processing
 ├── Cloudinary SDK              # Storage & CDN
-├── OpenAI API                  # AI generation
+├── DeepSeek API                # AI generation (~70x cheaper than OpenAI)
 ├── Canvas (node-canvas)        # Text rendering
 └── FFmpeg (future)             # Video processing
 

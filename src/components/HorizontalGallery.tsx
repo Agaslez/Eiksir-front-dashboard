@@ -256,7 +256,7 @@ export default function HorizontalGallery() {
           {[...images, ...images].map((image, index) => (
             <motion.div
               key={`${image.id}-${index}`}
-              className="flex-shrink-0 w-40 h-28 sm:w-44 sm:h-30 md:w-48 md:h-32 rounded-lg overflow-hidden border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300"
+              className="flex-shrink-0 w-40 h-28 sm:w-48 sm:h-32 md:w-56 md:h-36 rounded-lg overflow-hidden border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300"
               whileHover={{ scale: 1.05 }}
             >
               <img

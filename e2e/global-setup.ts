@@ -21,15 +21,15 @@ async function globalSetup(config: FullConfig) {
   const page = await context.newPage();
   
   // Wake up backend (Render.com free tier cold start)
-  let retries = 3;
+  let retries = 5;
   let lastError: Error | null = null;
   
   while (retries > 0) {
     try {
-      console.log(`Attempt ${4 - retries}/3...`);
+      console.log(`Attempt ${6 - retries}/5...`);
       
       const response = await page.request.get(`${BACKEND_URL}/api/health`, {
-        timeout: 60000, // 60s timeout per attempt
+        timeout: 90000, // 90s timeout per attempt (Render cold start can be slow)
       });
       
       if (response.status() === 200 || response.status() === 503) {
@@ -52,20 +52,20 @@ async function globalSetup(config: FullConfig) {
     
     retries--;
     if (retries > 0) {
-      console.log(`⏳ Waiting 10s before retry...`);
-      await page.waitForTimeout(10000);
+      console.log(`⏳ Waiting 20s before retry...`);
+      await page.waitForTimeout(20000);
     }
   }
   
   await browser.close();
   
-  console.error('❌ Backend not available after 3 attempts');
+  console.error('❌ Backend not available after 5 attempts (7.5 min wait)');
   console.error(`Last error: ${lastError?.message}`);
   
   // Throw error to fail entire test suite if backend is down
   throw new Error(
     `Backend not available at ${BACKEND_URL}/api/health. ` +
-    `Deploy backend first or check Render.com status.`
+    `Render.com cold start exceeded 7.5 min - check deployment status.`
   );
 }
 

@@ -15,7 +15,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0, // Auto-retry flaky tests once
   workers: process.env.CI ? 4 : undefined, // OPTIMIZED: 4 workers (was 2) = 2x faster
   reporter: process.env.CI ? 'github' : 'html',
-  timeout: 30 * 1000, // OPTIMIZED: 30s per test (was 90s)
+  timeout: 60 * 1000, // OPTIMIZED: 60s per test (was 90s) - allows for backend warm-up
   
   // OPTIMIZATION: Global setup (wake backend once, not 23x)
   globalSetup: './e2e/global-setup.ts',
@@ -25,8 +25,8 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    actionTimeout: 10 * 1000, // OPTIMIZED: 10s (was 20s)
-    navigationTimeout: 30 * 1000, // OPTIMIZED: 30s (was 60s)
+    actionTimeout: 15 * 1000, // OPTIMIZED: 15s (was 20s)
+    navigationTimeout: 45 * 1000, // OPTIMIZED: 45s (was 60s) - backend may still be warming
   },
 
   projects: [

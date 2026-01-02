@@ -9,9 +9,10 @@ import { expect, test } from '@playwright/test';
  * OPTIMIZATIONS (PROTOCOL DECISION #001 - 2026-01-02):
  * - Backend verification moved to global-setup.ts (1x, not 23x)
  * - Reduced waitForTimeout (removed redundant 8s waits)
- * - Changed waitUntil: 'networkidle' (more reliable than domcontentloaded)
+ * - Changed waitUntil: 'domcontentloaded' (faster, backend already warm from global setup)
  * - Parallel execution with 4 workers in CI (was 2)
- * - Expected: 15+ min → ~1.2 min (93% reduction)
+ * - Timeouts: 60s per test (was 90s), navigation 45s (was 60s)
+ * - Expected: 15+ min → ~2 min (87% reduction)
  */
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -31,7 +32,7 @@ test.describe('API Consistency Tests', () => {
       });
 
       // OPTIMIZED: networkidle is more reliable, removed 8s wait
-      await page.goto(FRONTEND_URL, { waitUntil: 'networkidle' });
+      await page.goto(FRONTEND_URL, { waitUntil: 'domcontentloaded' });
 
       // Verify correct API endpoint was called
       expect(apiRequests.length).toBeGreaterThan(0);
@@ -42,7 +43,7 @@ test.describe('API Consistency Tests', () => {
     });
 
     test('should display horizontal gallery', async ({ page }) => {
-      await page.goto(FRONTEND_URL, { waitUntil: 'networkidle' });
+      await page.goto(FRONTEND_URL, { waitUntil: 'domcontentloaded' });
 
       // Check if panorama images are visible (should be near top of page)
       const panoramaImages = page.locator('#galeria-panorama img, section img').first();
@@ -50,7 +51,7 @@ test.describe('API Consistency Tests', () => {
     });
 
     test('should not have infinite loader', async ({ page }) => {
-      await page.goto(FRONTEND_URL, { waitUntil: 'networkidle' });
+      await page.goto(FRONTEND_URL, { waitUntil: 'domcontentloaded' });
       
       // Check if loader appears
       const loader = page.locator('text=/Ładowanie galerii/i').first();
@@ -71,7 +72,7 @@ test.describe('API Consistency Tests', () => {
         }
       });
 
-      await page.goto(FRONTEND_URL, { waitUntil: 'networkidle' });
+      await page.goto(FRONTEND_URL, { waitUntil: 'domcontentloaded' });
       await page.waitForLoadState('domcontentloaded');
       
       // Scroll to Calculator section

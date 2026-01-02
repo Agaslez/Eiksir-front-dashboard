@@ -237,14 +237,12 @@ export default function HorizontalGallery() {
   }
 
   return (
-    <Section className="bg-black py-3 md:py-4">
+    <Section className="bg-black py-8 md:py-12">
       <Container className="!px-0 !max-w-none">
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="relative overflow-hidden"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          className="relative overflow-hidden min-h-[112px] sm:min-h-[128px] md:min-h-[144px]"
         >
           {/* Gradient overlays for smooth edges */}
           <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
@@ -261,7 +259,7 @@ export default function HorizontalGallery() {
             >
               <img
                 src={getImageUrl(image.url)}
-                alt={image.title}
+                alt={image.title || 'Gallery image'}
                 className="w-full h-full object-cover"
                 loading="lazy"
                 decoding="async"

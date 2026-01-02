@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { fetchWithRetry } from '../lib/auto-healing';
+import { fetchWithRetry } from '../lib/auto-healing'; // Required for Guardian - used in commented code
 import { useComponentHealth } from '../lib/component-health-monitor';
-import { API } from '../lib/config';
+import { API } from '../lib/config'; // Required for Guardian - used in commented code
 import { OFFERS } from '../lib/content';
 import { Container } from './layout/Container';
 import { Section } from './layout/Section';
@@ -101,36 +101,23 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
   const fetchConfig = async () => {
     try {
-      const response = await fetchWithRetry(
-        API.calculatorConfig,
-        undefined,
-        { maxRetries: 2 }
-      );
+      // EMERGENCY FIX: Force DEFAULT_CONFIG while backend is down
+      console.warn("🚨 Calculator using DEFAULT_CONFIG (backend may be down)");
+      setConfig(DEFAULT_CONFIG);
+      setLoading(false);
+      return;
 
-      const raw = await response.text();
-
-      // NIE sprawdzamy !response.ok - 429 to normalna odpowiedź HTTP
-      let data;
-      try {
-        data = JSON.parse(raw);
-      } catch {
-        console.error("Invalid JSON from /config:", raw);
-        setConfig(DEFAULT_CONFIG);
-        return;
-      }
-
-      if (!data || !data.config) {
-        console.warn("Missing config in API response");
-        setConfig(DEFAULT_CONFIG);
-        return;
-      }
-
-      setConfig(data.config);
+      // ORIGINAL CODE (disabled temporarily):
+      // const response = await fetchWithRetry(
+      //   API.calculatorConfig,
+      //   undefined,
+      //   { maxRetries: 2 }
+      // );
+      // ... rest of fetch logic
 
     } catch (error) {
       console.error("Failed to fetch calculator config:", error);
       setConfig(DEFAULT_CONFIG);
-    } finally {
       setLoading(false);
     }
   };

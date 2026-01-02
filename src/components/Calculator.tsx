@@ -101,20 +101,25 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
   const fetchConfig = async () => {
     try {
-      // EMERGENCY FIX: Force DEFAULT_CONFIG while backend is down
-      console.warn("🚨 Calculator using DEFAULT_CONFIG (backend may be down)");
-      setConfig(DEFAULT_CONFIG);
+      const response = await fetchWithRetry(
+        API.calculatorConfig,
+        undefined,
+        { maxRetries: 2 }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.config) {
+        setConfig(data.config);
+      } else {
+        throw new Error('Invalid config format');
+      }
+
       setLoading(false);
-      return;
-
-      // ORIGINAL CODE (disabled temporarily):
-      // const response = await fetchWithRetry(
-      //   API.calculatorConfig,
-      //   undefined,
-      //   { maxRetries: 2 }
-      // );
-      // ... rest of fetch logic
-
     } catch (error) {
       console.error("Failed to fetch calculator config:", error);
       setConfig(DEFAULT_CONFIG);

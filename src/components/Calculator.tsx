@@ -199,8 +199,14 @@ function Calculator({ onCalculate }: CalculatorProps) {
     const ledLightingCost = addons.ledLighting ? config.addons.ledLighting : 0;
 
     const addonsPrice = fountainCost + kegCost + extraBarmanCost + lemonadeCost + hockeryCost + ledLightingCost;
+    
+    // Logika: cena bazowa pakietu obejmuje minGuests, każdy dodatkowy gość to dopłata
     const basePackagePrice = offer.price;
-    const totalBeforeDiscount = basePackagePrice + addonsPrice;
+    const extraGuestsCharge = guests > offer.minGuests 
+      ? (guests - offer.minGuests) * config.pricePerExtraGuest[offer.id as keyof typeof config.pricePerExtraGuest]
+      : 0;
+    
+    const totalBeforeDiscount = basePackagePrice + extraGuestsCharge + addonsPrice;
     const promoDiscount = config.promoDiscount;
     const totalAfterDiscount = Math.round(totalBeforeDiscount * (1 - promoDiscount));
 
@@ -300,10 +306,13 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
   // --- CENA PAKIETU (SKALOWANA Z LICZBĄ GOŚCI) ---
 
-  // Cena minimalna pakietu (z lib/content)
+  // Logika: cena bazowa pakietu obejmuje minGuests, każdy dodatkowy gość to dopłata
   const basePackagePrice = offer.price;
+  const extraGuestsCharge = guests > offer.minGuests 
+    ? (guests - offer.minGuests) * config.pricePerExtraGuest[offer.id as keyof typeof config.pricePerExtraGuest]
+    : 0;
 
-  const totalBeforeDiscount = basePackagePrice + addonsPrice;
+  const totalBeforeDiscount = basePackagePrice + extraGuestsCharge + addonsPrice;
   const totalAfterDiscount = Math.round(totalBeforeDiscount * (1 - promoDiscount));
 
   const pricePerGuest = Math.round(totalAfterDiscount / guests);

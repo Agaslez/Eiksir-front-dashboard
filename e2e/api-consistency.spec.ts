@@ -395,11 +395,11 @@ test.describe('API Consistency Tests', () => {
       await page.waitForTimeout(8000); // Extra wait for slow backend
 
       // Verify all components use the same BACKEND_URL
-      for (const [component, urls] of apiRequests.entries()) {
+      apiRequests.forEach((urls, component) => {
         urls.forEach(url => {
           expect(url.startsWith(BACKEND_URL)).toBe(true);
         });
-      }
+      });
     });
   });
 

@@ -1,0 +1,72 @@
+/**
+ * Playwright Global Setup
+ * Runs once before all tests to verify backend availability
+ * 
+ * PROTOCOL DECISION #001 (2026-01-02)
+ * Approved by: Stefan Pitek
+ * Purpose: Reduce E2E test time from 15+ min to ~1.2 min
+ */
+
+import { chromium, FullConfig } from '@playwright/test';
+
+async function globalSetup(config: FullConfig) {
+  const BACKEND_URL = process.env.BACKEND_URL || 
+    'https://eliksir-backend-front-dashboard.onrender.com';
+  
+  console.log('🔥 Global Setup: Verifying backend is ready...');
+  console.log(`Backend URL: ${BACKEND_URL}`);
+  
+  const browser = await chromium.launch();
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  
+  // Wake up backend (Render.com free tier cold start)
+  let retries = 3;
+  let lastError: Error | null = null;
+  
+  while (retries > 0) {
+    try {
+      console.log(`Attempt ${4 - retries}/3...`);
+      
+      const response = await page.request.get(`${BACKEND_URL}/api/health`, {
+        timeout: 60000, // 60s timeout per attempt
+      });
+      
+      if (response.status() === 200 || response.status() === 503) {
+        const body = await response.json();
+        console.log('✅ Backend is ready');
+        console.log(`Status: ${body.status}`);
+        console.log(`Health checks: ${body.summary?.totalChecks || 0}`);
+        
+        await browser.close();
+        return;
+      }
+      
+      console.log(`⚠️  Unexpected status: ${response.status()}`);
+      lastError = new Error(`Status ${response.status()}`);
+      
+    } catch (error) {
+      lastError = error as Error;
+      console.log(`❌ Error: ${lastError.message}`);
+    }
+    
+    retries--;
+    if (retries > 0) {
+      console.log(`⏳ Waiting 10s before retry...`);
+      await page.waitForTimeout(10000);
+    }
+  }
+  
+  await browser.close();
+  
+  console.error('❌ Backend not available after 3 attempts');
+  console.error(`Last error: ${lastError?.message}`);
+  
+  // Throw error to fail entire test suite if backend is down
+  throw new Error(
+    `Backend not available at ${BACKEND_URL}/api/health. ` +
+    `Deploy backend first or check Render.com status.`
+  );
+}
+
+export default globalSetup;

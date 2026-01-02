@@ -6,46 +6,23 @@ import { expect, test } from '@playwright/test';
  * Sprawdza czy wszystkie komponenty używają tego samego centralized API configuration
  * i poprawnie łączą się z backendem.
  * 
- * OPTIMIZATIONS:
- * - Reduced waitForTimeout to minimum (networkidle, domcontentloaded)
- * - Increased timeouts for cold start tolerance (Render.com free tier)
- * - Parallel execution with 2 workers in CI
+ * OPTIMIZATIONS (PROTOCOL DECISION #001 - 2026-01-02):
+ * - Backend verification moved to global-setup.ts (1x, not 23x)
+ * - Reduced waitForTimeout (removed redundant 8s waits)
+ * - Changed waitUntil: 'networkidle' (more reliable than domcontentloaded)
+ * - Parallel execution with 4 workers in CI (was 2)
+ * - Expected: 15+ min → ~1.2 min (93% reduction)
  */
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const BACKEND_URL = process.env.BACKEND_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
 
-// Global flag to track if backend is responsive
-let BACKEND_IS_AVAILABLE = false;
-
-// Global setup: Wait for backend to be ready (cold start tolerance)
-test.beforeAll(async ({ request }) => {
-  console.log('🔥 Verifying backend is ready...');
-  let retries = 5; // Increased retries
-  while (retries > 0) {
-    try {
-      const response = await request.get(`${BACKEND_URL}/api/health`, { timeout: 90000 }); // 90s timeout
-      if (response.status() === 200 || response.status() === 503) {
-        console.log('✅ Backend is ready');
-        BACKEND_IS_AVAILABLE = true;
-        return;
-      }
-    } catch (error) {
-      console.log(`⏳ Backend not ready, retrying... (${retries} attempts left)`);
-      retries--;
-      if (retries > 0) {
-        await new Promise(resolve => setTimeout(resolve, 20000)); // Wait 20s before retry
-      }
-    }
-  }
-  console.warn('⚠️  Backend not available - some tests will be skipped');
-  BACKEND_IS_AVAILABLE = false;
-});
+// NOTE: Backend verification moved to e2e/global-setup.ts
+// No need for test.beforeAll - backend is already verified
 
 test.describe('API Consistency Tests', () => {
   test.describe('HorizontalGallery Component (Panorama)', () => {
     test('should use API.galleryPanorama endpoint', async ({ page }) => {
-      test.skip(!BACKEND_IS_AVAILABLE, 'Backend not available');
       const apiRequests: string[] = [];
       page.on('request', (request) => {
         if (request.url().includes('/api/content/gallery')) {
@@ -53,9 +30,8 @@ test.describe('API Consistency Tests', () => {
         }
       });
 
-      await page.goto(FRONTEND_URL, { waitUntil: 'domcontentloaded' });
-      await page.waitForLoadState('domcontentloaded', { timeout: 90000 });
-      await page.waitForTimeout(8000); // Extra wait for slow backend
+      // OPTIMIZED: networkidle is more reliable, removed 8s wait
+      await page.goto(FRONTEND_URL, { waitUntil: 'networkidle' });
 
       // Verify correct API endpoint was called
       expect(apiRequests.length).toBeGreaterThan(0);
@@ -66,29 +42,27 @@ test.describe('API Consistency Tests', () => {
     });
 
     test('should display horizontal gallery', async ({ page }) => {
-      await page.goto(FRONTEND_URL, { waitUntil: 'domcontentloaded' });
-      await page.waitForLoadState('domcontentloaded');
+      await page.goto(FRONTEND_URL, { waitUntil: 'networkidle' });
 
       // Check if panorama images are visible (should be near top of page)
       const panoramaImages = page.locator('#galeria-panorama img, section img').first();
-      await expect(panoramaImages).toBeVisible({ timeout: 40000 }); // Increased timeout
+      await expect(panoramaImages).toBeVisible({ timeout: 20000 }); // Reduced from 40s
     });
 
     test('should not have infinite loader', async ({ page }) => {
-      await page.goto(FRONTEND_URL, { waitUntil: 'domcontentloaded' });
+      await page.goto(FRONTEND_URL, { waitUntil: 'networkidle' });
       
       // Check if loader appears
       const loader = page.locator('text=/Ładowanie galerii/i').first();
       if (await loader.isVisible()) {
-        // Loader should disappear within 60 seconds (cold start tolerance)
-        await expect(loader).not.toBeVisible({ timeout: 65000 });
+        // Loader should disappear quickly (backend already warm from global setup)
+        await expect(loader).not.toBeVisible({ timeout: 10000 }); // Reduced from 65s
       }
     });
   });
 
   test.describe('Calculator Component', () => {
     test('should use API.calculatorConfig endpoint', async ({ page }) => {
-      test.skip(!BACKEND_IS_AVAILABLE, 'Backend not available');
       // Monitor network requests
       const apiRequests: string[] = [];
       page.on('request', (request) => {
@@ -97,16 +71,16 @@ test.describe('API Consistency Tests', () => {
         }
       });
 
-      await page.goto(FRONTEND_URL, { waitUntil: 'domcontentloaded' });
+      await page.goto(FRONTEND_URL, { waitUntil: 'networkidle' });
       await page.waitForLoadState('domcontentloaded');
       
       // Scroll to Calculator section
       const calculator = page.locator('#kalkulator');
-      await calculator.waitFor({ state: 'attached', timeout: 90000 });
-      await calculator.scrollIntoViewIfNeeded({ timeout: 90000 });
+      await calculator.waitFor({ state: 'attached', timeout: 20000 });
+      await calculator.scrollIntoViewIfNeeded({ timeout: 20000 });
       
       // Wait for Calculator API call (increased timeout for cold start)
-      await page.waitForResponse(resp => resp.url().includes('/api/calculator'), { timeout: 90000 });
+      await page.waitForResponse(resp => resp.url().includes('/api/calculator'), { timeout: 20000 });
 
       // Verify correct API endpoint was called
       expect(apiRequests.length).toBeGreaterThan(0);
@@ -118,8 +92,8 @@ test.describe('API Consistency Tests', () => {
       await page.waitForLoadState('domcontentloaded');
       
       const calculator = page.locator('#kalkulator');
-      await calculator.waitFor({ state: 'attached', timeout: 90000 });
-      await calculator.scrollIntoViewIfNeeded({ timeout: 90000 });
+      await calculator.waitFor({ state: 'attached', timeout: 20000 });
+      await calculator.scrollIntoViewIfNeeded({ timeout: 20000 });
 
       // Check if package selection is visible
       await expect(page.locator('text=Pakiet').first()).toBeVisible({ timeout: 30000 });
@@ -139,8 +113,8 @@ test.describe('API Consistency Tests', () => {
       await page.waitForLoadState('domcontentloaded');
       
       const calculator = page.locator('#kalkulator');
-      await calculator.waitFor({ state: 'attached', timeout: 90000 });
-      await calculator.scrollIntoViewIfNeeded({ timeout: 90000 });
+      await calculator.waitFor({ state: 'attached', timeout: 20000 });
+      await calculator.scrollIntoViewIfNeeded({ timeout: 20000 });
 
       // Select Premium package
       await page.click('text=PREMIUM', { timeout: 60000 });
@@ -167,8 +141,8 @@ test.describe('API Consistency Tests', () => {
 
       await page.goto(FRONTEND_URL, { waitUntil: 'domcontentloaded' });
       const calculator = page.locator('#kalkulator');
-      await calculator.waitFor({ state: 'attached', timeout: 90000 });
-      await calculator.scrollIntoViewIfNeeded({ timeout: 90000 });
+      await calculator.waitFor({ state: 'attached', timeout: 20000 });
+      await calculator.scrollIntoViewIfNeeded({ timeout: 20000 });
       await expect(page.locator('text=Pakiet').first()).toBeVisible({ timeout: 30000 });
 
       // Filter out Cloudinary tracking warnings (external, not our code) AND 429 rate limit errors
@@ -187,7 +161,6 @@ test.describe('API Consistency Tests', () => {
       // Gallery component has error handling for unavailable backend
       test.skip(true, 'Backend timeout/rate limiting - covered by HorizontalGallery test');
       
-      test.skip(!BACKEND_IS_AVAILABLE, 'Backend not available');
       const apiRequests: string[] = [];
       page.on('request', (request) => {
         if (request.url().includes('/api/content/gallery')) {
@@ -197,13 +170,13 @@ test.describe('API Consistency Tests', () => {
 
       await page.goto(FRONTEND_URL, { waitUntil: 'domcontentloaded' });
       const gallerySection = page.locator('text=Galeria Eliksir Bar').first();
-      await gallerySection.waitFor({ state: 'visible', timeout: 90000 });
-      await gallerySection.scrollIntoViewIfNeeded({ timeout: 90000 });
+      await gallerySection.waitFor({ state: 'visible', timeout: 20000 });
+      await gallerySection.scrollIntoViewIfNeeded({ timeout: 20000 });
       
       // Wait for API response OR error message (cold start tolerance)
       await Promise.race([
-        page.waitForResponse(resp => resp.url().includes('/api/content/gallery'), { timeout: 90000 }),
-        page.locator('text=⚠️ Galeria tymczasowo niedostępna').waitFor({ state: 'visible', timeout: 90000 })
+        page.waitForResponse(resp => resp.url().includes('/api/content/gallery'), { timeout: 20000 }),
+        page.locator('text=⚠️ Galeria tymczasowo niedostępna').waitFor({ state: 'visible', timeout: 20000 })
       ]);
 
       // Verify correct API endpoint was called (if not error)
@@ -246,8 +219,8 @@ test.describe('API Consistency Tests', () => {
       await page.waitForLoadState('domcontentloaded');
       
       const gallerySection = page.locator('text=Galeria Eliksir Bar').first();
-      await gallerySection.waitFor({ state: 'visible', timeout: 90000 });
-      await gallerySection.scrollIntoViewIfNeeded({ timeout: 90000 });
+      await gallerySection.waitFor({ state: 'visible', timeout: 20000 });
+      await gallerySection.scrollIntoViewIfNeeded({ timeout: 20000 });
       
       // Wait for images to load
       const images = page.locator('#galeria img');
@@ -316,7 +289,6 @@ test.describe('API Consistency Tests', () => {
       // API functionality is verified, this is infrastructure issue not app bug
       test.skip(true, 'Backend timeout/rate limiting - About display test covers functionality');
       
-      test.skip(!BACKEND_IS_AVAILABLE, 'Backend not available');
       const apiRequests: string[] = [];
       page.on('request', (request) => {
         if (request.url().includes('/api/content/sections')) {
@@ -326,7 +298,7 @@ test.describe('API Consistency Tests', () => {
 
       await page.goto(FRONTEND_URL, { waitUntil: 'domcontentloaded' });
       await page.waitForLoadState('domcontentloaded');
-      await page.waitForResponse(resp => resp.url().includes('/api/content/sections'), { timeout: 90000 });
+      await page.waitForResponse(resp => resp.url().includes('/api/content/sections'), { timeout: 20000 });
 
       // Verify correct API endpoint was called
       expect(apiRequests.length).toBeGreaterThan(0);
@@ -353,8 +325,7 @@ test.describe('API Consistency Tests', () => {
 
   test.describe('Backend Health Checks', () => {
     test('should verify backend /api/health endpoint', async ({ request }) => {
-      test.skip(!BACKEND_IS_AVAILABLE, 'Backend not available');
-      const response = await request.get(`${BACKEND_URL}/api/health`, { timeout: 90000 });
+      const response = await request.get(`${BACKEND_URL}/api/health`, { timeout: 20000 });
       
       // Accept both 200 and 503 (degraded) as valid responses
       expect([200, 503]).toContain(response.status());
@@ -369,8 +340,7 @@ test.describe('API Consistency Tests', () => {
       // Rate limiting (429) causes failures - infrastructure issue, not app bug
       test.skip(true, 'Redundant test + rate limiting - covered by other tests');
       
-      test.skip(!BACKEND_IS_AVAILABLE, 'Backend not available');
-      const response = await request.get(`${BACKEND_URL}/api/calculator/config`, { timeout: 90000 });
+      const response = await request.get(`${BACKEND_URL}/api/calculator/config`, { timeout: 20000 });
       expect(response.ok()).toBeTruthy();
       
       const data = await response.json();
@@ -430,18 +400,18 @@ test.describe('API Consistency Tests', () => {
       
       // Scroll through all major sections
       const calculator = page.locator('#kalkulator');
-      await calculator.waitFor({ state: 'attached', timeout: 90000 });
-      await calculator.scrollIntoViewIfNeeded({ timeout: 90000 });
+      await calculator.waitFor({ state: 'attached', timeout: 20000 });
+      await calculator.scrollIntoViewIfNeeded({ timeout: 20000 });
       await expect(calculator).toBeVisible();
       
       const gallerySection = page.locator('text=Galeria Eliksir Bar').first();
-      await gallerySection.waitFor({ state: 'visible', timeout: 90000 });
-      await gallerySection.scrollIntoViewIfNeeded({ timeout: 90000 });
+      await gallerySection.waitFor({ state: 'visible', timeout: 20000 });
+      await gallerySection.scrollIntoViewIfNeeded({ timeout: 20000 });
       await expect(gallerySection).toBeVisible();
       
       const aboutHeading = page.locator('h2:has-text("Kim jesteśmy")').first();
-      await aboutHeading.waitFor({ state: 'visible', timeout: 90000 });
-      await aboutHeading.scrollIntoViewIfNeeded({ timeout: 90000 });
+      await aboutHeading.waitFor({ state: 'visible', timeout: 20000 });
+      await aboutHeading.scrollIntoViewIfNeeded({ timeout: 20000 });
       await expect(aboutHeading).toBeVisible();
 
       // Filter out external errors AND 429 rate limit
@@ -453,7 +423,6 @@ test.describe('API Consistency Tests', () => {
     });
 
     test('should verify all API calls use centralized config', async ({ page }) => {
-      test.skip(!BACKEND_IS_AVAILABLE, 'Backend not available');
       const apiRequests = new Map<string, string[]>();
       
       page.on('request', (request) => {
@@ -474,7 +443,7 @@ test.describe('API Consistency Tests', () => {
       });
 
       await page.goto(FRONTEND_URL);
-      await page.waitForLoadState('domcontentloaded', { timeout: 90000 });
+      await page.waitForLoadState('domcontentloaded', { timeout: 20000 });
       await page.waitForTimeout(8000); // Extra wait for slow backend
 
       // Verify all components use the same BACKEND_URL
@@ -493,8 +462,8 @@ test.describe('API Consistency Tests', () => {
       
       // Check Calculator loader disappears
       const calculator = page.locator('#kalkulator');
-      await calculator.waitFor({ state: 'attached', timeout: 90000 });
-      await calculator.scrollIntoViewIfNeeded({ timeout: 90000 });
+      await calculator.waitFor({ state: 'attached', timeout: 20000 });
+      await calculator.scrollIntoViewIfNeeded({ timeout: 20000 });
       await expect(calculator).toBeVisible();
       
       const calculatorLoader = page.locator('text=/Ładowanie|Loading/i').first();
@@ -505,18 +474,17 @@ test.describe('API Consistency Tests', () => {
     });
 
     test('should not show infinite loaders in Gallery', async ({ page }) => {
-      test.skip(!BACKEND_IS_AVAILABLE, 'Backend not available');
       await page.goto(FRONTEND_URL, { waitUntil: 'domcontentloaded' });
       
       // Check Gallery loader disappears
       const gallerySection = page.locator('text=Galeria Eliksir Bar').first();
-      await gallerySection.waitFor({ state: 'visible', timeout: 90000 });
-      await gallerySection.scrollIntoViewIfNeeded({ timeout: 90000 });
+      await gallerySection.waitFor({ state: 'visible', timeout: 20000 });
+      await gallerySection.scrollIntoViewIfNeeded({ timeout: 20000 });
       await expect(gallerySection).toBeVisible();
       
       const galleryLoader = page.locator('text=/Ładowanie galerii/i').first();
       if (await galleryLoader.isVisible()) {
-        await expect(galleryLoader).not.toBeVisible({ timeout: 40000 }); // Increased
+        await expect(galleryLoader).not.toBeVisible({ timeout: 15000 }); // Increased
       }
     });
 
@@ -527,7 +495,7 @@ test.describe('API Consistency Tests', () => {
       const panoramaLoader = page.locator('text=/Ładowanie galerii/i').first();
       if (await panoramaLoader.isVisible()) {
         // HorizontalGallery has longer timeout due to cold start (60s)
-        await expect(panoramaLoader).not.toBeVisible({ timeout: 65000 });
+        await expect(panoramaLoader).not.toBeVisible({ timeout: 10000 });
       }
     });
   });
@@ -549,8 +517,8 @@ test.describe('Performance & Error Handling', () => {
     await page.waitForLoadState('domcontentloaded');
     
     const calculator = page.locator('#kalkulator');
-    await calculator.waitFor({ state: 'visible', timeout: 90000 });
-    await calculator.scrollIntoViewIfNeeded({ timeout: 90000 });
+    await calculator.waitFor({ state: 'visible', timeout: 20000 });
+    await calculator.scrollIntoViewIfNeeded({ timeout: 20000 });
     
     // Should show loading state
     await expect(page.locator('text=/Ładowanie|Loading/i').first()).toBeVisible({ timeout: 10000 }).catch(() => {});
@@ -560,7 +528,6 @@ test.describe('Performance & Error Handling', () => {
   });
 
   test('should handle 404 API errors gracefully', async ({ page }) => {
-    test.skip(!BACKEND_IS_AVAILABLE, 'Backend not available');
     // Mock 404 response
     await page.route('**/api/calculator/config', (route) => {
       route.fulfill({
@@ -580,8 +547,8 @@ test.describe('Performance & Error Handling', () => {
     await page.waitForLoadState('domcontentloaded');
     
     const calculator = page.locator('#kalkulator');
-    await calculator.waitFor({ state: 'attached', timeout: 90000 });
-    await calculator.scrollIntoViewIfNeeded({ timeout: 90000 });
+    await calculator.waitFor({ state: 'attached', timeout: 20000 });
+    await calculator.scrollIntoViewIfNeeded({ timeout: 20000 });
 
     // Should not crash - should use fallback data
     await expect(page.locator('text=Pakiet').first()).toBeVisible({ timeout: 30000 });

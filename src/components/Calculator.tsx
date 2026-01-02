@@ -156,6 +156,82 @@ function Calculator({ onCalculate }: CalculatorProps) {
     }
   }, [selectedOfferId]);
 
+  // Memoizacja snapshot dla stabilności referencji (MUSI BYĆ PRZED EARLY RETURN!)
+  const calculatorSnapshot: CalculatorSnapshot = useMemo(() => {
+    if (loading || !config) {
+      // Default snapshot gdy ładowanie
+      return {
+        offerName: OFFERS[selectedOfferId].name,
+        guests,
+        totalAfterDiscount: 0,
+        pricePerGuest: 0,
+        estimatedCocktails: 0,
+        estimatedShots: 0,
+        addons,
+      };
+    }
+
+    const offer = OFFERS[selectedOfferId];
+    const isKidsOffer = offer.id === 'kids';
+
+    // Oblicz fountainCost
+    const fountainCost = addons.fountain
+      ? (() => {
+          const { perGuest, min, max } = config.addons.fountain;
+          const value = guests * perGuest;
+          return Math.min(max, Math.max(min, value));
+        })()
+      : 0;
+
+    // KEG + extraBarman
+    const kegSelected = !isKidsOffer && addons.keg;
+    const kegCost = kegSelected
+      ? (() => {
+          const { pricePerKeg, guestsPerKeg } = config.addons.keg;
+          const kegs = Math.max(1, Math.ceil(guests / guestsPerKeg));
+          return pricePerKeg * kegs;
+        })()
+      : 0;
+    const extraBarmanCost = kegSelected ? (config.addons.extraBarman || 0) : 0;
+
+    // Lemonade
+    const lemonadeCost = addons.lemonade
+      ? (() => {
+          const { base, blockGuests } = config.addons.lemonade;
+          const blocks = Math.max(1, Math.ceil(guests / blockGuests));
+          return base * blocks;
+        })()
+      : 0;
+
+    const hockeryCost = addons.hockery ? config.addons.hockery : 0;
+    const ledLightingCost = addons.ledLighting ? config.addons.ledLighting : 0;
+
+    const addonsPrice = fountainCost + kegCost + extraBarmanCost + lemonadeCost + hockeryCost + ledLightingCost;
+    const basePackagePrice = offer.price;
+    const totalBeforeDiscount = basePackagePrice + addonsPrice;
+    const promoDiscount = config.promoDiscount;
+    const totalAfterDiscount = Math.round(totalBeforeDiscount * (1 - promoDiscount));
+
+    const pricePerGuest = Math.round(totalAfterDiscount / guests);
+    const estimatedCocktails = guests * 3;
+    const estimatedShots = Math.round(guests * 0.5);
+
+    return {
+      offerName: offer.name,
+      guests,
+      totalAfterDiscount,
+      pricePerGuest,
+      estimatedCocktails,
+      estimatedShots,
+      addons,
+    };
+  }, [selectedOfferId, guests, addons, loading, config]);
+
+  // useEffect dla onCalculate callback
+  useEffect(() => {
+    if (onCalculate) onCalculate(calculatorSnapshot);
+  }, [calculatorSnapshot, onCalculate]);
+
   // 🔥 ABSOLUTNY GUARD — musi być NA SAMEJ GÓRZE, zanim użyjesz config
   if (loading || !config) {
     return (
@@ -238,8 +314,8 @@ function Calculator({ onCalculate }: CalculatorProps) {
   const totalBeforeDiscount = basePackagePrice + addonsPrice;
   const totalAfterDiscount = Math.round(totalBeforeDiscount * (1 - promoDiscount));
 
-  const pricePerGuest = totalAfterDiscount / guests;
-  const pricePerHour = totalAfterDiscount / offer.hours;
+  const pricePerGuest = Math.round(totalAfterDiscount / guests);
+  const pricePerHour = Math.round(totalAfterDiscount / offer.hours);
 
   const estimatedCocktails = Math.round(guests * offer.drinksPerGuest);
   const estimatedShots = isKidsOffer ? 0 : Math.round(guests * (offer.shotsPerGuest ?? 0.5));
@@ -261,20 +337,6 @@ function Calculator({ onCalculate }: CalculatorProps) {
     : Math.max(1, Math.ceil((config.shoppingList?.proseccoBottles ?? 0) * scale50));
   const syrupsLiters = Math.max(1, Math.ceil((config.shoppingList?.syrupsLiters ?? 0) * scale50));
   const iceKg = Math.max(4, Math.ceil((config.shoppingList?.iceKg ?? 0) * scale50));
-
-  const calculatorSnapshot: CalculatorSnapshot = useMemo(() => ({
-    offerName: OFFERS[selectedOfferId].name,
-    guests,
-    totalAfterDiscount,
-    pricePerGuest,
-    estimatedCocktails,
-    estimatedShots,
-    addons,
-  }), [selectedOfferId, guests, addons, totalAfterDiscount, estimatedCocktails, estimatedShots]);
-
-  useEffect(() => {
-    if (onCalculate) onCalculate(calculatorSnapshot);
-  }, [calculatorSnapshot, onCalculate]);
 
   // --- UI (TWÓJ ORYGINALNY UI BEZ ZMIAN) ---
   return (
@@ -533,14 +595,14 @@ function Calculator({ onCalculate }: CalculatorProps) {
               <div className="text-white/70">
                 ok.{' '}
                 <span className="font-semibold">
-                  {pricePerGuest.toFixed(2)} zł
+                  {pricePerGuest} zł
                 </span>{' '}
                 / osobę
               </div>
               <div className="text-white/70">
                 ok.{' '}
                 <span className="font-semibold">
-                  {pricePerHour.toFixed(2)} zł
+                  {pricePerHour} zł
                 </span>{' '}
                 / godzinę baru
               </div>

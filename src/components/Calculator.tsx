@@ -400,7 +400,12 @@ function Calculator({ onCalculate }: CalculatorProps) {
                 min={offer.minGuests}
                 max={offer.maxGuests}
                 value={guests}
-                onChange={(e) => setGuests(Number(e.target.value))}
+                onChange={(e) => {
+                  const newValue = Number(e.target.value);
+                  // ARCHITECT_APPROVED: Debugging guests slider issue - temporary - 2026-01-02 - Stefan
+                  console.log('🎯 Guests changed:', guests, '→', newValue);
+                  setGuests(newValue);
+                }}
                 className="w-full"
               />
               <div className="flex justify-between text-[0.7rem] text-white/40 mt-1">

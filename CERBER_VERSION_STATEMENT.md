@@ -165,10 +165,11 @@ Response: {
 - [x] E2E tests 100% passing
 - [x] Documentation updated
 
-### Phase 2: Planned Extensions 📋 NEXT
-- [ ] **GIT-Cerber** - GitHub Actions workflow (first CI/CD step)
+### Phase 2: Planned Extensions 📋 IN PROGRESS
+- [x] **GIT-Cerber** - GitHub Actions workflow (first CI/CD step) ✅ **DEPLOYED 2026-01-02**
+- [x] **Health Monitor** - Automated backend health checks (every 30 min) ✅ **DEPLOYED 2026-01-02**
+- [x] **Multi-layer defense** - Guardian (local) + GIT-Cerber (CI/CD) ✅ **ACTIVE**
 - [ ] **BACKEND_SCHEMA.ts** - Backend validation mirror
-- [ ] **Multi-layer defense** - Guardian (local) + GIT-Cerber (CI/CD)
 - [ ] **Health dashboard** - Visual /api/health trends
 - [ ] **Alert system** - Slack/email on critical issues
 

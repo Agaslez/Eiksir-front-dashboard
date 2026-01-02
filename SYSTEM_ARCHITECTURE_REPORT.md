@@ -96,7 +96,307 @@
 
 ---
 
-## 📋 SPIS TREŚCI
+## � CODZIENNE RUTYNY & QUICK START
+
+### **QUICK START DLA NOWEGO CZATU AGENTA AI**
+
+**Kiedy Agent AI zaczyna nową sesję, ZAWSZE:**
+
+1. ✅ **PRZECZYTAJ TĘ SEKCJĘ** (Single Source of Truth Policy + Daily Routines)
+2. ✅ **SPRAWDŹ OSTATNI COMMIT**
+   ```bash
+   git log --oneline -5
+   git status
+   ```
+3. ✅ **ZWERYFIKUJ GUARDIAN STATUS**
+   ```bash
+   cd eliksir-frontend
+   node scripts/validate-schema.mjs
+   ```
+4. ✅ **SPRAWDŹ BACKEND HEALTH**
+   ```bash
+   curl https://eliksir-backend.onrender.com/api/health
+   ```
+5. ✅ **ZAPYTAJ STEFAN:** "Witam! Co dzisiaj robimy?"
+
+### **DAILY DEVELOPER ROUTINE**
+
+**🌅 RANO (Start pracy):**
+```bash
+# 1. Pull latest changes
+git pull origin main
+
+# 2. Update dependencies (jeśli potrzeba)
+cd eliksir-frontend && npm install
+cd ../stefano-eliksir-backend && npm install
+
+# 3. Run Guardian validation
+cd ../eliksir-frontend
+node scripts/validate-schema.mjs
+
+# 4. Check backend health
+curl https://eliksir-backend.onrender.com/api/health | jq
+
+# 5. Review GitHub Actions
+# Otwórz: https://github.com/Agaslez/Eiksir-front-dashboard/actions
+```
+
+**💻 PODCZAS PRACY:**
+- ✅ Każda zmiana zgodna z FRONTEND_SCHEMA.ts
+- ✅ Każdy fetch() przez fetchWithRetry()
+- ✅ Każdy API URL z lib/config.ts
+- ✅ Commit co 1-2h pracy (małe, atomowe commity)
+- ✅ Console.log tylko z ARCHITECT_APPROVAL
+
+**🌙 WIECZOREM (Przed końcem pracy):**
+```bash
+# 1. Run all tests
+cd eliksir-frontend
+npm run test:e2e
+
+# 2. Check for uncommitted changes
+git status
+
+# 3. Validate schema (Guardian)
+node scripts/validate-schema.mjs
+
+# 4. Commit if clean
+git add .
+git commit -m "feat: [opis]"  # Guardian zwaliduje
+
+# 5. Push (uruchomi CI/CD)
+git push origin main
+```
+
+### **CHECKLIST PRZED COMMITEM**
+
+**❌ ZAKAZANE (bez approval):**
+```typescript
+// ❌ Hardcoded URLs
+const url = 'https://eliksir-backend.onrender.com';
+
+// ❌ Console.log bez approval
+console.log('debug');
+
+// ❌ Direct fetch
+fetch('/api/data');
+
+// ❌ Debugger
+debugger;
+
+// ❌ Garbage text
+// zajmij sie tym pozniej
+// TODO_REMOVE
+```
+
+**✅ WYMAGANE:**
+```typescript
+// ✅ Centralized config
+import { API } from '@/lib/config';
+
+// ✅ Retry logic
+import { fetchWithRetry } from '@/lib/auto-healing';
+
+// ✅ Health monitoring
+import { useComponentHealth } from '@/lib/component-health-monitor';
+
+// ✅ Proper logging
+import { logger } from '@/lib/logger';
+logger.info('User action');
+```
+
+**PRZED GIT COMMIT:**
+```bash
+# 1. Guardian validation (automatic via pre-commit hook)
+# Jeśli chcesz sprawdzić manualnie:
+node scripts/validate-schema.mjs
+
+# 2. TypeScript check
+npm run type-check
+
+# 3. Lint
+npm run lint
+
+# 4. Build test
+npm run build
+
+# 5. Commit (Guardian zablokuje jeśli violation)
+git commit -m "feat: new feature"
+```
+
+### **CHECKLIST PRZED DEPLOYMENTEM**
+
+**Frontend (Vercel):**
+```bash
+# 1. E2E tests MUSZĄ PRZEJŚĆ
+npm run test:e2e
+# Expected: 18 passed, 5 skipped, 0 failed
+
+# 2. Build production
+npm run build
+# Sprawdź: dist/ < 500KB bundle size
+
+# 3. Guardian validation
+node scripts/validate-schema.mjs
+# Expected: ✅ ALL CHECKS PASSED
+
+# 4. Push (auto-deploy)
+git push origin main
+# Vercel auto-deploy z main branch
+```
+
+**Backend (Render):**
+```bash
+# 1. Backend health check
+curl https://eliksir-backend.onrender.com/api/health
+
+# 2. Database migrations (jeśli są)
+npm run db:push
+
+# 3. Environment variables check
+# Verify w Render dashboard:
+# - DATABASE_URL ✅
+# - CLOUDINARY_* ✅
+# - JWT_SECRET ✅
+# - RESEND_API_KEY ✅
+
+# 4. Push (auto-deploy)
+git push stefano main
+# Render auto-deploy z main branch
+```
+
+### **WSPÓŁPRACA Z STEFAN (HUMAN)**
+
+**Kiedy Agent AI MUSI zapytać Stefan:**
+1. ⚠️ **Zmiana w FRONTEND_SCHEMA.ts** - zawsze wymaga approval
+2. ⚠️ **Nowa funkcjonalność** - alignment z roadmap
+3. ⚠️ **Naprawa błędu** - użyj formatu 🐛 BŁĄD (sekcja ERROR RESOLUTION)
+4. ⚠️ **Zmiana struktury bazy** - migrations & schema changes
+5. ⚠️ **Nowa zależność (npm package)** - sprawdź czy potrzebna
+6. ⚠️ **Deployment na produkcję** - confirmation przed push
+
+**Kiedy Agent AI może działać autonomicznie:**
+- ✅ Bugfix zgodny z FRONTEND_SCHEMA.ts (bez zmian w schema)
+- ✅ Refactoring bez zmian logiki
+- ✅ Dokumentacja / komentarze w kodzie
+- ✅ Testy (dodawanie nowych testów)
+- ✅ CSS/styling (jeśli nie łamie responsiveness)
+- ✅ Commits z małymi zmianami
+
+**Format komunikacji z Stefan:**
+```markdown
+**PYTANIE DO STEFAN:**
+
+**Kontekst:** [Co robimy]
+**Propozycja:** [Co chcę zmienić]
+**Dlaczego:** [Powód zmiany]
+**Impact:** [Co to zmieni w projekcie]
+**Roadmap alignment:** [Phase X, zgodne/niezgodne]
+
+**Czy zatwierdzasz? (tak/nie/zmień)**
+```
+
+### **QUICK REFERENCE - NAJWAŻNIEJSZE ZASADY**
+
+| Zasada | Opis | Konsekwencja naruszenia |
+|--------|------|------------------------|
+| **FRONTEND_SCHEMA.ts = Source of Truth** | Wszystkie reguły w tym pliku | Guardian ZABLOKUJE commit |
+| **SYSTEM_ARCHITECTURE_REPORT.md = Jedyne źródło prawdy** | Żadnych osobnych .md dokumentów | Agent AI dostanie przypomnienie |
+| **Każda zmiana = approval Stefan** | Pytaj przed zmianami w architekturze | Revert changes |
+| **API URLs tylko z lib/config.ts** | Zakaz hardcoded URLs | Guardian ZABLOKUJE commit |
+| **Fetch tylko przez fetchWithRetry()** | Retry logic zawsze | Guardian ZABLOKUJE commit |
+| **Console.log wymaga ARCHITECT_APPROVAL** | Komentarz approval w kodzie | Guardian ZABLOKUJE commit |
+| **Git commit = Guardian validation** | Pre-commit hook automatyczny | Commit zablokowany jeśli violation |
+| **CI/CD soft mode** | continue-on-error: true | Violations widoczne, nie blokują |
+| **Health check co 30 min** | Cerber Health Monitor | Auto-creates issue jeśli critical |
+
+### **COMMON TASKS - QUICK COMMANDS**
+
+**Dodanie nowego komponentu:**
+```bash
+# 1. Create file
+touch src/components/NewComponent.tsx
+
+# 2. Add to FRONTEND_SCHEMA.ts jeśli CRITICAL
+# Edit: FRONTEND_SCHEMA.ts → requiredFiles: ['src/components/NewComponent.tsx']
+
+# 3. Import API config
+import { API } from '@/lib/config';
+import { fetchWithRetry } from '@/lib/auto-healing';
+
+# 4. Commit (Guardian zwaliduje)
+git add src/components/NewComponent.tsx
+git commit -m "feat: add NewComponent"
+```
+
+**Dodanie nowego API endpoint:**
+```bash
+# Backend:
+# 1. Add route: server/routes/newEndpoint.ts
+# 2. Add to server/routes/index.ts
+# 3. Test: curl http://localhost:3001/api/newEndpoint
+
+# Frontend:
+# 1. Add to lib/config.ts:
+# export const API = {
+#   ...existing,
+#   newEndpoint: `${API_URL}/api/newEndpoint`
+# }
+# 2. Use: await fetchWithRetry(API.newEndpoint)
+```
+
+**Architect Approval dla console.log:**
+```typescript
+// Pattern:
+// ARCHITECT_APPROVED: [powód] - YYYY-MM-DD - Stefan
+console.log('debug message');
+
+// Real example:
+// ARCHITECT_APPROVED: User login tracking essential for analytics - 2026-01-02 - Stefan
+console.log('User logged in:', userId);
+```
+
+### **TROUBLESHOOTING**
+
+**Problem: Guardian blokuje commit**
+```bash
+# 1. Read error message
+# Guardian shows exact file & line with violation
+
+# 2. Fix violation OR add approval
+# Jeśli legit: ask Stefan for ARCHITECT_APPROVAL
+
+# 3. Retry commit
+git commit -m "fix: resolve Guardian violation"
+```
+
+**Problem: E2E tests failing**
+```bash
+# 1. Check which test failed
+npm run test:e2e
+
+# 2. Run single test for debugging
+npx playwright test e2e/specific.spec.ts --debug
+
+# 3. Check backend health
+curl https://eliksir-backend.onrender.com/api/health
+
+# 4. Fix & retry
+```
+
+**Problem: CI/CD workflow failed**
+```bash
+# 1. Open GitHub Actions
+# https://github.com/Agaslez/Eiksir-front-dashboard/actions
+
+# 2. Check failed step (usually: lint, build, or e2e)
+
+# 3. Fix locally & push again
+```
+
+---
+
+## �📋 SPIS TREŚCI
 1. [Stack Technologiczny](#stack)
 2. [Struktura Projektu](#struktura)
 3. [Frontend - Komponenty](#frontend)

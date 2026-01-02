@@ -1,0 +1,194 @@
+name: 🏥 Cerber Health Monitor
+
+on:
+  # Run after deployment
+  workflow_run:
+    workflows: ["CI - Backend Quality Gate"]
+    types: [completed]
+    branches: [main]
+  
+  # Manual trigger
+  workflow_dispatch:
+  
+  # Schedule - every 30 minutes
+  schedule:
+    - cron: '*/30 * * * *'
+
+env:
+  BACKEND_URL: https://eliksir-backend.onrender.com
+  HEALTH_ENDPOINT: /api/health
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════
+  # CERBER HEALTH CHECK - Backend Diagnostics
+  # ═══════════════════════════════════════════════════════════════
+  cerber-health-check:
+    name: 🏥 Backend Health Diagnostics
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    
+    steps:
+      - name: 🏥 Check Backend Health
+        id: health
+        run: |
+          echo "══════════════════════════════════════════════════════════"
+          echo "🏥 CERBER 2.1 - HEALTH DIAGNOSTICS"
+          echo "══════════════════════════════════════════════════════════"
+          echo "Endpoint: ${{ env.BACKEND_URL }}${{ env.HEALTH_ENDPOINT }}"
+          echo "Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo ""
+          
+          # Fetch health status with timeout
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            --max-time 10 \
+            "${{ env.BACKEND_URL }}${{ env.HEALTH_ENDPOINT }}" \
+            || echo '{"error":"timeout"}\n000')
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n-1)
+          
+          echo "HTTP Status: $HTTP_CODE"
+          
+          if [ "$HTTP_CODE" = "000" ]; then
+            echo "❌ Backend unreachable (timeout/connection error)"
+            echo "status=unreachable" >> $GITHUB_OUTPUT
+            echo "http_code=000" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+          echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
+          echo ""
+          
+          # Parse JSON response
+          STATUS=$(echo "$BODY" | jq -r '.status' 2>/dev/null || echo "unknown")
+          CRITICAL=$(echo "$BODY" | jq -r '.summary.criticalIssues' 2>/dev/null || echo "0")
+          ERRORS=$(echo "$BODY" | jq -r '.summary.errorIssues' 2>/dev/null || echo "0")
+          WARNINGS=$(echo "$BODY" | jq -r '.summary.warningIssues' 2>/dev/null || echo "0")
+          
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "http_code=$HTTP_CODE" >> $GITHUB_OUTPUT
+          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+          echo "errors=$ERRORS" >> $GITHUB_OUTPUT
+          echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
+          
+          # Determine result
+          if [ "$HTTP_CODE" = "200" ] && [ "$STATUS" = "healthy" ]; then
+            echo "✅ Backend HEALTHY"
+            echo "result=healthy" >> $GITHUB_OUTPUT
+          elif [ "$STATUS" = "degraded" ]; then
+            echo "⚠️  Backend DEGRADED ($ERRORS errors, $WARNINGS warnings)"
+            echo "result=degraded" >> $GITHUB_OUTPUT
+          elif [ "$STATUS" = "unhealthy" ]; then
+            echo "❌ Backend UNHEALTHY ($CRITICAL critical, $ERRORS errors)"
+            echo "result=unhealthy" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "⚠️  Backend status UNKNOWN"
+            echo "result=unknown" >> $GITHUB_OUTPUT
+          fi
+        continue-on-error: true
+        # ⚠️ TEMPORARY: Non-blocking (monitoring only, doesn't fail workflow)
+      
+      - name: 📊 Health Report Summary
+        if: always()
+        run: |
+          echo "══════════════════════════════════════════════════════════"
+          echo "📊 CERBER HEALTH REPORT"
+          echo "══════════════════════════════════════════════════════════"
+          
+          case "${{ steps.health.outputs.result }}" in
+            "healthy")
+              echo "✅ Status: HEALTHY"
+              echo "✅ All systems operational"
+              echo "✅ HTTP ${{ steps.health.outputs.http_code }}"
+              ;;
+            "degraded")
+              echo "⚠️  Status: DEGRADED"
+              echo "⚠️  Errors: ${{ steps.health.outputs.errors }}"
+              echo "⚠️  Warnings: ${{ steps.health.outputs.warnings }}"
+              echo "⚠️  HTTP ${{ steps.health.outputs.http_code }}"
+              echo ""
+              echo "💡 Action required:"
+              echo "   Check detailed health response for diagnosis + fix"
+              ;;
+            "unhealthy")
+              echo "❌ Status: UNHEALTHY"
+              echo "❌ Critical: ${{ steps.health.outputs.critical }}"
+              echo "❌ Errors: ${{ steps.health.outputs.errors }}"
+              echo "❌ HTTP ${{ steps.health.outputs.http_code }}"
+              echo ""
+              echo "🚨 URGENT: Backend requires immediate attention!"
+              ;;
+            "unreachable")
+              echo "❌ Status: UNREACHABLE"
+              echo "❌ Backend not responding"
+              echo ""
+              echo "💡 Possible causes:"
+              echo "   - Render free tier cold start (~30s)"
+              echo "   - Deployment in progress"
+              echo "   - Network issues"
+              echo "   - Backend down"
+              ;;
+            *)
+              echo "⚠️  Status: UNKNOWN"
+              echo "⚠️  HTTP ${{ steps.health.outputs.http_code }}"
+              ;;
+          esac
+          
+          echo ""
+          echo "══════════════════════════════════════════════════════════"
+          echo ""
+          echo "ℹ️  Cerber Health Monitor: INFORMATIONAL MODE"
+          echo "   Health checks don't block workflows (monitoring only)"
+          echo "   Set up Slack/email alerts for production monitoring"
+          echo ""
+          echo "══════════════════════════════════════════════════════════"
+      
+      - name: 📝 Create Issue on Critical Failure
+        if: steps.health.outputs.critical != '0' && steps.health.outputs.critical != ''
+        uses: actions/github-script@v7
+        continue-on-error: true
+        with:
+          script: |
+            // Check if similar issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['cerber-health', 'critical']
+            });
+            
+            if (issues.data.length === 0) {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🚨 Backend UNHEALTHY - Critical Issues Detected',
+                labels: ['cerber-health', 'critical', 'bug'],
+                body: `## 🚨 Cerber Health Alert - Critical Issues
+                
+                **Timestamp:** ${new Date().toISOString()}
+                **Backend:** ${{ env.BACKEND_URL }}
+                **Status:** UNHEALTHY
+                
+                ### 📊 Issue Summary:
+                - Critical Issues: ${{ steps.health.outputs.critical }}
+                - Error Issues: ${{ steps.health.outputs.errors }}
+                - Warning Issues: ${{ steps.health.outputs.warnings }}
+                
+                ### 🔍 Diagnosis:
+                Check full health response at: ${{ env.BACKEND_URL }}${{ env.HEALTH_ENDPOINT }}
+                
+                ### 📋 Action Items:
+                1. [ ] Review health check response for detailed diagnosis
+                2. [ ] Apply suggested fixes from \`rootCause\` and \`fix\` fields
+                3. [ ] Verify resolution with follow-up health check
+                4. [ ] Close this issue once all critical issues resolved
+                
+                ### 📚 Documentation:
+                - [Cerber 2.1 Documentation](../SYSTEM_ARCHITECTURE_REPORT.md#cerber)
+                - [Health Check Guide](../docs/SYSTEM_INTEGRATION_TEST_REPORT.md)
+                
+                **Note:** This issue was auto-generated by Cerber Health Monitor workflow.`
+              });
+            }

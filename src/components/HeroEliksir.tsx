@@ -49,31 +49,6 @@ const HeroEliksir = () => {
       <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-eliksir-gold/10 rounded-full blur-3xl" />
       <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-eliksir-gold/5 rounded-full blur-3xl" />
 
-      {/* Animated Logo - positioned in top-left corner */}
-      {ENABLE_LOGO_ANIMATION && shouldLoadVideo ? (
-        <div className="absolute top-4 left-0 md:top-8 md:left-0 z-20 rounded-full overflow-hidden bg-black/20">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-16 h-16 md:w-24 md:h-24 object-cover rounded-full"
-            poster="/favicon.png"
-            preload="auto"
-          >
-            <source src="/videos/logo-animation.mp4" type="video/mp4" />
-          </video>
-        </div>
-      ) : (
-        <div className="absolute top-4 left-0 md:top-8 md:left-0 z-20 rounded-full overflow-hidden bg-black/20">
-          <img
-            src="/favicon.png"
-            alt="ELIKSIR Logo"
-            className="w-16 h-16 md:w-24 md:h-24 object-cover rounded-full"
-          />
-        </div>
-      )}
-
       {/* Content w kontenerze */}
       <Container className="relative z-10">
         <motion.div

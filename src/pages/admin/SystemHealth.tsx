@@ -97,13 +97,17 @@ interface HealthCheck {
 }
 
 export default function SystemHealthDashboard() {
+  // Real-time backend health data (Cerber 2.1 format)
+  const [backendHealth, setBackendHealth] = useState<any>(null);
+  const [backendHealthLoading, setBackendHealthLoading] = useState(true);
+
   const [checks, setChecks] = useState<HealthCheck[]>([
     {
       name: 'Backend API Health',
       category: 'Backend',
       endpoint: '/api/health',
       check: async () => {
-        return await performHttpCheck('Backend API Health', `${API_URL}/health`);
+        return await performHttpCheck('Backend API Health', `${API_URL}/api/health`);
       },
       status: 'checking'
     },
@@ -114,9 +118,9 @@ export default function SystemHealthDashboard() {
       check: async () => {
         return await performHttpCheck(
           'Calculator Config API',
-          `${API_URL}/calculator/config`,
+          `${API_URL}/api/calculator/config`,
           undefined,
-          (data) => data.success && data.config
+          (data) => data && data.success && data.config
         );
       },
       status: 'checking'
@@ -128,9 +132,9 @@ export default function SystemHealthDashboard() {
       check: async () => {
         return await performHttpCheck(
           'Gallery API (Public)',
-          `${API_URL}/content/gallery/public?category=wszystkie`,
+          `${API_URL}/api/content/gallery/public?category=wszystkie`,
           undefined,
-          (data) => data.success && Array.isArray(data.images)
+          (data) => data && data.success && Array.isArray(data.images)
         );
       },
       status: 'checking'
@@ -142,9 +146,9 @@ export default function SystemHealthDashboard() {
       check: async () => {
         return await performHttpCheck(
           'Content Sections API',
-          `${API_URL}/content/sections`,
+          `${API_URL}/api/content/sections`,
           undefined,
-          (data) => data.success && Array.isArray(data.sections)
+          (data) => data && data.success && Array.isArray(data.sections)
         );
       },
       status: 'checking'
@@ -156,9 +160,9 @@ export default function SystemHealthDashboard() {
       check: async () => {
         return await performHttpCheck(
           'Auth Health',
-          `${API_URL}/auth/health`,
+          `${API_URL}/api/auth/health`,
           undefined,
-          (data) => (data.success === true && data.status === 'operational') || data.status === 'healthy' || data.status === 'Available'
+          (data) => data && ((data.success === true && data.status === 'operational') || data.status === 'healthy' || data.status === 'Available')
         );
       },
       status: 'checking'
@@ -170,7 +174,7 @@ export default function SystemHealthDashboard() {
       check: async () => {
         return await performHttpCheck(
           'AI Service Health',
-          `${API_URL}/ai/health`,
+          `${API_URL}/api/ai/health`,
           undefined,
           (data) => data.status === 'healthy' || data.status === 'Available' || (data.service && data.endpoints)
         );
@@ -182,7 +186,7 @@ export default function SystemHealthDashboard() {
       category: 'Database',
       endpoint: '/api/calculator/config',
       check: async () => {
-        return await performHttpCheck('Database Connection', `${API_URL}/calculator/config`);
+        return await performHttpCheck('Database Connection', `${API_URL}/api/calculator/config`);
       },
       status: 'checking'
     },
@@ -194,7 +198,7 @@ export default function SystemHealthDashboard() {
         const start = Date.now();
         const result = await performHttpCheck(
           'Database Query Performance',
-          `${API_URL}/content/gallery/public?category=wszystkie`
+          `${API_URL}/api/content/gallery/public?category=wszystkie`
         );
         const duration = Date.now() - start;
         return result && duration < 2000; // Should respond within 2 seconds
@@ -207,7 +211,7 @@ export default function SystemHealthDashboard() {
       endpoint: '/api/content/gallery/public',
       check: async () => {
         try {
-          const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`);
+          const response = await fetch(`${API_URL}/api/content/gallery/public?category=wszystkie`);
           if (!response.ok) return false;
           
           const data = await response.json();
@@ -258,7 +262,7 @@ export default function SystemHealthDashboard() {
         try {
           // Backend already validates Cloudinary connection - use that instead of direct ping
           // This avoids 401 errors from protected Cloudinary endpoints
-          const healthResponse = await fetch(`${API_URL}/health`, {
+          const healthResponse = await fetch(`${API_URL}/api/health`, {
             signal: AbortSignal.timeout(5000)
           });
           
@@ -298,7 +302,7 @@ export default function SystemHealthDashboard() {
       check: async () => {
         // Test if backend is responding at all
         try {
-          const response = await fetch(`${API_URL}/health`, { 
+          const response = await fetch(`${API_URL}/api/health`, { 
             signal: AbortSignal.timeout(5000) 
           });
           return response.ok;
@@ -328,7 +332,7 @@ export default function SystemHealthDashboard() {
           const componentHealth = (window as any).__componentHealthMonitor;
           
           // Test API endpoint that HorizontalGallery uses
-          const response = await fetch(`${API_URL}/content/gallery/public?category=wszystkie`, {
+          const response = await fetch(`${API_URL}/api/content/gallery/public?category=wszystkie`, {
             signal: AbortSignal.timeout(10000)
           });
           
@@ -485,6 +489,20 @@ export default function SystemHealthDashboard() {
 
   const runHealthChecks = async () => {
     setIsRunning(true);
+    
+    // First, fetch backend health (Cerber 2.1 format)
+    setBackendHealthLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/api/health`);
+      if (response.ok) {
+        const data = await response.json();
+        setBackendHealth(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch backend health:', error);
+    }
+    setBackendHealthLoading(false);
+
     const updatedChecks = [...checks];
 
     for (let i = 0; i < updatedChecks.length; i++) {
@@ -613,6 +631,100 @@ export default function SystemHealthDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Backend Health (Cerber 2.1 - Real System State) */}
+        {backendHealth && (
+          <div className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Activity className="w-6 h-6 text-blue-600" />
+              <h2 className="text-xl font-semibold text-gray-900">
+                Backend Health Check (Cerber 2.1)
+              </h2>
+              <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                backendHealth.status === 'healthy' 
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-yellow-100 text-yellow-800'
+              }`}>
+                {backendHealth.status.toUpperCase()}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white rounded-lg p-4">
+                <div className="text-sm text-gray-600 mb-1">Total Checks</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {backendHealth.summary.totalChecks}
+                </div>
+              </div>
+              <div className="bg-white rounded-lg p-4">
+                <div className="text-sm text-gray-600 mb-1">Critical Issues</div>
+                <div className="text-2xl font-bold text-red-600">
+                  {backendHealth.summary.criticalIssues}
+                </div>
+              </div>
+              <div className="bg-white rounded-lg p-4">
+                <div className="text-sm text-gray-600 mb-1">Warnings</div>
+                <div className="text-2xl font-bold text-yellow-600">
+                  {backendHealth.summary.warningIssues}
+                </div>
+              </div>
+              <div className="bg-white rounded-lg p-4">
+                <div className="text-sm text-gray-600 mb-1">Environment</div>
+                <div className="text-lg font-semibold text-gray-900">
+                  {backendHealth.app.environment}
+                </div>
+              </div>
+            </div>
+
+            {backendHealth.components && backendHealth.components.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                  Detected Issues
+                </h3>
+                {backendHealth.components.map((issue: any, idx: number) => (
+                  <div key={idx} className={`bg-white rounded-lg p-4 border-l-4 ${
+                    issue.severity === 'critical' ? 'border-red-500' :
+                    issue.severity === 'error' ? 'border-orange-500' :
+                    issue.severity === 'warning' ? 'border-yellow-500' :
+                    'border-blue-500'
+                  }`}>
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <div className="font-semibold text-gray-900">{issue.component}</div>
+                        <div className="text-sm text-gray-600">{issue.message}</div>
+                      </div>
+                      <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                        issue.severity === 'critical' ? 'bg-red-100 text-red-800' :
+                        issue.severity === 'error' ? 'bg-orange-100 text-orange-800' :
+                        issue.severity === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                        {issue.severity.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="mt-3 space-y-2 text-sm">
+                      <div>
+                        <span className="font-semibold text-gray-700">Diagnosis: </span>
+                        <span className="text-gray-600">{issue.diagnosis}</span>
+                      </div>
+                      <div>
+                        <span className="font-semibold text-gray-700">Root Cause: </span>
+                        <span className="text-gray-600">{issue.rootCause}</span>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded border border-green-200">
+                        <span className="font-semibold text-green-800">Fix: </span>
+                        <span className="text-green-700">{issue.fix}</span>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Duration: {issue.durationMs.toFixed(2)}ms | ID: {issue.id}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Health Checks by Category */}
         {categories.map(category => {
@@ -967,17 +1079,17 @@ function ComponentHealthPanel() {
         <div className="text-center py-8 space-y-4">
           <RefreshCw className="w-12 h-12 mx-auto text-blue-500 animate-spin" />
           <div className="text-gray-700">
-            <p className="font-medium">Loading components...</p>
-            <p className="text-sm text-gray-500 mt-1">Auto-discovering React components</p>
+            <p className="font-medium">Waiting for components...</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Open <a href="/" target="_blank" className="text-blue-600 hover:underline">main page</a> in another tab to activate component monitoring
+            </p>
           </div>
-          
-          {/* Hidden iframes to trigger component mounts */}
-          <iframe src="/" style={{ display: 'none' }} title="preload-home" />
-          <iframe src="/gallery" style={{ display: 'none' }} title="preload-gallery" />
-          <iframe src="/contact" style={{ display: 'none' }} title="preload-contact" />
           
           <div className="text-xs text-gray-400 mt-4">
             Expected: HorizontalGallery, Calculator, Gallery, Contact
+          </div>
+          <div className="text-xs text-gray-500 mt-2">
+            Components will appear here once they render on the main page
           </div>
         </div>
       ) : (

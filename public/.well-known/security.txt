@@ -1,0 +1,5 @@
+Contact: mailto:kontakt@eliksir-bar.pl
+Contact: tel:+48-781-024-701
+Expires: 2027-01-01T00:00:00.000Z
+Preferred-Languages: pl, en
+Canonical: https://eliksir-bar.pl/.well-known/security.txt

@@ -1,9 +1,7 @@
 import { API, BACKEND_URL } from '@/lib/config';
-import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useComponentHealth } from '../lib/component-health-monitor';
 import { Container } from './layout/Container';
-import { Section } from './layout/Section';
 
 // Helper function to handle both Cloudinary and local URLs
 const getImageUrl = (url: string) => {
@@ -12,8 +10,8 @@ const getImageUrl = (url: string) => {
   // If Cloudinary URL, add optimization parameters
   if (url.includes('cloudinary.com')) {
     // Insert transformation parameters before /upload/
-    // w_400 = width 400px, h_300 = height 300px, c_fill = crop to fill, q_auto = auto quality, f_auto = auto format
-    return url.replace('/upload/', '/upload/w_400,h_300,c_fill,q_auto,f_auto/');
+    // w_500 = width 500px, h_350 = height 350px, c_fill = crop to fill, q_auto = auto quality, f_auto = auto format
+    return url.replace('/upload/', '/upload/w_500,h_350,c_fill,q_auto,f_auto/');
   }
   
   // If already absolute URL (non-Cloudinary), return as is
@@ -184,7 +182,7 @@ export default function HorizontalGallery() {
   // Show loading state with info about potential cold start
   if (isLoading) {
     return (
-      <Section className="bg-black py-3 md:py-4">
+      <section className="relative bg-black py-3 md:py-4">
         <Container>
           <div className="text-center text-white py-8">
             <div className="animate-spin inline-block w-8 h-8 border-4 border-white border-t-transparent rounded-full mb-2"></div>
@@ -192,14 +190,14 @@ export default function HorizontalGallery() {
             <p className="text-xs text-white/60 mt-1">Może potrwać do 30s przy pierwszym uruchomieniu</p>
           </div>
         </Container>
-      </Section>
+      </section>
     );
   }
 
   // Show error state with retry button
   if (error) {
     return (
-      <Section className="bg-black py-3 md:py-4">
+      <section className="relative bg-black py-3 md:py-4">
         <Container>
           <div className="text-center text-red-400 py-4">
             <p className="text-sm">⚠️ Galeria tymczasowo niedostępna</p>
@@ -212,14 +210,14 @@ export default function HorizontalGallery() {
             </button>
           </div>
         </Container>
-      </Section>
+      </section>
     );
   }
 
   // Show placeholder if no images (with retry button)
   if (images.length === 0) {
     return (
-      <Section className="bg-black py-3 md:py-4">
+      <section className="relative bg-black py-3 md:py-4">
         <Container>
           <div className="text-center text-white/60 py-4">
             <p className="text-sm">📸 Brak obrazów w galerii</p>
@@ -232,18 +230,15 @@ export default function HorizontalGallery() {
             </button>
           </div>
         </Container>
-      </Section>
+      </section>
     );
   }
 
   return (
-    <Section className="bg-black py-8 md:py-12">
+    <section className="relative bg-black py-8 md:py-12">
       <Container className="!px-0 !max-w-none">
-        <motion.div
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-          className="relative overflow-hidden min-h-[112px] sm:min-h-[128px] md:min-h-[144px]"
-        >
+        <div className="relative overflow-hidden min-h-[112px] sm:min-h-[128px] md:min-h-[144px]">
+
           {/* Gradient overlays for smooth edges */}
           <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
@@ -252,10 +247,9 @@ export default function HorizontalGallery() {
           <div className="flex gap-2 md:gap-3 animate-scroll hover:pause-animation">
           {/* Duplicate images for infinite scroll effect */}
           {[...images, ...images].map((image, index) => (
-            <motion.div
+            <div
               key={`${image.id}-${index}`}
-              className="flex-shrink-0 w-40 h-28 sm:w-48 sm:h-32 md:w-56 md:h-36 rounded-lg overflow-hidden border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300"
-              whileHover={{ scale: 1.05 }}
+              className="flex-shrink-0 w-40 h-28 sm:w-44 sm:h-32 md:w-48 md:h-34 lg:w-52 lg:h-36 rounded-lg overflow-hidden border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300 hover:scale-105"
             >
               <img
                 src={getImageUrl(image.url)}
@@ -264,10 +258,10 @@ export default function HorizontalGallery() {
                 loading="lazy"
                 decoding="async"
               />
-            </motion.div>
+            </div>
           ))}
         </div>
-      </motion.div>
+        </div>
       </Container>
 
       <style>{`
@@ -288,6 +282,6 @@ export default function HorizontalGallery() {
           animation-play-state: paused;
         }
       `}</style>
-    </Section>
+    </section>
   );
 }

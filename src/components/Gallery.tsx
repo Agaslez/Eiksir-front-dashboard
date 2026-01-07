@@ -13,7 +13,6 @@ import { fetchWithRetry } from '../lib/auto-healing';
 import { useComponentHealth } from '../lib/component-health-monitor';
 import { trackEvent } from '../lib/error-monitoring';
 import { Container } from './layout/Container';
-import { Section } from './layout/Section';
 
 // Helper function to handle both Cloudinary and local URLs
 const getImageUrl = (url: string, size: 'thumbnail' | 'lightbox' = 'thumbnail') => {
@@ -178,19 +177,19 @@ const Gallery = () => {
   // --- LOADER W JSX (po wszystkich hookach) ---
   if (loading) {
     return (
-      <Section id="galeria" className="bg-black">
+      <section id="galeria" className="relative bg-black py-20">
         <Container>
           <div className="text-center py-20">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-amber-500 border-r-transparent"></div>
             <p className="text-white/60 mt-4">Ładowanie galerii...</p>
           </div>
         </Container>
-      </Section>
+      </section>
     );
   }
 
   return (
-    <Section id="galeria" className="bg-black">
+    <section id="galeria" className="relative bg-black py-20">
       {/* TYTUŁ W KONTENERZE */}
       <Container>
         {/* Header */}
@@ -448,7 +447,7 @@ const Gallery = () => {
           </div>
         </div>
       )}
-    </Section>
+    </section>
   );
 };
 

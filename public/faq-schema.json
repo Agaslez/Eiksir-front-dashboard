@@ -1,0 +1,46 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Jaki jest koszt wynajmu mobilnego baru koktajlowego?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cena zależy od ilości gości i wybranego pakietu. Używając naszego kalkulatora otrzymasz dokładną wycenę. Pakiet Basic zaczyna się od 50 zł/os, Premium od 70 zł/os, a Exclusive od 100 zł/os."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Na jakim obszarze świadczycie usługi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Obsługujemy eventy na terenie całej Polski. Mobilny bar przyjeżdża do Ciebie niezależnie od lokalizacji wesela, eventu firmowego czy przyjęcia prywatnego."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ile czasu trwa przygotowanie baru na miejscu?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Przygotowanie mobilnego baru zajmuje około 2-3 godzin. Przyjeżdżamy z wyprzedzeniem, aby wszystko było gotowe na przyjęcie pierwszych gości."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Czy oferujecie koktajle bezalkoholowe?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tak, wszystkie nasze pakiety zawierają zarówno koktajle alkoholowe jak i bezalkoholowe. Dbamy o to, aby każdy gość znalazł coś dla siebie."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Jak daleko przed imprezą należy zarezerwować bar?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Rekomendujemy rezerwację min. 2-3 miesiące przed planowanym eventem, szczególnie w sezonie weselnym (maj-wrzesień). Skontaktuj się z nami telefonicznie: 781 024 701."
+      }
+    }
+  ]
+}

@@ -62,8 +62,20 @@
     </script>
     <!-- End Meta Pixel Code -->
     
+    <!-- Geographic & Business Meta Tags -->
+    <meta name="geo.region" content="PL" />
+    <meta name="geo.placename" content="Polska" />
+    <meta name="ICBM" content="52.2297, 21.0122" />
+    <meta name="rating" content="general" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    
+    <!-- Resource Hints for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="https://connect.facebook.net" />
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
@@ -115,6 +127,15 @@
         "https://www.facebook.com/profile.php?id=61585498184401",
         "https://www.instagram.com/eliksir.mobilny.bar/"
       ],
+      "openingHours": "Mo-Su 00:00-23:59",
+      "paymentAccepted": "Cash, Credit Card, Bank Transfer",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5.0",
+        "reviewCount": "47",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
         "name": "Pakiety usług",
@@ -145,6 +166,95 @@
           }
         ]
       }
+    }
+    </script>
+    
+    <!-- WebSite Schema for Search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "ELIKSIR Bar",
+      "url": "https://eliksir-bar.pl",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://eliksir-bar.pl/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    
+    <!-- BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://eliksir-bar.pl/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Oferta",
+          "item": "https://eliksir-bar.pl/#oferta"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Kalkulator Cen",
+          "item": "https://eliksir-bar.pl/#kalkulator"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Galeria",
+          "item": "https://eliksir-bar.pl/#galeria"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Kontakt",
+          "item": "https://eliksir-bar.pl/#kontakt"
+        }
+      ]
+    }
+    </script>
+    
+    <!-- FAQ Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Jaki jest koszt wynajmu mobilnego baru koktajlowego?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Cena zależy od ilości gości i wybranego pakietu. Używając naszego kalkulatora otrzymasz dokładną wycenę. Pakiet Basic zaczyna się od 50 zł/os, Premium od 70 zł/os, a Exclusive od 100 zł/os."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Na jakim obszarze świadczycie usługi?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Obsługujemy eventy na terenie całej Polski. Mobilny bar przyjeżdża do Ciebie niezależnie od lokalizacji wesela, eventu firmowego czy przyjęcia prywatnego."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Czy oferujecie koktajle bezalkoholowe?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Tak, wszystkie nasze pakiety zawierają zarówno koktajle alkoholowe jak i bezalkoholowe. Dbamy o to, aby każdy gość znalazł coś dla siebie."
+          }
+        }
+      ]
     }
     </script>
   </body>

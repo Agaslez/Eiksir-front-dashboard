@@ -260,8 +260,8 @@ export default function SystemHealthDashboard() {
       category: 'External',
       check: async () => {
         try {
-          // Backend already validates Cloudinary connection - use that instead of direct ping
-          // This avoids 401 errors from protected Cloudinary endpoints
+          // Backend validates Cloudinary in health check
+          // If no CLOUDINARY_UNAVAILABLE warning = Cloudinary works
           const healthResponse = await fetch(`${API_URL}/api/health`, {
             signal: AbortSignal.timeout(5000)
           });
@@ -270,21 +270,21 @@ export default function SystemHealthDashboard() {
           
           const healthData = await healthResponse.json();
           
-          // Check if backend successfully connected to Cloudinary
-          const cloudinaryStatus = healthData.components?.cloudinary?.status;
-          const cloudName = healthData.components?.cloudinary?.cloud_name;
+          // Check if backend reported CLOUDINARY_UNAVAILABLE issue
+          const cloudinaryIssue = healthData.components?.find(
+            (c: any) => c.id === 'CLOUDINARY_UNAVAILABLE' || c.component === 'cloudinary'
+          );
           
-          if (cloudinaryStatus !== 'healthy' || !cloudName) {
+          if (cloudinaryIssue) {
+            // Cloudinary has issues
             const check = (window as any).__healthChecks?.find((c: HealthCheck) => c.name === 'Cloudinary CDN');
             if (check) {
-              check.message = cloudinaryStatus === 'unhealthy' 
-                ? 'Backend reports Cloudinary configuration issue'
-                : 'Cloud name not found in backend health check';
+              check.message = cloudinaryIssue.diagnosis || 'Cloudinary configuration issue';
             }
             return false;
           }
           
-          // Backend confirmed Cloudinary is configured and working
+          // No Cloudinary issues = it's working
           return true;
         } catch (error) {
           const check = (window as any).__healthChecks?.find((c: HealthCheck) => c.name === 'Cloudinary CDN');

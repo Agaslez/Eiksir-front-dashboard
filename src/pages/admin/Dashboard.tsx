@@ -1,4 +1,4 @@
-import { Activity, BarChart3, Calculator, Home, Image, LogOut, Mail, User } from 'lucide-react';
+import { Activity, BarChart3, Calculator, Home, Image, LogOut, Mail, Sparkles, User } from 'lucide-react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { useAuth } from '../../context/AuthContext';

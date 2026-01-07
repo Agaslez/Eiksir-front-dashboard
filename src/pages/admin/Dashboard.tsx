@@ -111,6 +111,18 @@ export default function Dashboard() {
                   <Activity size={18} />
                   <span>Health</span>
                 </button>
+
+                <button
+                  onClick={() => navigate('/admin/ghost')}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-eliksir transition-all ${
+                    isActive('/admin/ghost') 
+                      ? 'bg-eliksir-gold text-black font-medium' 
+                      : 'text-white/70 hover:text-eliksir-gold hover:bg-white/5'
+                  }`}
+                >
+                  <Sparkles size={18} />
+                  <span>GHOST Bot</span>
+                </button>
               </div>
             </div>
 

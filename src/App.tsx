@@ -31,6 +31,7 @@ const Settings = lazy(() => import('./pages/admin/Settings'));
 const EmailSettings = lazy(() => import('./components/admin/EmailSettings'));
 const CalculatorSettings = lazy(() => import('./components/admin/CalculatorSettings'));
 const SystemHealth = lazy(() => import('./pages/admin/SystemHealth'));
+const GhostDashboard = lazy(() => import('./pages/admin/GhostDashboard'));
 
 
 
@@ -138,6 +139,14 @@ function App() {
               element={
                 <ProtectedRoute requiredRole="admin">
                   <SystemHealth />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="ghost"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <GhostDashboard />
                 </ProtectedRoute>
               }
             />

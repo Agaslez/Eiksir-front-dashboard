@@ -348,6 +348,164 @@ git commit -m "feat: add NewComponent"
 **Architect Approval dla console.log:**
 ```typescript
 // Pattern:
+// ... existing code
+```
+
+---
+
+## 🎯 GHOST PHASE 9: QUALITY CONTROL CHECKLIST
+
+**Status obecny:** PR #1 DONE ✅ (2026-01-08)
+
+### **✅ PR #1: Database Schema + Migration** (COMPLETE)
+**Branch:** `feature/ghost-phase9-quality-control`  
+**Commit:** `23a1a92` + submodule `9fe7baf`
+
+- ✅ Created migration `0013_ghost_quality_control.sql`
+- ✅ 3 new tables:
+  * `ghost_quality_gate_results` - validation scores & decisions
+  * `ghost_approval_queue` - posts requiring review
+  * `ghost_publication_audit` - lifecycle audit trail
+- ✅ All tables match `shared/schema.ts` (single source of truth)
+- ✅ Migration applied successfully to database
+- ✅ Test created: `e2e/ghost-quality-schema.spec.ts` (17 tests)
+- ✅ Documentation updated: SYSTEM_ARCHITECTURE_REPORT.md
+- ✅ PR pushed to GitHub: https://github.com/Agaslez/Eiksir-front-dashboard/pull/new/feature/ghost-phase9-quality-control
+
+**Files changed:**
+- `stefano-eliksir-backend/migrations/0013_ghost_quality_control.sql` (NEW)
+- `stefano-eliksir-backend/shared/schema.ts` (UPDATED - Phase 9 tables)
+- `e2e/ghost-quality-schema.spec.ts` (NEW - 17 tests)
+- `SYSTEM_ARCHITECTURE_REPORT.md` (UPDATED - full schema docs)
+
+---
+
+### **✅ PR #2: Quality Gates Implementation** (COMPLETE - 2026-01-08)
+**Branch:** `feature/ghost-phase9-quality-control`  
+**Commit:** Backend `f5d8d85` + Main `e868814`
+
+**Implementacja:**
+- ✅ **ImageQualityAnalyzer** - wykorzystuje Phase 1 quality score
+- ✅ **ContentQualityAnalyzer** - caption, hashtagi, spam, ALL CAPS
+- ✅ **SafetyChecker** - forbidden phrases (alcohol compliance)
+- ✅ **BrandConsistencyValidator** - mandatory hashtags, brand consistency
+- ✅ **QualityGateOrchestrator** - decision engine (95+ auto, 80+ review, <80 reject)
+- ✅ **Repositories:** GhostQualityRepository, GhostApprovalQueueRepository
+- ✅ **Audit:** PublicationAuditService (lifecycle tracking)
+- ✅ **API Endpoints:** 4 routes (/api/ghost/quality/*)
+
+**Tests:**
+- ✅ Unit tests: QualityGateOrchestrator.test.ts (8/8 passing)
+- ✅ E2E tests: ghost-quality-gates.spec.ts (full workflow)
+
+**Files created:**
+- `server/ghost/application/QualityGateOrchestrator.ts`
+- `server/ghost/domain/quality/QualityTypes.ts`
+- `server/ghost/infrastructure/quality/*.ts` (4 analyzers)
+- `server/ghost/infrastructure/repositories/*.ts` (2 repos)
+- `server/ghost/infrastructure/audit/PublicationAuditService.ts`
+- `server/routes/ghost-quality.ts` (API endpoints)
+- `tests/ghost/unit/QualityGateOrchestrator.test.ts`
+- `e2e/ghost-quality-gates.spec.ts`
+
+---
+
+### **✅ PR #3: Approval API Endpoints** (COMPLETE - 2026-01-08)
+**Included in PR #2** - All endpoints already implemented in `ghost-quality.ts`
+
+**API Endpoints:**
+- ✅ GET `/api/ghost/quality/pending-review` - lista postów do akceptacji
+- ✅ POST `/api/ghost/quality/:postId/approve` - zatwierdź post
+- ✅ POST `/api/ghost/quality/:postId/reject` - odrzuć post  
+- ✅ GET `/api/ghost/quality/:postId/report` - raport jakości
+
+**Features:**
+- ✅ Middleware: only authenticated users can access
+- ✅ Updates `ghost_approval_queue` status on approve/reject
+- ✅ Creates audit entry in `ghost_publication_audit`
+- ✅ Tenant-based authorization (users see only their posts)
+- ✅ Updates `ghost_scheduled_posts.approval_status`
+
+**Tests:**
+- ✅ Covered in E2E: `ghost-quality-gates.spec.ts`
+
+---
+
+### **⏸️ PR #4: Scheduler Update** (PENDING)
+**Zależy od:** PR #3 must be merged
+
+**TODO:**
+- [ ] Modify scheduler query: filter by `approval_status = 'approved' OR 'auto_approved'`
+- [ ] Skip posts with `approval_status = 'pending'`
+- [ ] Skip posts with `approval_status = 'rejected'`
+- [ ] Create audit entry on publish attempt (success/failure)
+- [ ] Handle approval expiration (posts older than 30 days auto-expire)
+
+**Tests TODO:**
+- [ ] Integration test scheduler with approval filter (5 tests)
+- [ ] E2E test end-to-end workflow (10 tests)
+
+**Files to update:**
+- `server/ghost/infrastructure/scheduler-cron.ts` (UPDATE)
+- `server/ghost/infrastructure/SchedulerService.ts` (UPDATE)
+- `test/integration/SchedulerApproval.test.ts` (NEW)
+- `e2e/ghost-scheduler-approval.spec.ts` (NEW)
+
+---
+
+### **⏸️ PR #5: Frontend UI** (PENDING)
+**Zależy od:** PR #4 must be merged
+
+**TODO Components:**
+- [ ] `<QualityReviewQueue />` - lista postów do akceptacji
+- [ ] `<QualityScoreCard />` - wyświetla score + issues
+- [ ] `<ApprovalActions />` - przyciski Approve/Reject
+- [ ] `<PublicationAuditLog />` - historia zmian
+- [ ] Add "Quality" tab to GHOST dashboard
+- [ ] Add notifications for posts requiring review
+- [ ] Add filters: priority, status, date range
+
+**Tests TODO:**
+- [ ] Component tests (4 tests per component = 16 tests)
+- [ ] E2E test user workflow (8 tests)
+
+**Files to create:**
+- `src/components/ghost/quality/QualityReviewQueue.tsx` (NEW)
+- `src/components/ghost/quality/QualityScoreCard.tsx` (NEW)
+- `src/components/ghost/quality/ApprovalActions.tsx` (NEW)
+- `src/components/ghost/quality/PublicationAuditLog.tsx` (NEW)
+- `src/lib/ghost-quality-api.ts` (NEW - API client)
+- `e2e/ghost-quality-ui.spec.ts` (NEW)
+
+---
+
+### **📊 Phase 9 Progress Summary**
+
+```
+PR #1: Database Schema       ████████████████████ 100% ✅ DONE (2026-01-08)
+PR #2: Quality Gates         ████████████████████ 100% ✅ DONE (2026-01-08)
+PR #3: Approval API          ████████████████████ 100% ✅ DONE (2026-01-08)
+PR #4: Scheduler Update      ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ PENDING
+PR #5: Frontend UI           ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ PENDING
+                             ─────────────────────
+                             TOTAL: 60% Complete
+```
+
+**Estimated timeline:**
+- PR #1: ✅ DONE (2026-01-08)
+- PR #2: ✅ DONE (2026-01-08) - Quality Gates + API endpoints combined
+- PR #3: ✅ DONE (2026-01-08) - Included in PR #2
+- PR #4: 1 day (Scheduler integration)
+- PR #5: 2-3 days (Frontend UI)
+**Total: 3-4 days remaining** to complete Phase 9
+
+**Next action:** PR #4 - Scheduler Update (filter by approval_status)
+
+---
+
+**Architect Approval dla console.log:**
+```typescript
+// Pattern:
 // ARCHITECT_APPROVED: [powód] - YYYY-MM-DD - Stefan
 console.log('debug message');
 
@@ -3029,36 +3187,154 @@ Frontend (Dashboard):
 
 ### **Database Schema GHOST**
 
+**ŹRÓDŁO PRAWDY:** `stefano-eliksir-backend/shared/schema.ts`
+
 ```typescript
-ghostBrands:
-├── id, name, description
-├── primaryColor, secondaryColor, fontFamily
-├── logoUrl
-└── timestamps
+// ==================== PHASE 1-2: BRAND KITS & ASSETS ====================
 
-ghostAssets:
-├── id, brandId (FK)
-├── type (logo/image/icon/background)
-├── url, cloudinaryPublicId
-├── metadata (jsonb: width, height, format, size, tags)
-└── createdAt
+ghost_brands (ghostBrands):
+├── id                  text PRIMARY KEY
+├── tenant_id           text NOT NULL
+├── name                text NOT NULL
+├── logo_public_id      text NOT NULL (Cloudinary)
+├── logo_url            text NOT NULL
+├── primary_color       text NOT NULL (hex)
+├── logo_position       enum('br','bl','tr','tl') DEFAULT 'br'
+├── frame_style         enum('minimal','premium','elegant') DEFAULT 'minimal'
+├── padding             integer DEFAULT 24
+├── border_width        integer DEFAULT 12
+├── created_at          timestamp DEFAULT NOW()
+└── updated_at          timestamp DEFAULT NOW()
 
-ghostCompositions:
-├── id, brandId (FK)
-├── name, description
-├── template (social-post/story/banner/promo)
-├── layers (jsonb: array of layer configs)
-├── outputUrl
-└── timestamps
+ghost_assets (ghostAssets):
+├── id                  text PRIMARY KEY
+├── tenant_id           text NOT NULL
+├── public_id           text UNIQUE NOT NULL (Cloudinary)
+├── url                 text NOT NULL
+├── original_name       text NOT NULL
+├── format              text NOT NULL (jpg/png/webp)
+├── width               integer NOT NULL
+├── height              integer NOT NULL
+├── bytes               integer NOT NULL
+├── tags                text DEFAULT '[]' (JSON array)
+├── metadata            text (JSON object)
+├── created_at          timestamp DEFAULT NOW()
+├── category            enum('cocktail','event','bar','people','food','outdoor','other') (Phase 6)
+├── subcategory         text (Phase 6)
+├── quality_score       integer 0-100 (Phase 6)
+└── ai_metadata         text (Phase 6 JSON: colors, mood, lighting, composition)
 
-ghostScheduledPosts:
-├── id, compositionId (FK)
-├── platform (instagram/facebook/twitter)
-├── scheduledAt
-├── status (pending/posted/failed)
-├── postUrl (po publikacji)
-└── timestamps
+// ==================== PHASE 3: TEMPLATES & SCHEDULING ====================
+
+ghost_templates (ghostTemplates):
+├── id                  text PRIMARY KEY
+├── tenant_id           text NOT NULL
+├── name                text NOT NULL
+├── description         text
+├── type                enum('daily','weekly','event','promotion','announcement','custom')
+├── status              enum('active','inactive','archived') DEFAULT 'active'
+├── caption_template    text NOT NULL (template z {{placeholders}})
+├── brand_voice         text DEFAULT 'friendly'
+├── hashtags            text DEFAULT '[]' (JSON array)
+├── call_to_action      text
+├── target_audience     text
+├── metadata            text DEFAULT '{}' (JSON object)
+├── created_at          timestamp DEFAULT NOW()
+└── updated_at          timestamp DEFAULT NOW()
+
+ghost_scheduled_posts (ghostScheduledPosts):
+├── id                              text PRIMARY KEY
+├── tenant_id                       text NOT NULL
+├── template_id                     text FK -> ghost_templates.id
+├── asset_id                        text FK -> ghost_assets.id NOT NULL
+├── brand_kit_id                    text FK -> ghost_brands.id NOT NULL
+├── scheduled_for                   timestamp NOT NULL
+├── status                          enum('scheduled','published','failed','cancelled') DEFAULT 'scheduled'
+├── caption_text                    text NOT NULL
+├── hashtags                        text DEFAULT '[]' (JSON array)
+├── composed_image_url              text (po kompozycji)
+├── published_at                    timestamp
+├── published_url                   text (Instagram post URL)
+├── failure_reason                  text
+├── metadata                        text DEFAULT '{}' (JSON)
+├── campaign_id                     text (Phase 7)
+├── content_quality_score           integer 0-100 (Phase 8)
+├── content_validation_metadata     text (Phase 8 JSON)
+├── approval_status                 enum('pending','approved','rejected','auto_approved') DEFAULT 'pending' (Phase 9)
+├── approved_at                     timestamp (Phase 9)
+├── approved_by_user_id             integer (Phase 9)
+├── last_quality_score              integer 0-100 (Phase 9)
+├── last_quality_decision           enum('auto_approve','require_review','reject') (Phase 9)
+├── created_at                      timestamp DEFAULT NOW()
+└── updated_at                      timestamp DEFAULT NOW()
+
+// ==================== PHASE 7: CAMPAIGNS ====================
+
+ghost_campaigns (ghostCampaigns):
+├── id                  text PRIMARY KEY
+├── tenant_id           text NOT NULL
+├── name                text NOT NULL
+├── description         text
+├── type                enum('seasonal','promotional','educational','awareness')
+├── start_date          timestamp NOT NULL
+├── end_date            timestamp NOT NULL
+├── status              enum('draft','active','paused','completed') DEFAULT 'draft'
+├── goals               text (JSON: engagementTarget, reachTarget, conversions)
+├── content_plan        text DEFAULT '[]' (JSON array of ContentPlanItem)
+├── metadata            text (JSON)
+├── created_at          timestamp DEFAULT NOW()
+└── updated_at          timestamp DEFAULT NOW()
+
+ghost_campaign_posts (ghostCampaignPosts):
+├── campaign_id         text FK -> ghost_campaigns.id ON DELETE CASCADE
+├── scheduled_post_id   text FK -> ghost_scheduled_posts.id ON DELETE CASCADE
+├── content_plan_index  integer
+├── compliance_score    integer 0-100
+└── assigned_at         timestamp DEFAULT NOW()
+
+// ==================== PHASE 9: QUALITY CONTROL & APPROVAL ====================
+
+ghost_quality_gate_results (ghostQualityGateResults):
+├── id                          text PRIMARY KEY
+├── scheduled_post_id           text FK -> ghost_scheduled_posts.id ON DELETE CASCADE
+├── image_quality_score         integer 0-100
+├── content_quality_score       integer 0-100
+├── seo_score                   integer 0-100
+├── brand_consistency_score     integer 0-100
+├── safety_pass                 boolean DEFAULT true
+├── overall_score               integer 0-100
+├── decision                    enum('auto_approve','require_review','reject') NOT NULL
+├── validation_results          text DEFAULT '{}' (JSON: detailed issues)
+└── executed_at                 timestamp DEFAULT NOW()
+
+ghost_approval_queue (ghostApprovalQueue):
+├── id                      text PRIMARY KEY
+├── scheduled_post_id       text FK -> ghost_scheduled_posts.id ON DELETE CASCADE UNIQUE
+├── tenant_id               text NOT NULL
+├── status                  enum('pending','approved','rejected','expired') DEFAULT 'pending'
+├── priority                integer DEFAULT 5 (1=low, 10=urgent)
+├── assigned_to_user_id     integer
+├── reviewed_by_user_id     integer
+├── reviewed_at             timestamp
+├── review_notes            text
+├── expires_at              timestamp
+└── created_at              timestamp DEFAULT NOW()
+
+ghost_publication_audit (ghostPublicationAudit):
+├── id                  text PRIMARY KEY
+├── scheduled_post_id   text FK -> ghost_scheduled_posts.id ON DELETE CASCADE
+├── tenant_id           text NOT NULL
+├── event_type          enum('created','validated','approved','rejected','published','publish_failed')
+├── triggered_by        enum('system','user','scheduler')
+├── event_data          text DEFAULT '{}' (JSON: event-specific details)
+└── created_at          timestamp DEFAULT NOW()
 ```
+
+**UWAGA:** Każda tabela GHOST musi być:
+1. ✅ Zdefiniowana w `shared/schema.ts` (TypeScript Drizzle ORM)
+2. ✅ Utworzona przez migration SQL (`migrations/00XX_*.sql`)
+3. ✅ Udokumentowana w tym raporcie
+4. ✅ Przetestowana w `e2e/ghost-*.spec.ts`
 
 ### **GHOST API Endpoints (Planned)**
 

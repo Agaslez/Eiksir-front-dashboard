@@ -348,6 +348,200 @@ git commit -m "feat: add NewComponent"
 **Architect Approval dla console.log:**
 ```typescript
 // Pattern:
+// ... existing code
+```
+
+---
+
+## 🎯 GHOST PHASE 9: QUALITY CONTROL CHECKLIST
+
+**Status obecny:** PR #1 DONE ✅ (2026-01-08)
+
+### **✅ PR #1: Database Schema + Migration** (COMPLETE)
+**Branch:** `feature/ghost-phase9-quality-control`  
+**Commit:** `23a1a92` + submodule `9fe7baf`
+
+- ✅ Created migration `0013_ghost_quality_control.sql`
+- ✅ 3 new tables:
+  * `ghost_quality_gate_results` - validation scores & decisions
+  * `ghost_approval_queue` - posts requiring review
+  * `ghost_publication_audit` - lifecycle audit trail
+- ✅ All tables match `shared/schema.ts` (single source of truth)
+- ✅ Migration applied successfully to database
+- ✅ Test created: `e2e/ghost-quality-schema.spec.ts` (17 tests)
+- ✅ Documentation updated: SYSTEM_ARCHITECTURE_REPORT.md
+- ✅ PR pushed to GitHub: https://github.com/Agaslez/Eiksir-front-dashboard/pull/new/feature/ghost-phase9-quality-control
+
+**Files changed:**
+- `stefano-eliksir-backend/migrations/0013_ghost_quality_control.sql` (NEW)
+- `stefano-eliksir-backend/shared/schema.ts` (UPDATED - Phase 9 tables)
+- `e2e/ghost-quality-schema.spec.ts` (NEW - 17 tests)
+- `SYSTEM_ARCHITECTURE_REPORT.md` (UPDATED - full schema docs)
+
+---
+
+### **⏳ PR #2: Quality Gates Implementation** (IN PROGRESS)
+**Cel:** Implementacja analyzerów jakości i orchestratora decyzji
+
+**TODO:**
+- [ ] **ImageQualityAnalyzer** (już istnieje w MVP)
+  * Lokalizacja: `server/ghost/infrastructure/quality/ImageQualityAnalyzer.ts`
+  * Sprawdza: rozdzielczość, aspect ratio, format, rozmiar pliku
+  * Output: score 0-100 + lista issues
+
+- [ ] **ContentQualityAnalyzer**
+  * Lokalizacja: `server/ghost/infrastructure/quality/ContentQualityAnalyzer.ts`  
+  * Sprawdza: długość caption, hashtagi, emojis, Call-to-Action
+  * Output: score 0-100 + lista issues
+
+- [ ] **SafetyChecker**
+  * Lokalizacja: `server/ghost/infrastructure/quality/SafetyChecker.ts`
+  * Sprawdza: profanity, spam patterns, blacklisted words
+  * Output: pass/fail + lista issues
+
+- [ ] **BrandConsistencyValidator**
+  * Lokalizacja: `server/ghost/infrastructure/quality/BrandConsistencyValidator.ts`
+  * Sprawdza: zgodność z brand kit, kolory, logo visibility
+  * Output: score 0-100 + lista issues
+
+- [ ] **QualityGateOrchestrator** (już istnieje)
+  * Lokalizacja: `server/ghost/application/QualityGateOrchestrator.ts`
+  * Uruchamia wszystkie 4 analyzery
+  * Oblicza overall_score (weighted average)
+  * Podejmuje decyzję: `auto_approve | require_review | reject`
+  * Zapisuje wynik do `ghost_quality_gate_results`
+
+**Decision Tree:**
+```typescript
+if (overall_score >= 95 && all_checks_pass) {
+  decision = 'auto_approve'  // ✅ Automatyczna akceptacja
+} else if (overall_score >= 80 && all_checks_pass) {
+  decision = 'require_review'  // ⏳ Wymaga ludzkiej akceptacji
+} else {
+  decision = 'reject'  // ❌ Odrzucone
+}
+```
+
+**Tests TODO:**
+- [ ] Unit tests dla każdego analyzera
+  * ImageQualityAnalyzer.test.ts (5 tests)
+  * ContentQualityAnalyzer.test.ts (5 tests)
+  * SafetyChecker.test.ts (5 tests)
+  * BrandConsistencyValidator.test.ts (5 tests)
+- [ ] Integration test dla orchestratora
+  * QualityGateOrchestrator.test.ts (10 tests)
+- [ ] E2E test workflow
+  * `e2e/ghost-quality-gates.spec.ts` (8 tests)
+
+**Files to create/update:**
+- `server/ghost/infrastructure/quality/ContentQualityAnalyzer.ts` (NEW)
+- `server/ghost/infrastructure/quality/SafetyChecker.ts` (NEW)
+- `server/ghost/infrastructure/quality/BrandConsistencyValidator.ts` (NEW)
+- `server/ghost/application/QualityGateOrchestrator.ts` (UPDATE)
+- `test/unit/quality/*.test.ts` (NEW - 4 files)
+- `test/integration/QualityGateOrchestrator.test.ts` (NEW)
+- `e2e/ghost-quality-gates.spec.ts` (NEW)
+
+---
+
+### **⏸️ PR #3: Approval API Endpoints** (PENDING)
+**Zależy od:** PR #2 must be merged
+
+**TODO:**
+- [ ] GET `/api/ghost/quality/pending-review` - lista postów do akceptacji
+- [ ] POST `/api/ghost/quality/:postId/approve` - zatwierdź post
+- [ ] POST `/api/ghost/quality/:postId/reject` - odrzuć post
+- [ ] GET `/api/ghost/quality/:postId/report` - raport jakości
+- [ ] Middleware: only admin/manager can approve
+- [ ] Update `ghost_approval_queue` status on approve/reject
+- [ ] Create audit entry in `ghost_publication_audit`
+
+**Tests TODO:**
+- [ ] E2E test approval workflow (5 tests)
+- [ ] Unit tests dla approval endpoints (8 tests)
+
+**Files to create:**
+- `server/routes/ghost-quality.ts` (NEW - API endpoints)
+- `server/ghost/application/ApprovalUseCase.ts` (NEW)
+- `e2e/ghost-approval-api.spec.ts` (NEW)
+
+---
+
+### **⏸️ PR #4: Scheduler Update** (PENDING)
+**Zależy od:** PR #3 must be merged
+
+**TODO:**
+- [ ] Modify scheduler query: filter by `approval_status = 'approved' OR 'auto_approved'`
+- [ ] Skip posts with `approval_status = 'pending'`
+- [ ] Skip posts with `approval_status = 'rejected'`
+- [ ] Create audit entry on publish attempt (success/failure)
+- [ ] Handle approval expiration (posts older than 30 days auto-expire)
+
+**Tests TODO:**
+- [ ] Integration test scheduler with approval filter (5 tests)
+- [ ] E2E test end-to-end workflow (10 tests)
+
+**Files to update:**
+- `server/ghost/infrastructure/scheduler-cron.ts` (UPDATE)
+- `server/ghost/infrastructure/SchedulerService.ts` (UPDATE)
+- `test/integration/SchedulerApproval.test.ts` (NEW)
+- `e2e/ghost-scheduler-approval.spec.ts` (NEW)
+
+---
+
+### **⏸️ PR #5: Frontend UI** (PENDING)
+**Zależy od:** PR #4 must be merged
+
+**TODO Components:**
+- [ ] `<QualityReviewQueue />` - lista postów do akceptacji
+- [ ] `<QualityScoreCard />` - wyświetla score + issues
+- [ ] `<ApprovalActions />` - przyciski Approve/Reject
+- [ ] `<PublicationAuditLog />` - historia zmian
+- [ ] Add "Quality" tab to GHOST dashboard
+- [ ] Add notifications for posts requiring review
+- [ ] Add filters: priority, status, date range
+
+**Tests TODO:**
+- [ ] Component tests (4 tests per component = 16 tests)
+- [ ] E2E test user workflow (8 tests)
+
+**Files to create:**
+- `src/components/ghost/quality/QualityReviewQueue.tsx` (NEW)
+- `src/components/ghost/quality/QualityScoreCard.tsx` (NEW)
+- `src/components/ghost/quality/ApprovalActions.tsx` (NEW)
+- `src/components/ghost/quality/PublicationAuditLog.tsx` (NEW)
+- `src/lib/ghost-quality-api.ts` (NEW - API client)
+- `e2e/ghost-quality-ui.spec.ts` (NEW)
+
+---
+
+### **📊 Phase 9 Progress Summary**
+
+```
+PR #1: Database Schema       ████████████████████ 100% ✅ DONE (2026-01-08)
+PR #2: Quality Gates         ░░░░░░░░░░░░░░░░░░░░   0% ⏳ NEXT
+PR #3: Approval API          ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ PENDING
+PR #4: Scheduler Update      ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ PENDING
+PR #5: Frontend UI           ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ PENDING
+                             ─────────────────────
+                             TOTAL: 20% Complete
+```
+
+**Estimated timeline:**
+- PR #1: ✅ DONE (2026-01-08)
+- PR #2: 1-2 days (Quality Gates)
+- PR #3: 1 day (Approval API)
+- PR #4: 1 day (Scheduler)
+- PR #5: 2-3 days (Frontend UI)
+**Total: 5-7 days** to complete Phase 9
+
+**Next action:** Start PR #2 - Quality Gates Implementation
+
+---
+
+**Architect Approval dla console.log:**
+```typescript
+// Pattern:
 // ARCHITECT_APPROVED: [powód] - YYYY-MM-DD - Stefan
 console.log('debug message');
 

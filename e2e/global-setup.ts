@@ -10,8 +10,7 @@
 import { chromium, FullConfig } from '@playwright/test';
 
 async function globalSetup(config: FullConfig) {
-  const BACKEND_URL = process.env.BACKEND_URL || 
-    'https://eliksir-backend-front-dashboard.onrender.com';
+  const BACKEND_URL = process.env.BACKEND_URL || 'http://127.0.0.1:3001';
   
   console.log('🔥 Global Setup: Verifying backend is ready...');
   console.log(`Backend URL: ${BACKEND_URL}`);
@@ -65,7 +64,7 @@ async function globalSetup(config: FullConfig) {
   // Throw error to fail entire test suite if backend is down
   throw new Error(
     `Backend not available at ${BACKEND_URL}/api/health. ` +
-    `Render.com cold start exceeded 7.5 min - check deployment status.`
+    `Check if backend is running locally or update BACKEND_URL env variable.`
   );
 }
 

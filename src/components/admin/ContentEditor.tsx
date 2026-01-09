@@ -4,12 +4,15 @@ import { ELIKSIR_STYLES } from '../../lib/styles';
 import ImageGalleryEnhanced from './ImageGalleryEnhanced';
 
 interface ContentSection {
-  id: string;
+  id: number;
   sectionKey: string;
   title: string;
   content: string;
   imageUrl?: string;
+  ctaText?: string;
+  ctaLink?: string;
   displayOrder?: number;
+  updatedAt?: string;
 }
 
 export default function ContentEditor() {
@@ -69,7 +72,7 @@ export default function ContentEditor() {
     }
   };
 
-  const handleChange = (id: string, field: keyof ContentSection, value: string) => {
+  const handleChange = (id: number, field: keyof ContentSection, value: string) => {
     setSections(sections.map(s =>
       s.id === id ? { ...s, [field]: value } : s
     ));
@@ -143,7 +146,7 @@ export default function ContentEditor() {
                   {section.imageUrl && (
                     <img
                       src={`${API_URL}${section.imageUrl}`}
-                      alt={section.name}
+                      alt={section.title}
                       className="w-full max-w-md rounded-eliksir"
                     />
                   )}

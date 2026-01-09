@@ -45,7 +45,7 @@ test.describe('GHOST Phase 9: Quality Control Schema', () => {
     // If query succeeds, it means:
     // 1. Database connection works
     // 2. Related tables exist (including quality_gate_results via FK)
-    expect(data).toHaveProperty('posts');
+    expect(data).toHaveProperty('scheduledPosts');
     
     console.log('✅ Schema validation: ghost_quality_gate_results table accessible');
   });
@@ -63,7 +63,7 @@ test.describe('GHOST Phase 9: Quality Control Schema', () => {
     const data = await response.json();
     
     // Posts array should exist (approval_queue references scheduled_posts)
-    expect(Array.isArray(data.posts)).toBe(true);
+    expect(Array.isArray(data.scheduledPosts)).toBe(true);
     
     console.log('✅ Schema validation: ghost_approval_queue table relationships OK');
   });
@@ -81,7 +81,7 @@ test.describe('GHOST Phase 9: Quality Control Schema', () => {
     
     // Any scheduled post creates audit entry when created
     // This validates the audit table is working
-    expect(data).toHaveProperty('posts');
+    expect(data).toHaveProperty('scheduledPosts');
     
     console.log('✅ Schema validation: ghost_publication_audit table accessible');
   });
@@ -122,31 +122,28 @@ test.describe('GHOST Phase 9: Quality Control Schema', () => {
 
   test('should support approval decision types', async ({ request }) => {
     // Verify decision enum constraint: auto_approve, require_review, reject
-    // This will be fully tested in PR #2 Quality Gates
     
-    const response = await request.get(`${BACKEND_URL}/api/health`, {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
-
+    const response = await request.get(`${BACKEND_URL}/api/ghost/schema/validate`);
     expect(response.ok()).toBeTruthy();
-    const data = await response.json();
     
-    expect(data).toHaveProperty('status');
-    expect(data.status).toBe('ok');
+    const data = await response.json();
+    expect(data).toHaveProperty('constraints');
+    expect(data.constraints).toHaveProperty('decisionEnum');
+    expect(data.constraints.decisionEnum).toBe(true);
     
     console.log('✅ Schema validation: Decision enum constraints ready');
   });
 
   test('should support audit event types', async ({ request }) => {
     // Verify audit event_type enum: created, validated, approved, rejected, published, etc
-    // Full audit trail testing in PR #3
     
-    const response = await request.get(`${BACKEND_URL}/api/ghost/brand`, {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
-
-    // Accept both 200 (brand exists) and 404 (no brand yet)
-    expect([200, 404]).toContain(response.status());
+    const response = await request.get(`${BACKEND_URL}/api/ghost/schema/validate`);
+    expect(response.ok()).toBeTruthy();
+    
+    const data = await response.json();
+    expect(data).toHaveProperty('constraints');
+    expect(data.constraints).toHaveProperty('eventTypeEnum');
+    expect(data.constraints.eventTypeEnum).toBe(true);
     
     console.log('✅ Schema validation: Audit event types configured');
   });
@@ -165,11 +162,11 @@ test.describe('GHOST Phase 9: Quality Control Schema', () => {
     const data = await response.json();
     
     // If we can query schedule, FK relationships are valid
-    expect(data).toHaveProperty('posts');
-    expect(Array.isArray(data.posts)).toBe(true);
+    expect(data).toHaveProperty('scheduledPosts');
+    expect(Array.isArray(data.scheduledPosts)).toBe(true);
     
     console.log('✅ Schema validation: Foreign key relationships intact');
-    console.log(`   📊 Scheduled posts: ${data.posts.length}`);
+    console.log(`   📊 Scheduled posts: ${data.scheduledPosts.length}`);
   });
 
   test('should have indexes for performance optimization', async ({ request }) => {
@@ -218,13 +215,19 @@ test.describe('GHOST Phase 9: Migration Verification', () => {
     // 2. ghost_approval_queue
     // 3. ghost_publication_audit
     
-    const response = await request.get(`${BACKEND_URL}/api/health`);
+    const response = await request.get(`${BACKEND_URL}/api/ghost/schema/validate`);
     expect(response.ok()).toBeTruthy();
     
     const data = await response.json();
-    expect(data.status).toBe('ok');
+    expect(data).toHaveProperty('tables');
+    expect(data.tables.count).toBe(3);
+    expect(data.tables.allPresent).toBe(true);
+    expect(data.tables.names).toEqual([
+      'ghost_approval_queue',
+      'ghost_publication_audit', 
+      'ghost_quality_gate_results'
+    ]);
     
-    // If backend health is OK, database schema is valid
     console.log('✅ Migration 0013: All 3 tables verified');
   });
 
@@ -239,7 +242,7 @@ test.describe('GHOST Phase 9: Migration Verification', () => {
     const data = await response.json();
     
     // Future posts will have approval_status set
-    expect(data).toHaveProperty('posts');
+    expect(data).toHaveProperty('scheduledPosts');
     
     console.log('✅ Migration 0013: ghost_scheduled_posts modified successfully');
   });
@@ -250,11 +253,14 @@ test.describe('GHOST Phase 9: Migration Verification', () => {
     // - Deleting post removes approval queue entry
     // - Deleting post removes audit entries
     
-    const response = await request.get(`${BACKEND_URL}/api/ghost/schedule`, {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
-
+    const response = await request.get(`${BACKEND_URL}/api/ghost/schema/validate`);
     expect(response.ok()).toBeTruthy();
+    
+    const data = await response.json();
+    expect(data).toHaveProperty('foreignKeys');
+    expect(data.foreignKeys.count).toBe(3);
+    expect(data.foreignKeys.cascadeDelete).toBe(true);
+    expect(data.foreignKeys.allValid).toBe(true);
     
     console.log('✅ Migration 0013: CASCADE DELETE constraints configured');
   });
@@ -269,13 +275,14 @@ test.describe('GHOST Phase 9: Readiness Check', () => {
     // - BrandConsistencyValidator
     // - QualityGateOrchestrator
     
-    const response = await request.get(`${BACKEND_URL}/api/health`);
+    const response = await request.get(`${BACKEND_URL}/api/ghost/schema/validate`);
     expect(response.ok()).toBeTruthy();
     
     const data = await response.json();
-    expect(data.status).toBe('ok');
-    expect(data).toHaveProperty('database');
-    expect(data.database).toBe('connected');
+    expect(data.valid).toBe(true);
+    expect(data.tables.allPresent).toBe(true);
+    expect(data.constraints.allPresent).toBe(true);
+    expect(data.foreignKeys.allValid).toBe(true);
     
     console.log('✅ Phase 9 PR #1 Complete: Schema ready for Quality Gates implementation');
   });
@@ -287,12 +294,12 @@ test.describe('GHOST Phase 9: Readiness Check', () => {
     // - POST /api/ghost/quality/:postId/reject
     // - GET /api/ghost/quality/:postId/report
     
-    const response = await request.get(`${BACKEND_URL}/api/ghost/brand`, {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
-
-    // Both 200 and 404 are valid responses
-    expect([200, 404]).toContain(response.status());
+    const response = await request.get(`${BACKEND_URL}/api/ghost/schema/validate`);
+    expect(response.ok()).toBeTruthy();
+    
+    const data = await response.json();
+    expect(data.tables.count).toBe(3);
+    expect(data.constraints.statusEnum).toBe(true); // approval queue status
     
     console.log('✅ Phase 9 PR #1 Complete: Schema ready for Approval API');
   });
@@ -303,14 +310,12 @@ test.describe('GHOST Phase 9: Readiness Check', () => {
     // - Create audit entries for publish attempts
     // - Handle approval expiration
     
-    const response = await request.get(`${BACKEND_URL}/api/ghost/schedule`, {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
-
+    const response = await request.get(`${BACKEND_URL}/api/ghost/schema/validate`);
     expect(response.ok()).toBeTruthy();
-    const data = await response.json();
     
-    expect(data).toHaveProperty('posts');
+    const data = await response.json();
+    expect(data.columns.approvalStatus).toBe(true); // approval_status column exists
+    expect(data.constraints.eventTypeEnum).toBe(true); // audit event types ready
     
     console.log('✅ Phase 9 PR #1 Complete: Schema ready for Scheduler Update');
   });
@@ -322,14 +327,12 @@ test.describe('GHOST Phase 9: Readiness Check', () => {
     // - <ApprovalActions />
     // - <PublicationAuditLog />
     
-    const response = await request.get(`${BACKEND_URL}/api/ghost/templates`, {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
-
+    const response = await request.get(`${BACKEND_URL}/api/ghost/schema/validate`);
     expect(response.ok()).toBeTruthy();
-    const data = await response.json();
     
-    expect(data).toHaveProperty('templates');
+    const data = await response.json();
+    expect(data.valid).toBe(true);
+    expect(data.migration.complete).toBe(true);
     
     console.log('✅ Phase 9 PR #1 Complete: Schema ready for Frontend UI');
   });
@@ -337,15 +340,17 @@ test.describe('GHOST Phase 9: Readiness Check', () => {
 
 // Summary test
 test('PHASE 9 PR #1: Database Schema Migration - COMPLETE', async ({ request }) => {
-  const response = await request.get(`${BACKEND_URL}/api/health`, {
-    headers: { Authorization: `Bearer ${authToken}` },
-  });
-
+  const response = await request.get(`${BACKEND_URL}/api/ghost/schema/validate`);
   expect(response.ok()).toBeTruthy();
+  
   const data = await response.json();
   
-  expect(data.status).toBe('ok');
-  expect(data.database).toBe('connected');
+  expect(data.valid).toBe(true);
+  expect(data.tables.allPresent).toBe(true);
+  expect(data.constraints.allPresent).toBe(true);
+  expect(data.foreignKeys.allValid).toBe(true);
+  expect(data.columns.approvalStatus).toBe(true);
+  expect(data.migration.complete).toBe(true);
 
   console.log('\n========================================');
   console.log('🎉 GHOST Phase 9 PR #1: COMPLETE');

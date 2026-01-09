@@ -964,12 +964,216 @@ with:
 
 ---
 
+## 🎭 **EPIK 8: ORCHESTRATOR ARCHITECTURE** 🌟 *NEW - "Jedna Prawda + Best Tools"*
+
+**FILOZOFIA:** Cerber nie reimplementuje wszystkiego - jest dirigentem najlepszych narzędzi.
+
+### 8.1 Tool Registry + Mapping
+```typescript
+// src/orchestrator/ToolRegistry.ts
+interface ToolAdapter {
+  name: string;
+  command: string;
+  parseOutput(raw: string): Violation[];
+  mapRule(cerberRule: string): string; // cerber rule → tool config
+}
+
+const TOOLS: Record<string, ToolAdapter> = {
+  eslint: {
+    name: 'ESLint',
+    command: 'npx eslint --format json',
+    mapRule: (rule) => {
+      // security/no-console → @typescript-eslint/no-console
+      if (rule === 'best-practices/no-console') return '@typescript-eslint/no-console';
+    }
+  },
+  hadolint: {
+    name: 'Hadolint (Dockerfile)',
+    command: 'docker run --rm -i hadolint/hadolint',
+    mapRule: (rule) => {
+      // docker/no-root-user → DL3002
+      if (rule === 'docker/no-root-user') return 'DL3002';
+    }
+  },
+  actionlint: {
+    name: 'actionlint (GitHub Actions)',
+    command: 'actionlint -format json',
+    mapRule: (rule) => rule // Direct mapping
+  },
+  trufflehog: {
+    name: 'TruffleHog (Secrets)',
+    command: 'trufflehog git file://.',
+    mapRule: (rule) => null // Global secrets scanning
+  }
+};
+```
+**Deadline:** Dzień 15, 3 godziny
+
+### 8.2 Orchestrator Engine
+```typescript
+// src/orchestrator/Orchestrator.ts
+export class Orchestrator {
+  async validate(workflow: string, contract: Contract): Promise<Report> {
+    const violations: Violation[] = [];
+    
+    // 1. Cerber's semantic validation (struktura, triggers, jobs)
+    violations.push(...this.semanticValidator.validate(workflow, contract));
+    
+    // 2. Delegate to specialized tools
+    for (const rule of contract.rules) {
+      const tool = this.findTool(rule);
+      if (tool) {
+        const toolViolations = await this.runTool(tool, workflow, rule);
+        violations.push(...toolViolations);
+      }
+    }
+    
+    // 3. Aggregate results
+    return this.aggregateReport(violations);
+  }
+  
+  private findTool(rule: Rule): ToolAdapter | null {
+    // Map cerber rule to external tool
+    if (rule.id.startsWith('security/no-hardcoded-secrets')) return TOOLS.trufflehog;
+    if (rule.id.startsWith('best-practices/')) return TOOLS.eslint;
+    if (rule.id.startsWith('docker/')) return TOOLS.hadolint;
+    return null; // Cerber handles it
+  }
+  
+  private async runTool(tool: ToolAdapter, workflow: string, rule: Rule): Promise<Violation[]> {
+    // 1. Check if tool installed
+    if (!await this.isInstalled(tool)) {
+      console.warn(`⚠️  ${tool.name} not installed - skipping ${rule.id}`);
+      return [];
+    }
+    
+    // 2. Map cerber rule to tool config
+    const toolRule = tool.mapRule(rule.id);
+    
+    // 3. Run tool
+    const output = await exec(`${tool.command} ${toolRule}`);
+    
+    // 4. Parse output → Cerber violations
+    return tool.parseOutput(output);
+  }
+}
+```
+**Deadline:** Dzień 16, 4 godziny
+
+### 8.3 Contract Extensions (Tool Declaration)
+```yaml
+# .cerber/contract.yml
+version: 2.0.0
+extends: nodejs-base
+
+# Declare which tools to use
+tools:
+  eslint:
+    enabled: true
+    config: .eslintrc.json
+  hadolint:
+    enabled: false  # No Dockerfile in this project
+  actionlint:
+    enabled: true
+  trufflehog:
+    enabled: true
+    scan-depth: 100  # commits
+
+rules:
+  # Cerber's semantic rules (always active)
+  ci/required-permissions:
+    enforced: true
+  
+  # Delegated rules (require tool)
+  best-practices/no-console:
+    enforced: true
+    tool: eslint  # ESLint handles this
+    
+  security/no-hardcoded-secrets:
+    enforced: true
+    tool: trufflehog  # TruffleHog handles this
+```
+**Deadline:** Dzień 17, 2 godziny
+
+### 8.4 Unified Output Format
+```typescript
+// All violations from all tools → unified format
+interface Violation {
+  id: string;              // cerber rule ID
+  severity: 'error' | 'warning';
+  path: string;            // file path
+  line?: number;
+  message: string;
+  hint?: string;
+  source: string;          // 'cerber' | 'eslint' | 'hadolint'
+  toolViolation?: any;     // Original tool output (for debugging)
+}
+
+// Example output:
+// ❌ security/no-hardcoded-secrets (trufflehog)
+//    .github/workflows/ci.yml:15
+//    Hardcoded secret detected: AWS_SECRET_ACCESS_KEY
+//    💡 Hint: Use GitHub Secrets instead
+```
+**Deadline:** Dzień 17, 1 godzina
+
+### 8.5 Tool Installation Check + Guidance
+```typescript
+// src/orchestrator/ToolChecker.ts
+export class ToolChecker {
+  async checkAll(): Promise<ToolStatus[]> {
+    const tools = ['eslint', 'hadolint', 'actionlint', 'trufflehog'];
+    return Promise.all(tools.map(tool => this.check(tool)));
+  }
+  
+  async check(tool: string): Promise<ToolStatus> {
+    const installed = await this.isInstalled(tool);
+    return {
+      name: tool,
+      installed,
+      installCommand: this.getInstallCommand(tool),
+      optional: this.isOptional(tool)
+    };
+  }
+  
+  private getInstallCommand(tool: string): string {
+    const commands = {
+      eslint: 'npm install -D eslint',
+      hadolint: 'brew install hadolint',
+      actionlint: 'brew install actionlint',
+      trufflehog: 'brew install trufflehog'
+    };
+    return commands[tool] || '';
+  }
+}
+
+// CLI output:
+// 🔍 Checking tools...
+// ✅ ESLint (v8.57.0)
+// ⚠️  Hadolint not installed - run: brew install hadolint
+// ✅ actionlint (v1.6.27)
+// ❌ TruffleHog not installed (required for security/no-hardcoded-secrets)
+//    Install: brew install trufflehog
+```
+**Deadline:** Dzień 18, 2 godziny
+
+**✅ Epik 8 Total: 12 godzin (1.5 dnia)**
+
+**KORZYŚCI:**
+- 🚀 **10x szybszy development** - używamy gotowych narzędzi
+- 🎯 **Lepsza jakość** - specialized tools > custom implementation
+- 🔧 **Łatwiejsze utrzymanie** - nie utrzymujemy 100+ reguł
+- 🌍 **Kompatybilność** - integracja z ekosystemem
+- 📊 **Jedna prawda** - contract.yml pozostaje źródłem prawdy
+
+---
+
 ## 📊 **ROADMAP TIMELINE**
 
 ```
 Week 1  (Epik 1-4):   Foundation       [Fala 1 + 1.5]
 Week 2  (Epik 5-7):   Features         [Kontrakty, Templates, Auto-fix]
-Week 3  (Epik 8-10):  Integrations     [GitHub API, Action, Reusable]
+Week 3  (Epik 8-10):  Integrations     [Orchestrator, GitHub API, Action]
 Week 4  (Epik 11-13): Quality          [Tests, Release, Docs]
 Week 5  (Epik 14-15): Community        [Contributors, Discord, Sponsors]
 ```

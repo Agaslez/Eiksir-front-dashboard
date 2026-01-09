@@ -4,7 +4,6 @@ import {
     ChevronRight,
     Heart,
     Maximize2,
-    RefreshCw,
     Share2,
     X
 } from 'lucide-react';
@@ -227,50 +226,6 @@ const Gallery = () => {
               {category.label}
             </button>
           ))}
-          
-          {/* Refresh Button */}
-          <button
-            onClick={async () => {
-              setLoading(true);
-              const response = await fetch(API.galleryPanorama);
-              
-              // ZAWSZE pobieramy raw text — nawet przy 429/500
-              const raw = await response.text();
-              
-              let data;
-              try {
-                data = JSON.parse(raw);
-              } catch {
-                console.error("Invalid JSON from refresh /gallery/public:", raw.substring(0, 100));
-                setGalleryImages([]);
-                setLoading(false);
-                return;
-              }
-              
-              // Jeśli backend zwrócił błąd (np. 429), ale JSON się sparsował
-              if (!response.ok || !data.success) {
-                console.warn("Gallery refresh API returned error:", data);
-                setGalleryImages([]);
-                setLoading(false);
-                return;
-              }
-              
-              const sortedImages = data.images
-                .filter((img: GalleryImage) => img.url)
-                .sort((a: GalleryImage, b: GalleryImage) => 
-                  (a.displayOrder || 0) - (b.displayOrder || 0)
-                );
-              setGalleryImages(sortedImages);
-              setLoading(false);
-              trackEvent('gallery_refresh', { category: activeCategory });
-            }}
-            disabled={loading}
-            className="px-4 py-2 rounded-full text-sm font-medium transition-all bg-gray-800 text-gray-300 hover:bg-gray-700 disabled:opacity-50 flex items-center gap-2"
-            title="Odśwież galerię"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Odśwież
-          </button>
         </div>
 
         {/* Gallery Grid */}

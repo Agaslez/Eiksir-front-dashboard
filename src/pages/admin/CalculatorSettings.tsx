@@ -76,7 +76,7 @@ export default function CalculatorSettings() {
       business: 45,
     },
     addonNames: {
-      fountain: 'Fontanna Alkoholowa',
+      fountain: 'Fontanna Czekolady',
       keg: 'Keg Piwo/Cydry 30L',
       extraBarman: 'Dodatkowy Barman',
       lemonade: 'Dystrybutor Lemoniady',
@@ -289,15 +289,13 @@ export default function CalculatorSettings() {
           <input
             type="number"
             step="1"
-            min="1"
+            min="0"
             max="99"
-            value={configData.promoDiscount}
+            value={configData.promoDiscount || ''}
             onChange={(e) => {
-              const val = parseFloat(e.target.value);
-              if (val >= 1 && val <= 99) {
+              const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
+              if (val >= 0 && val <= 99) {
                 updateConfig(['promoDiscount'], val);
-              } else if (e.target.value === '') {
-                updateConfig(['promoDiscount'], 0);
               }
             }}
             className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"

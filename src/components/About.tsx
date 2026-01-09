@@ -34,9 +34,15 @@ const About = () => {
         }
         
         if (data.success) {
-          const aboutSection = data.sections.find((s: any) => s.id === 'about');
-          if (aboutSection?.content) {
-            setContent(aboutSection.content);
+          const aboutSection = data.sections.find((s: any) => 
+            s.sectionKey === 'about' || s.sectionKey === 'o-nas'
+          );
+          if (aboutSection) {
+            setContent({
+              heading: aboutSection.title || 'Kim jesteśmy?',
+              description: aboutSection.content || content.description,
+              image: aboutSection.imageUrl || '/images/about.jpg',
+            });
           }
         }
       } catch (error) {

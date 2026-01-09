@@ -5,10 +5,11 @@ import ImageGalleryEnhanced from './ImageGalleryEnhanced';
 
 interface ContentSection {
   id: string;
-  name: string;
+  sectionKey: string;
   title: string;
-  description: string;
+  content: string;
   imageUrl?: string;
+  displayOrder?: number;
 }
 
 export default function ContentEditor() {
@@ -50,7 +51,7 @@ export default function ContentEditor() {
         },
         body: JSON.stringify({
           title: section.title,
-          description: section.description,
+          content: section.content,
           imageUrl: section.imageUrl,
         }),
       });
@@ -123,7 +124,7 @@ export default function ContentEditor() {
             {/* Section Header */}
             <div className="bg-gradient-to-r from-eliksir-gold to-eliksir-gold-dark p-4">
               <h3 className="font-playfair text-xl text-black font-bold">
-                {section.name}
+                {section.sectionKey || section.title}
               </h3>
             </div>
 
@@ -135,8 +136,8 @@ export default function ContentEditor() {
                     <h4 className="text-2xl font-playfair text-white mb-2">
                       {section.title}
                     </h4>
-                    <p className="text-white/70 leading-relaxed">
-                      {section.description}
+                    <p className="text-white/70 leading-relaxed whitespace-pre-line">
+                      {section.content}
                     </p>
                   </div>
                   {section.imageUrl && (
@@ -164,18 +165,21 @@ export default function ContentEditor() {
                     />
                   </div>
 
-                  {/* Description */}
+                  {/* Description / Content */}
                   <div>
                     <label className="block text-white/80 text-sm mb-2">
-                      Opis
+                      Treść
                     </label>
                     <textarea
-                      value={section.description}
-                      onChange={(e) => handleChange(section.id, 'description', e.target.value)}
-                      rows={4}
+                      value={section.content}
+                      onChange={(e) => handleChange(section.id, 'content', e.target.value)}
+                      rows={8}
                       className={ELIKSIR_STYLES.input}
-                      placeholder="Wprowadź opis..."
+                      placeholder="Wprowadź treść sekcji..."
                     />
+                    <p className="text-white/40 text-xs mt-1">
+                      Tip: Używaj Enter dla nowej linii. Frontend zachowa formatowanie.
+                    </p>
                   </div>
 
                   {/* Image URL */}

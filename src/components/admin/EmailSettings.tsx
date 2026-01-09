@@ -272,8 +272,8 @@ export default function EmailSettings() {
             </label>
             <input
               type="number"
-              value={settings.smtpPort}
-              onChange={(e) => handleChange('smtpPort', parseInt(e.target.value))}
+              value={settings.smtpPort || 587}
+              onChange={(e) => handleChange('smtpPort', parseInt(e.target.value) || 587)}
               className={ELIKSIR_STYLES.input}
               placeholder="587"
             />

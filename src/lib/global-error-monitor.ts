@@ -24,6 +24,8 @@ class GlobalErrorMonitor {
   private maxErrors = 50; // Keep last 50 errors in memory
   private backendUrl: string;
   private isInitialized = false;
+  private consecutiveLogFailures = 0;
+  private readonly MAX_LOG_FAILURES = 5; // Circuit breaker threshold
 
   constructor(backendUrl: string) {
     this.backendUrl = backendUrl;
@@ -83,8 +85,8 @@ class GlobalErrorMonitor {
       const method = config?.method || 'GET';
       const startTime = Date.now();
 
-      // CRITICAL: Skip logging for /api/logs to prevent infinite loop
-      const isLogEndpoint = url.includes('/api/logs');
+      // CRITICAL: Skip logging for /api/logs AND /logs to prevent infinite loop
+      const isLogEndpoint = url.includes('/api/logs') || url.includes('/logs');
       if (isLogEndpoint) {
         return originalFetch(...args);
       }
@@ -191,6 +193,14 @@ class GlobalErrorMonitor {
    * Send error to backend /api/logs
    */
   private async sendToBackend(error: ErrorEntry) {
+    // Circuit breaker: stop trying after too many consecutive failures
+    if (this.consecutiveLogFailures >= this.MAX_LOG_FAILURES) {
+      console.warn(
+        `[GlobalErrorMonitor] Circuit breaker open - stopped logging after ${this.MAX_LOG_FAILURES} consecutive failures`
+      );
+      return;
+    }
+
     try {
       const response = await fetch(`${this.backendUrl}/logs`, {
         method: 'POST',
@@ -214,11 +224,21 @@ class GlobalErrorMonitor {
       });
 
       if (!response.ok) {
-        console.warn('[GlobalErrorMonitor] Backend returned non-ok status:', response.status);
+        this.consecutiveLogFailures++;
+        console.warn(
+          `[GlobalErrorMonitor] Backend returned ${response.status} (failure ${this.consecutiveLogFailures}/${this.MAX_LOG_FAILURES})`
+        );
+      } else {
+        // Reset counter on success
+        this.consecutiveLogFailures = 0;
       }
     } catch (err) {
       // Silent fail - don't throw errors in error handler
-      console.warn('[GlobalErrorMonitor] Network error sending to backend:', err);
+      this.consecutiveLogFailures++;
+      console.warn(
+        `[GlobalErrorMonitor] Network error (failure ${this.consecutiveLogFailures}/${this.MAX_LOG_FAILURES}):`,
+        err
+      );
     }
   }
 

@@ -1,5 +1,5 @@
 import { config } from '@/lib/config';
-import { Image as ImageIcon, RefreshCw, Trash2, Upload } from 'lucide-react';
+import { ArrowDown, ArrowUp, Image as ImageIcon, RefreshCw, Trash2, Upload } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface GalleryImage {
@@ -42,29 +42,32 @@ export default function GalleryManager() {
     if (!files || files.length === 0) return;
 
     setUploading(true);
-    const formData = new FormData();
-    
-    for (let i = 0; i < files.length; i++) {
-      formData.append('images', files[i]);
-    }
 
     try {
       const token = localStorage.getItem('eliksir_jwt_token');
-      const response = await fetch(`${API_URL}/api/content/gallery/upload`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      
+      // Upload each file separately (backend expects single file)
+      for (let i = 0; i < files.length; i++) {
+        const formData = new FormData();
+        formData.append('image', files[i]); // Backend expects 'image' not 'images'
 
-      if (response.ok) {
-        alert('Zdjęcia uploaded successfully!');
-        fetchImages(); // Refresh list
-      } else {
-        const error = await response.json();
-        alert(`Upload failed: ${error.message || 'Unknown error'}`);
+        const response = await fetch(`${API_URL}/api/content/images/upload`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          alert(`Upload failed for ${files[i].name}: ${error.error || 'Unknown error'}`);
+          continue;
+        }
       }
+
+      alert('Zdjęcia uploaded successfully!');
+      fetchImages(); // Refresh list
     } catch (error) {
       console.error('Upload error:', error);
       alert('Upload failed. Check console for details.');
@@ -78,7 +81,8 @@ export default function GalleryManager() {
 
     try {
       const token = localStorage.getItem('eliksir_jwt_token');
-      const response = await fetch(`${API_URL}/api/content/gallery/${id}`, {
+      // Backend expects /images/:filename, not /gallery/:id
+      const response = await fetch(`${API_URL}/api/content/images/${encodeURIComponent(filename)}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -90,11 +94,53 @@ export default function GalleryManager() {
         alert('Zdjęcie usunięte!');
         fetchImages();
       } else {
-        alert('Błąd usuwania zdjęcia');
+        const errorData = await response.json();
+        alert(`Błąd usuwania zdjęcia: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Delete error:', error);
       alert('Błąd usuwania zdjęcia');
+    }
+  };
+
+  const handleReorder = async (imageId: number, direction: 'up' | 'down') => {
+    const currentIndex = images.findIndex(img => img.id === imageId);
+    if (currentIndex === -1) return;
+    
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= images.length) return;
+
+    // Create new array with swapped positions
+    const newImages = [...images];
+    [newImages[currentIndex], newImages[newIndex]] = [newImages[newIndex], newImages[currentIndex]];
+
+    // Update display order
+    const reorderData = newImages.map((img, index) => ({
+      id: img.id,
+      order: index
+    }));
+
+    try {
+      const token = localStorage.getItem('eliksir_jwt_token');
+      const response = await fetch(`${API_URL}/api/content/images/reorder`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ images: reorderData }),
+      });
+
+      if (response.ok) {
+        setImages(newImages.map((img, index) => ({ ...img, displayOrder: index })));
+      } else {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Reorder failed:', response.status, errorData);
+        alert(`Błąd zmiany kolejności: ${errorData.error || response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Reorder error:', error);
+      alert('Błąd zmiany kolejności (network error)');
     }
   };
 
@@ -142,6 +188,20 @@ export default function GalleryManager() {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => handleReorder(image.id, 'up')}
+                    className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                    title="Przesuń w górę"
+                  >
+                    <ArrowUp className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleReorder(image.id, 'down')}
+                    className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                    title="Przesuń w dół"
+                  >
+                    <ArrowDown className="w-4 h-4" />
+                  </button>
                   <button
                     onClick={() => handleDelete(image.id, image.filename)}
                     className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"

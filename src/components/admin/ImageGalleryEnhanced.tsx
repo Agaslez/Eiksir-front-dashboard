@@ -141,14 +141,14 @@ export default function ImageGalleryEnhanced() {
 
     const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     
-    // Swap only the two images
-    const image1 = sortedImages[currentIndex];
-    const image2 = sortedImages[swapIndex];
+    // Swap positions in array
+    [sortedImages[currentIndex], sortedImages[swapIndex]] = [sortedImages[swapIndex], sortedImages[currentIndex]];
     
-    const newOrder = [
-      { id: image1.id, order: swapIndex },
-      { id: image2.id, order: currentIndex }
-    ];
+    // Send ALL images with their new order (backend needs complete list)
+    const reorderData = sortedImages.map((img, index) => ({
+      id: img.id,
+      order: index
+    }));
 
     try {
       const response = await fetchWithAuth(`${API_URL}/api/content/images/reorder`, {
@@ -156,18 +156,19 @@ export default function ImageGalleryEnhanced() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ images: newOrder }),
+        body: JSON.stringify({ images: reorderData }),
       });
 
       const data = await response.json();
       if (data.success) {
         await fetchImages();
       } else {
+        console.error('Reorder failed:', data);
         alert('❌ Błąd: ' + (data.error || 'Nieznany błąd'));
       }
     } catch (error) {
       console.error('Error reordering images:', error);
-      alert('❌ Błąd podczas zmiany kolejności');
+      alert('❌ Błąd podczas zmiany kolejności (network error)');
     }
   };
 

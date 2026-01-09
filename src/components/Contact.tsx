@@ -24,6 +24,7 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Funkcje walidacyjne
   const validateEmail = (email: string): boolean => {
@@ -65,7 +66,7 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!agreedToTerms) {
@@ -78,69 +79,63 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
       return;
     }
 
-    const lines: string[] = [
-      `Imię i nazwisko: ${formData.name}`,
-      `Email: ${formData.email}`,
-      `Telefon: ${formData.phone || '-'}`,
-      `Data imprezy: ${formData.date || '-'}`,
-      `Liczba gości (z formularza): ${formData.guests || '-'}`,
-      '',
-      'Wiadomość:',
-      formData.message || '-',
-      '',
-      '--- ZGODY ---',
-      '☑️ Wyrażam zgodę na przetwarzanie moich danych osobowych',
-    ];
+    setIsSubmitting(true);
 
-    if (calculatorSnapshot) {
-      lines.push(
-        '',
-        '------------------------',
-        'Dane z kalkulatora:',
-        `Pakiet: ${calculatorSnapshot.offerName}`,
-        `Liczba gości (kalkulator): ${calculatorSnapshot.guests}`,
-        `Szacunkowa cena: ${calculatorSnapshot.totalAfterDiscount.toLocaleString('pl-PL')} PLN`,
-        `Cena za osobę: ~${calculatorSnapshot.pricePerGuest.toFixed(2)} PLN`,
-        `Szacowana liczba koktajli: ${calculatorSnapshot.estimatedCocktails}`,
-        `Szacowana liczba shotów: ${calculatorSnapshot.estimatedShots}`,
-        'Dodatki:',
-        `- Fontanna czekolady: ${
-          calculatorSnapshot.addons.fountain ? 'TAK' : 'NIE'
-        }`,
-        `- Dystrybutor lemoniady: ${
-          calculatorSnapshot.addons.lemonade ? 'TAK' : 'NIE'
-        }`,
-        `- KEG piwa: ${calculatorSnapshot.addons.keg ? 'TAK' : 'NIE'}`,
-        `- Hockery 6 szt.: ${calculatorSnapshot.addons.hockery ? 'TAK' : 'NIE'}`,
-        `- Oświetlenie LED: ${calculatorSnapshot.addons.ledLighting ? 'TAK' : 'NIE'}`
-      );
-    }
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      
+      // Przygotuj dane do wysłania
+      const emailData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || undefined,
+        message: formData.message,
+        eventType: 'Zapytanie z formularza',
+        eventDate: formData.date || undefined,
+        guestCount: formData.guests ? parseInt(formData.guests) : undefined,
+        calculatorSnapshot: calculatorSnapshot || undefined,
+      };
 
-    const subject = `Zapytanie ELIKSIR - ${formData.name || 'bez imienia'}`;
-    const body = lines.join('\n');
-
-    const mailtoLink = `mailto:kontakt@eliksir-bar.pl?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
-
-    setIsSubmitted(true);
-
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        date: '',
-        guests: '',
-        message: '',
+      // Wyślij przez backend API
+      const response = await fetch(`${API_URL}/api/email/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(emailData),
       });
-      setAgreedToTerms(false);
-      setErrors({});
-    }, 3000);
 
-    window.location.href = mailtoLink;
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Błąd podczas wysyłania wiadomości');
+      }
+
+      // Sukces!
+      setIsSubmitted(true);
+      alert('✅ Wiadomość wysłana! Odezwiemy się wkrótce.');
+
+      // Reset form after 3 seconds
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          date: '',
+          guests: '',
+          message: '',
+        });
+        setAgreedToTerms(false);
+        setErrors({});
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error sending contact form:', error);
+      alert('❌ Błąd podczas wysyłania. Spróbuj ponownie lub skontaktuj się bezpośrednio: kontakt@eliksir-bar.pl');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

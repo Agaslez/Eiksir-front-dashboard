@@ -4,6 +4,14 @@ import { useEffect, useState } from 'react';
 
 interface CalculatorConfig {
   promoDiscount: number; // 0-1 (0.2 = 20%)
+  packages: {
+    basic: { name: string; price: number };
+    premium: { name: string; price: number };
+    exclusive: { name: string; price: number };
+    kids: { name: string; price: number };
+    family: { name: string; price: number };
+    business: { name: string; price: number };
+  };
   pricePerExtraGuest: {
     basic: number;
     premium: number;
@@ -11,6 +19,14 @@ interface CalculatorConfig {
     kids: number;
     family: number;
     business: number;
+  };
+  addonNames: {
+    fountain: string;
+    keg: string;
+    extraBarman: string;
+    lemonade: string;
+    hockery: string;
+    ledLighting: string;
   };
   addons: {
     fountain: {
@@ -22,6 +38,7 @@ interface CalculatorConfig {
       pricePerKeg: number;
       guestsPerKeg: number;
     };
+    extraBarman: number;
     lemonade: {
       base: number;
       blockGuests: number;
@@ -42,6 +59,14 @@ interface CalculatorConfig {
 export default function CalculatorSettings() {
   const [configData, setConfigData] = useState<CalculatorConfig>({
     promoDiscount: 0.2,
+    packages: {
+      basic: { name: 'BASIC', price: 2900 },
+      premium: { name: 'PREMIUM', price: 3900 },
+      exclusive: { name: 'EXCLUSIVE', price: 5200 },
+      kids: { name: 'Kids Party 0%', price: 1900 },
+      family: { name: 'Family & Seniors', price: 2600 },
+      business: { name: 'Event firmowy', price: 3900 },
+    },
     pricePerExtraGuest: {
       basic: 40,
       premium: 50,
@@ -49,6 +74,14 @@ export default function CalculatorSettings() {
       kids: 30,
       family: 35,
       business: 45,
+    },
+    addonNames: {
+      fountain: 'Fontanna Alkoholowa',
+      keg: 'Keg Piwo/Cydry 30L',
+      extraBarman: 'Dodatkowy Barman',
+      lemonade: 'Dystrybutor Lemoniady',
+      hockery: 'Hockery (6 szt.)',
+      ledLighting: 'Oświetlenie LED',
     },
     addons: {
       fountain: {
@@ -60,6 +93,7 @@ export default function CalculatorSettings() {
         pricePerKeg: 550,
         guestsPerKeg: 50,
       },
+      extraBarman: 400,
       lemonade: {
         base: 250,
         blockGuests: 60,
@@ -133,7 +167,7 @@ export default function CalculatorSettings() {
     }
   };
 
-  const updateConfig = (path: string[], value: number) => {
+  const updateConfig = (path: string[], value: number | string) => {
     setConfigData((prev) => {
       const updated = { ...prev };
       let current: any = updated;
@@ -168,6 +202,68 @@ export default function CalculatorSettings() {
           <Save size={20} />
           {saving ? 'Zapisywanie...' : 'Zapisz Zmiany'}
         </button>
+      </div>
+
+      {/* Pakiety - Ceny Bazowe */}
+      <div className="bg-neutral-800/50 p-6 rounded-lg border border-white/10">
+        <h3 className="text-xl font-semibold text-white mb-4">📦 Pakiety - Ceny Bazowe</h3>
+        <p className="text-white/60 text-sm mb-4">
+          Ceny podstawowe pakietów (przed doliczeniem gości)
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {Object.keys(configData.packages).map((packageKey) => (
+            <div key={packageKey} className="space-y-2">
+              <label className="block text-sm text-white/70 capitalize font-semibold">
+                {packageKey.toUpperCase()}
+              </label>
+              <div>
+                <label className="block text-xs text-white/50 mb-1">Nazwa</label>
+                <input
+                  type="text"
+                  value={configData.packages[packageKey as keyof typeof configData.packages].name}
+                  onChange={(e) => updateConfig(['packages', packageKey, 'name'], e.target.value as any)}
+                  className="w-full px-3 py-2 bg-neutral-800 text-white border border-white/10 rounded text-sm"
+                  placeholder="Nazwa pakietu"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-white/50 mb-1">Cena (PLN)</label>
+                <input
+                  type="number"
+                  step="100"
+                  min="0"
+                  value={configData.packages[packageKey as keyof typeof configData.packages].price}
+                  onChange={(e) => updateConfig(['packages', packageKey, 'price'], parseFloat(e.target.value))}
+                  className="w-full px-3 py-2 bg-neutral-800 text-white border border-white/10 rounded text-sm"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Nazwy Dodatków */}
+      <div className="bg-neutral-800/50 p-6 rounded-lg border border-white/10">
+        <h3 className="text-xl font-semibold text-white mb-4">🏷️ Nazwy Dodatków</h3>
+        <p className="text-white/60 text-sm mb-4">
+          Edytuj nazwy dodatków wyświetlane w kalkulatorze
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {Object.keys(configData.addonNames).map((addonKey) => (
+            <div key={addonKey}>
+              <label className="block text-sm text-white/70 mb-2 capitalize">
+                {addonKey}
+              </label>
+              <input
+                type="text"
+                value={configData.addonNames[addonKey as keyof typeof configData.addonNames]}
+                onChange={(e) => updateConfig(['addonNames', addonKey], e.target.value as any)}
+                className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+                placeholder={`Nazwa dla ${addonKey}`}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Promo Discount */}

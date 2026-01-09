@@ -8,6 +8,14 @@ import { Section } from './layout/Section';
 
 interface CalculatorConfig {
   promoDiscount: number;
+  packages?: {
+    basic: { name: string; price: number };
+    premium: { name: string; price: number };
+    exclusive: { name: string; price: number };
+    kids: { name: string; price: number };
+    family: { name: string; price: number };
+    business: { name: string; price: number };
+  };
   pricePerExtraGuest: {
     basic: number;
     premium: number;
@@ -15,6 +23,14 @@ interface CalculatorConfig {
     kids: number;
     family: number;
     business: number;
+  };
+  addonNames?: {
+    fountain: string;
+    keg: string;
+    extraBarman: string;
+    lemonade: string;
+    hockery: string;
+    ledLighting: string;
   };
   addons: {
     fountain: { perGuest: number; min: number; max: number };
@@ -73,6 +89,14 @@ function Calculator({ onCalculate }: CalculatorProps) {
 
   const DEFAULT_CONFIG: CalculatorConfig = {
     promoDiscount: 0,
+    packages: {
+      basic: { name: 'BASIC', price: 2900 },
+      premium: { name: 'PREMIUM', price: 3900 },
+      exclusive: { name: 'EXCLUSIVE', price: 5200 },
+      kids: { name: 'Kids Party 0%', price: 1900 },
+      family: { name: 'Family & Seniors', price: 2600 },
+      business: { name: 'Event firmowy', price: 3900 },
+    },
     pricePerExtraGuest: {
       basic: 40,
       premium: 50,
@@ -80,6 +104,14 @@ function Calculator({ onCalculate }: CalculatorProps) {
       kids: 30,
       family: 35,
       business: 60,
+    },
+    addonNames: {
+      fountain: 'Fontanna Alkoholowa',
+      keg: 'Keg Piwo/Cydry 30L',
+      extraBarman: 'Dodatkowy Barman',
+      lemonade: 'Dystrybutor Lemoniady',
+      hockery: 'Hockery (6 szt.)',
+      ledLighting: 'Oświetlenie LED',
     },
     addons: {
       fountain: { perGuest: 10, min: 600, max: 1200 },
@@ -163,7 +195,12 @@ function Calculator({ onCalculate }: CalculatorProps) {
       };
     }
 
-    const offer = OFFERS[selectedOfferId];
+    const baseOffer = OFFERS[selectedOfferId];
+    const offer = {
+      ...baseOffer,
+      price: config.packages?.[selectedOfferId]?.price ?? baseOffer.price,
+      name: config.packages?.[selectedOfferId]?.name ?? baseOffer.name,
+    };
     const isKidsOffer = offer.id === 'kids';
 
     // Oblicz fountainCost
@@ -454,7 +491,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
                     }
                   />
                   <span>
-                    Fontanna czekolady{' '}
+                    {config.addonNames?.fountain ?? 'Fontanna Alkoholowa'}{' '}
                     {addons.fountain && (
                       <span className="text-amber-300">
                         (+{fountainCost.toLocaleString('pl-PL')} zł)
@@ -478,7 +515,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
                         }
                       />
                       <span>
-                        KEG piwa 30L (z obsługą – wymaga dodatkowego barmana){' '}
+                        {config.addonNames?.keg ?? 'Keg Piwo/Cydry 30L'} (z obsługą – wymaga dodatkowego barmana){' '}
                         {kegSelected && (
                           <span className="text-amber-300">
                             (+{(kegCost + extraBarmanCost).toLocaleString('pl-PL')} zł)
@@ -488,7 +525,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
                     </label>
                     {kegSelected && extraBarmanCost > 0 && (
                       <p className="text-xs text-amber-300/80 ml-6">
-                        w tym: KEG {kegCost.toLocaleString('pl-PL')} zł + dodatkowy barman{' '}
+                        w tym: KEG {kegCost.toLocaleString('pl-PL')} zł + {config.addonNames?.extraBarman ?? 'Dodatkowy Barman'}{' '}
                         {extraBarmanCost.toLocaleString('pl-PL')} zł
                       </p>
                     )}
@@ -514,7 +551,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
                     }
                   />
                   <span>
-                    Dystrybutor lemoniady 2×12L{' '}
+                    {config.addonNames?.lemonade ?? 'Dystrybutor Lemoniady'}{' '}
                     {addons.lemonade && (
                       <span className="text-amber-300">
                         (+{lemonadeCost.toLocaleString('pl-PL')} zł)
@@ -536,7 +573,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
                     }
                   />
                   <span>
-                    Hockery 6 szt. (eleganckie stołki barowe){' '}
+                    {config.addonNames?.hockery ?? 'Hockery (6 szt.)'}{' '}
                     {addons.hockery && (
                       <span className="text-amber-300">
                         (+{hockeryCost.toLocaleString('pl-PL')} zł)
@@ -557,7 +594,7 @@ function Calculator({ onCalculate }: CalculatorProps) {
                     }
                   />
                   <span>
-                    Oświetlenie LED z personalizacją{' '}
+                    {config.addonNames?.ledLighting ?? 'Oświetlenie LED'}{' '}
                     {addons.ledLighting && (
                       <span className="text-amber-300">
                         (+{ledLightingCost.toLocaleString('pl-PL')} zł)

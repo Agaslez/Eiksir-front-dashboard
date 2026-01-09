@@ -58,7 +58,7 @@ interface CalculatorConfig {
 
 export default function CalculatorSettings() {
   const [configData, setConfigData] = useState<CalculatorConfig>({
-    promoDiscount: 0.2,
+    promoDiscount: 20,
     packages: {
       basic: { name: 'BASIC', price: 2900 },
       premium: { name: 'PREMIUM', price: 3900 },
@@ -127,7 +127,12 @@ export default function CalculatorSettings() {
       });
       const data = await response.json();
       if (data.success && data.config) {
-        setConfigData(data.config);
+        // Convert decimal (0-1) to percentage (1-99) for display
+        const displayConfig = {
+          ...data.config,
+          promoDiscount: Math.round(data.config.promoDiscount * 100)
+        };
+        setConfigData(displayConfig);
       }
     } catch (error) {
       console.error('Error fetching calculator config:', error);
@@ -137,13 +142,18 @@ export default function CalculatorSettings() {
   const handleSave = async () => {
     try {
       setSaving(true);
+      // Convert percentage (1-99) to decimal (0-1) for API
+      const apiConfig = {
+        ...configData,
+        promoDiscount: configData.promoDiscount / 100
+      };
       const response = await fetch(`${API_URL}/api/calculator/config`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
         },
-        body: JSON.stringify(configData),
+        body: JSON.stringify(apiConfig),
       });
 
       if (response.ok) {
@@ -268,20 +278,36 @@ export default function CalculatorSettings() {
 
       {/* Promo Discount */}
       <div className="bg-neutral-800/50 p-6 rounded-lg border border-white/10">
-        <h3 className="text-xl font-semibold text-white mb-4">Promocyjny Rabat</h3>
+        <h3 className="text-xl font-semibold text-white mb-4">💰 Promocyjny Rabat</h3>
+        <p className="text-white/60 text-sm mb-4">
+          Wpisz wartość rabatu w procentach (1-99)
+        </p>
         <div>
           <label className="block text-sm text-white/70 mb-2">
-            Promo Discount (0-1)
+            Rabat (%)
           </label>
           <input
             type="number"
-            step="0.01"
-            min="0"
-            max="1"
+            step="1"
+            min="1"
+            max="99"
             value={configData.promoDiscount}
-            onChange={(e) => updateConfig(['promoDiscount'], parseFloat(e.target.value))}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value);
+              if (val >= 1 && val <= 99) {
+                updateConfig(['promoDiscount'], val);
+              } else if (e.target.value === '') {
+                updateConfig(['promoDiscount'], 0);
+              }
+            }}
             className="w-full px-4 py-2 bg-neutral-800 text-white border border-white/10 rounded"
+            placeholder="np. 20 dla 20% rabatu"
           />
+          {configData.promoDiscount > 0 && (
+            <p className="text-amber-400 text-xs mt-2">
+              Rabat: {configData.promoDiscount}% (cena końcowa = {100 - configData.promoDiscount}% ceny bazowej)
+            </p>
+          )}
         </div>
       </div>
 

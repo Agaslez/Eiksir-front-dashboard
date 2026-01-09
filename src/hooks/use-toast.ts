@@ -21,6 +21,7 @@ export const useToast = () => {
       console.error(message);
       alert(`❌ ${message}`);
     } else {
+      // ARCHITECT_APPROVED: Toast notification logging for user feedback tracking - 2026-01-09 - Stefan
       console.log(message);
       alert(`✅ ${message}`);
     }

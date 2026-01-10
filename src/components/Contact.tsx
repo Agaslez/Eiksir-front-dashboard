@@ -349,10 +349,10 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
                         if (errors.name)
                           setErrors((prev) => ({ ...prev, name: '' }));
                       }}
-                      className={`w-full bg-transparent border-b py-2 text-white text-sm focus:outline-none mt-1 ${
+                      className={`w-full bg-transparent border-b py-2 text-white text-sm focus:outline-none mt-1 transition-colors duration-300 ${
                         errors.name
                           ? 'border-red-500'
-                          : 'border-white/25 focus:border-amber-400'
+                          : 'border-white/25 focus:border-amber-400 hover:border-white/40'
                       }`}
                     />
                     {errors.name && (
@@ -374,10 +374,10 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
                           if (errors.email)
                             setErrors((prev) => ({ ...prev, email: '' }));
                         }}
-                        className={`w-full bg-transparent border-b py-2 text-white text-sm focus:outline-none mt-1 ${
+                        className={`w-full bg-transparent border-b py-2 text-white text-sm focus:outline-none mt-1 transition-colors duration-300 ${
                           errors.email
                             ? 'border-red-500'
-                            : 'border-white/25 focus:border-amber-400'
+                            : 'border-white/25 focus:border-amber-400 hover:border-white/40'
                         }`}
                       />
                       {errors.email && (
@@ -401,10 +401,10 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
                         placeholder="123456789 (9 cyfr)"
                         maxLength={9}
                         pattern="\d{9}"
-                        className={`w-full bg-transparent border-b py-2 text-white text-sm focus:outline-none mt-1 ${
+                        className={`w-full bg-transparent border-b py-2 text-white text-sm focus:outline-none mt-1 transition-colors duration-300 ${
                           errors.phone
                             ? 'border-red-500'
-                            : 'border-white/25 focus:border-amber-400'
+                            : 'border-white/25 focus:border-amber-400 hover:border-white/40'
                         }`}
                       />
                       {errors.phone && (
@@ -426,7 +426,7 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
                         onChange={(e) =>
                           setFormData((f) => ({ ...f, date: e.target.value }))
                         }
-                        className="w-full bg-transparent border-b border-white/25 py-2 text-white text-sm focus:border-amber-400 focus:outline-none mt-1"
+                        className="w-full bg-transparent border-b border-white/25 py-2 text-white text-sm focus:border-amber-400 hover:border-white/40 focus:outline-none mt-1 transition-colors duration-300"
                       />
                     </div>
                     <div>
@@ -446,10 +446,10 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
                           if (errors.guests)
                             setErrors((prev) => ({ ...prev, guests: '' }));
                         }}
-                        className={`w-full bg-transparent border-b py-2 text-white text-sm focus:outline-none mt-1 ${
+                        className={`w-full bg-transparent border-b py-2 text-white text-sm focus:outline-none mt-1 transition-colors duration-300 ${
                           errors.guests
                             ? 'border-red-500'
-                            : 'border-white/25 focus:border-amber-400'
+                            : 'border-white/25 focus:border-amber-400 hover:border-white/40'
                         }`}
                       />
                       {errors.guests && (
@@ -470,7 +470,7 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
                       onChange={(e) =>
                         setFormData((f) => ({ ...f, message: e.target.value }))
                       }
-                      className="w-full bg-transparent border-b border-white/25 py-2 text-white text-sm focus:border-amber-400 focus:outline-none resize-none"
+                      className="w-full bg-transparent border-b border-white/25 py-2 text-white text-sm focus:border-amber-400 hover:border-white/40 focus:outline-none resize-none transition-colors duration-300"
                       placeholder="Np. wesele 120 osób, plener, chcemy bar z pokazem flair i pakietem premium..."
                     />
                   </div>

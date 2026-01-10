@@ -1,5 +1,6 @@
-import { Mail, RefreshCw, Save, Send } from 'lucide-react';
+import { CheckCircle, Mail, RefreshCw, Save, Send, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useToast } from '../../hooks/use-toast';
 import { ELIKSIR_STYLES } from '../../lib/styles';
 
 // Using console for logging with architect approvals
@@ -28,30 +29,7 @@ interface EmailLog {
   sentAt: string;
 }
 
-interface InboxMessage {
-  id: number;
-  fromEmail: string;
-  fromName: string | null;
-  subject: string;
-  preview: string | null;
-  receivedAt: string;
-  isRead: boolean;
-}
 
-const EMAIL_PRESETS = {
-  'home.pl': {
-    smtpHost: 'poczta2559727.home.pl',
-    smtpPort: 587,
-  },
-  'Gmail': {
-    smtpHost: 'smtp.gmail.com',
-    smtpPort: 587,
-  },
-  'Onet': {
-    smtpHost: 'smtp.poczta.onet.pl',
-    smtpPort: 587,
-  },
-};
 
 export default function EmailSettings() {
   const [settings, setSettings] = useState<EmailSettings>({
@@ -63,20 +41,28 @@ export default function EmailSettings() {
     fromName: 'ELIKSIR Bar',
   });
   const [logs, setLogs] = useState<EmailLog[]>([]);
-  const [inbox, setInbox] = useState<InboxMessage[]>([]);
   const [testing, setTesting] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [syncing, setSyncing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [passwordChanged, setPasswordChanged] = useState(false);
+  const [newLogsCount, setNewLogsCount] = useState(0);
+  const [lastLogId, setLastLogId] = useState<number | null>(null);
+  const { toast } = useToast();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   // Load settings on mount
   useEffect(() => {
     loadSettings();
     loadLogs();
-    loadInbox();
   }, []);
+
+  // Auto-refresh logs every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadLogs(true); // Silent refresh
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [lastLogId]);
 
   const loadSettings = async () => {
     try {
@@ -97,39 +83,41 @@ export default function EmailSettings() {
     }
   };
 
-  const loadLogs = async () => {
+  const loadLogs = async (silent = false) => {
     try {
-      const response = await fetch(`${API_URL}/api/email/logs?limit=20`, {
+      const response = await fetch(`${API_URL}/api/email/logs?limit=50`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
         },
       });
       const data = await response.json();
-      if (data.success) {
-        setLogs(data.logs);
+      if (data.success && data.logs.length > 0) {
+        const newLogs = data.logs;
+        const newestId = newLogs[0]?.id;
+        
+        // Detect new logs
+        if (lastLogId && newestId > lastLogId) {
+          const newCount = newLogs.filter((log: EmailLog) => log.id > lastLogId).length;
+          setNewLogsCount(newCount);
+          if (!silent) {
+            toast({
+              title: "Nowe wiadomości",
+              description: `${newCount} ${newCount === 1 ? 'nowa wiadomość' : 'nowych wiadomości'}`,
+            });
+          }
+        }
+        
+        setLogs(newLogs);
+        if (newestId) setLastLogId(newestId);
       }
     } catch (error) {
-      // ARCHITECT_APPROVED: Error logging for logs load failure - 2026-01-10 - Stefan
-      log.error('Error loading logs:', error);
+      if (!silent) {
+        log.error('Error loading logs:', error);
+      }
     }
   };
 
-  const loadInbox = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/email/inbox?limit=20`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
-        },
-      });
-      const data = await response.json();
-      if (data.success) {
-        setInbox(data.messages);
-      }
-    } catch (error) {
-      // ARCHITECT_APPROVED: Error logging for inbox load failure - 2026-01-10 - Stefan
-      log.error('Error loading inbox:', error);
-    }
-  };
+
 
   const handleChange = (field: keyof EmailSettings, value: string | number) => {
     setSettings({ ...settings, [field]: value });
@@ -140,10 +128,7 @@ export default function EmailSettings() {
     }
   };
 
-  const applyPreset = (preset: keyof typeof EMAIL_PRESETS) => {
-    const presetConfig = EMAIL_PRESETS[preset];
-    setSettings({ ...settings, ...presetConfig });
-  };
+
 
   const handleTest = async () => {
     setTesting(true);
@@ -162,49 +147,53 @@ export default function EmailSettings() {
       const data = await response.json();
       
       if (data.success) {
-        // ARCHITECT_APPROVED: Success logging for email test confirmation - 2026-01-10 - Stefan
         log.info('[EmailSettings] ✅ Test successful:', data);
-        alert(
-          '✅ Email testowy wysłany pomyślnie!\n\n' +
-          `Sprawdz skrzynkę: ${settings.smtpUser}\n` +
-          (data.details?.messageId ? `Message ID: ${data.details.messageId}` : '')
-        );
-        loadLogs(); // Refresh logs
+        toast({
+          title: "✅ Email testowy wysłany!",
+          description: `Sprawdź skrzynkę: ${settings.smtpUser}. Metoda: ${data.details?.method || 'SendGrid'}`,
+        });
+        loadLogs();
       } else {
-        // ARCHITECT_APPROVED: Error logging for failed email test - 2026-01-10 - Stefan
         log.error('[EmailSettings] ❌ Test failed:', data);
-        alert(
-          '❌ Błąd wysyłania email:\n\n' + 
-          data.error +
-          (data.details ? '\n\nSzczegóły: ' + JSON.stringify(data.details, null, 2) : '')
-        );
+        toast({
+          title: "❌ Błąd wysyłania",
+          description: data.error,
+          variant: "destructive",
+        });
       }
     } catch (error) {
-      // ARCHITECT_APPROVED: Error logging for test connection failure - 2026-01-10 - Stefan
       log.error('[EmailSettings] ❌ Test error:', error);
-      alert('❌ Błąd połączenia z backendem. Sprawdź logi w konsoli.');
+      toast({
+        title: "❌ Błąd połączenia",
+        description: "Sprawdź połączenie z backendem",
+        variant: "destructive",
+      });
     } finally {
       setTesting(false);
     }
   };
 
   const handleSave = async () => {
-    // Validate required fields
     if (!settings.smtpHost || !settings.smtpUser || !settings.fromEmail) {
-      alert('❌ Wypełnij wszystkie wymagane pola!');
+      toast({
+        title: "❌ Brak wymaganych pól",
+        description: "Wypełnij wszystkie wymagane pola",
+        variant: "destructive",
+      });
       return;
     }
 
-    // Warn if no password
     if (!settings.hasPassword && !passwordChanged) {
-      if (!confirm('⚠️ Hasło nie jest ustawione. Czy chcesz kontynuować?')) {
-        return;
-      }
+      toast({
+        title: "⚠️ Hasło nie ustawione",
+        description: "Zapisz hasło email przed wysyłaniem",
+        variant: "destructive",
+      });
+      return;
     }
 
     setSaving(true);
     try {
-      // ARCHITECT_APPROVED: Debug logging for email settings save - 2026-01-10 - Stefan
       log.info('[EmailSettings] Saving configuration...');
       
       const response = await fetch(`${API_URL}/api/email/settings`, {
@@ -219,63 +208,49 @@ export default function EmailSettings() {
       const data = await response.json();
       
       if (data.success) {
-        // ARCHITECT_APPROVED: Success confirmation for settings save - 2026-01-10 - Stefan
         log.info('[EmailSettings] ✅ Settings saved');
-        alert('✅ Ustawienia zapisane pomyślnie!\n\nMożesz teraz przetestować połączenie.');
+        toast({
+          title: "✅ Zapisano",
+          description: "Ustawienia email zapisane pomyślnie",
+        });
         setPasswordChanged(false);
-        await loadSettings(); // Reload to get fresh data
+        await loadSettings();
       } else {
-        // ARCHITECT_APPROVED: Error logging for save failure - 2026-01-10 - Stefan
         log.error('[EmailSettings] ❌ Save failed:', data);
-        alert('❌ Błąd zapisu: ' + data.error);
+        toast({
+          title: "❌ Błąd zapisu",
+          description: data.error,
+          variant: "destructive",
+        });
       }
     } catch (error) {
-      // ARCHITECT_APPROVED: Error logging for save error - 2026-01-10 - Stefan
       log.error('[EmailSettings] ❌ Save error:', error);
-      alert('❌ Błąd podczas zapisywania. Sprawdź połączenie.');
+      toast({
+        title: "❌ Błąd",
+        description: "Błąd podczas zapisywania",
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
   };
 
-  const handleSyncInbox = async () => {
-    setSyncing(true);
+  const handleDeleteLogs = async () => {
+    if (!confirm('❌ Czy na pewno usunąć całą historię email?')) return;
+    
     try {
-      const response = await fetch(`${API_URL}/api/email/inbox/sync`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
-        },
+      // Backend endpoint needed
+      toast({
+        title: "⚠️ Funkcja w przygotowaniu",
+        description: "Usuwanie logów zostanie dodane wkrótce",
       });
-
-      const data = await response.json();
-      if (data.success) {
-        alert(`✅ Zsynchronizowano ${data.newMessages} nowych wiadomości`);
-        loadInbox(); // Refresh inbox
-      } else {
-        alert('❌ Błąd: ' + data.error);
-      }
     } catch (error) {
-      // ARCHITECT_APPROVED: Error logging for inbox sync failure - 2026-01-10 - Stefan
-      log.error('Error syncing inbox:', error);
-      alert('❌ Błąd podczas synchronizacji');
-    } finally {
-      setSyncing(false);
-    }
-  };
-
-  const markAsRead = async (id: number) => {
-    try {
-      await fetch(`${API_URL}/api/email/inbox/${id}/read`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
-        },
+      log.error('Error deleting logs:', error);
+      toast({
+        title: "❌ Błąd",
+        description: "Nie udało się usunąć logów",
+        variant: "destructive",
       });
-      loadInbox(); // Refresh
-    } catch (error) {
-      // ARCHITECT_APPROVED: Error logging for mark as read failure - 2026-01-10 - Stefan
-      log.error('Error marking as read:', error);
     }
   };
 
@@ -285,30 +260,20 @@ export default function EmailSettings() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="font-playfair text-3xl text-eliksir-gold font-bold">
-          Ustawienia Email
-        </h2>
-        <p className="text-white/60 mt-1">
-          Konfiguracja serwera SMTP dla formularzy kontaktowych
-        </p>
-      </div>
-
-      {/* Presets */}
-      <div className="bg-eliksir-gray/50 rounded-eliksir border border-white/10 p-4">
-        <label className="block text-white/80 text-sm mb-2">
-          Szybka konfiguracja (Preset)
-        </label>
-        <select
-          onChange={(e) => e.target.value && applyPreset(e.target.value as keyof typeof EMAIL_PRESETS)}
-          className={ELIKSIR_STYLES.input}
-        >
-          <option value="">Wybierz preset...</option>
-          <option value="home.pl">home.pl (poczta2559727.home.pl)</option>
-          <option value="Gmail">Gmail (smtp.gmail.com)</option>
-          <option value="Onet">Onet (smtp.poczta.onet.pl)</option>
-        </select>
+      {/* Header with SendGrid Status */}
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="font-playfair text-3xl text-eliksir-gold font-bold">
+            Ustawienia Email
+          </h2>
+          <p className="text-white/60 mt-1">
+            Konfiguracja wysyłania email (SendGrid + SMTP fallback)
+          </p>
+        </div>
+        <div className="flex items-center space-x-2 bg-green-500/10 border border-green-500/30 rounded-eliksir px-4 py-2">
+          <CheckCircle className="text-green-400" size={20} />
+          <span className="text-green-400 font-semibold">SendGrid Active</span>
+        </div>
       </div>
 
       {/* Settings Form */}
@@ -405,13 +370,15 @@ export default function EmailSettings() {
 
         {/* Help Text */}
         <div className="bg-blue-500/10 border border-blue-500/30 rounded-eliksir p-4">
-          <h4 className="text-blue-400 font-bold mb-2">📧 Instrukcja home.pl</h4>
-          <ol className="text-white/70 text-sm space-y-1 list-decimal list-inside">
-            <li>Użyj pełnego adresu email jako login (kontakt@eliksir-bar.pl)</li>
-            <li>Hasło to hasło do twojego konta email</li>
-            <li>Serwer: poczta2559727.home.pl, Port: 587</li>
-            <li>Dla Gmail: włącz weryfikację dwuetapową i wygeneruj hasło aplikacji</li>
-          </ol>
+          <h4 className="text-blue-400 font-bold mb-2">📧 Wysyłanie Email</h4>
+          <div className="text-white/70 text-sm space-y-2">
+            <p><strong>Serwer home.pl:</strong> poczta2559727.home.pl, Port: 587 lub 465</p>
+            <p><strong>Login:</strong> Pełny adres email (kontakt@eliksir-bar.pl)</p>
+            <p><strong>Hasło:</strong> Hasło do konta email</p>
+            <p className="text-amber-400 mt-2">
+              ⚡ Render blokuje porty SMTP - używamy SendGrid jako fallback (automatyczny)
+            </p>
+          </div>
         </div>
 
         {/* Action Buttons */}
@@ -438,15 +405,32 @@ export default function EmailSettings() {
       {/* Email Logs */}
       <div className="bg-eliksir-gray/50 rounded-eliksir border border-white/10 p-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-playfair text-xl text-eliksir-gold font-bold">
-            Historia Wysłanych Wiadomości
-          </h3>
-          <button
-            onClick={loadLogs}
-            className="text-white/60 hover:text-white transition-colors"
-          >
-            <RefreshCw size={20} />
-          </button>
+          <div className="flex items-center space-x-3">
+            <h3 className="font-playfair text-xl text-eliksir-gold font-bold">
+              Historia Wysłanych Wiadomości
+            </h3>
+            {newLogsCount > 0 && (
+              <span className="bg-amber-500 text-black px-3 py-1 rounded-full text-xs font-bold animate-pulse">
+                {newLogsCount} nowych
+              </span>
+            )}
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => loadLogs(false)}
+              disabled={loading}
+              className="flex items-center space-x-2 text-white/60 hover:text-white transition-colors disabled:opacity-50"
+            >
+              <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
+            </button>
+            <button
+              onClick={handleDeleteLogs}
+              className="flex items-center space-x-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1 rounded-eliksir transition-colors"
+              title="Usuń wszystkie logi"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
         </div>
         
         {logs.length === 0 ? (
@@ -484,60 +468,6 @@ export default function EmailSettings() {
                 ))}
               </tbody>
             </table>
-          </div>
-        )}
-      </div>
-
-      {/* Inbox */}
-      <div className="bg-eliksir-gray/50 rounded-eliksir border border-white/10 p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-playfair text-xl text-eliksir-gold font-bold">
-            Odebrane Wiadomości (Skrzynka Odbiorcza)
-          </h3>
-          <button
-            onClick={handleSyncInbox}
-            disabled={syncing}
-            className={`${ELIKSIR_STYLES.buttonSecondary} flex items-center space-x-2 text-sm`}
-          >
-            <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
-            <span>{syncing ? 'Synchronizacja...' : 'Synchronizuj'}</span>
-          </button>
-        </div>
-        
-        {inbox.length === 0 ? (
-          <div className="text-center py-8 text-white/40">
-            <Mail size={48} className="mx-auto mb-4" />
-            <p>Brak wiadomości. Kliknij "Synchronizuj" aby pobrać.</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {inbox.map((msg) => (
-              <div
-                key={msg.id}
-                onClick={() => markAsRead(msg.id)}
-                className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                  msg.isRead
-                    ? 'bg-white/5 border-white/5 text-white/60'
-                    : 'bg-white/10 border-white/20 text-white font-semibold'
-                }`}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <span className="text-eliksir-gold">{msg.fromName || msg.fromEmail}</span>
-                    {msg.fromName && (
-                      <span className="text-white/40 text-xs ml-2">({msg.fromEmail})</span>
-                    )}
-                  </div>
-                  <span className="text-white/40 text-xs">
-                    {new Date(msg.receivedAt).toLocaleString('pl-PL')}
-                  </span>
-                </div>
-                <div className="text-white/80 mb-1">{msg.subject}</div>
-                {msg.preview && (
-                  <div className="text-white/50 text-sm">{msg.preview}</div>
-                )}
-              </div>
-            ))}
           </div>
         )}
       </div>

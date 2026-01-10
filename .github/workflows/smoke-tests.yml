@@ -34,32 +34,20 @@ jobs:
           npm run dev &
           sleep 10
           echo "Frontend started on http://localhost:5174"
-        working-directory: ./eliksir-frontend
-
-      - name: 🔧 Start Backend (dev server)
-        run: |
-          npm run dev &
-          sleep 5
-          echo "Backend started on http://localhost:3001"
-        working-directory: ./stefano-eliksir-backend
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          JWT_SECRET: test-secret-key
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
 
       - name: ⏳ Wait for services to be ready
         run: |
           echo "Waiting for frontend..."
           npx wait-on http://localhost:5174 --timeout 30000
-          echo "Waiting for backend..."
-          npx wait-on http://localhost:3001/health --timeout 30000 || npx wait-on http://localhost:3001/api/config --timeout 30000
+          echo "Checking backend (Render)..."
+          npx wait-on https://stefano-eliksir-backend.onrender.com/health --timeout 60000 || npx wait-on https://stefano-eliksir-backend.onrender.com/api/config --timeout 60000
           echo "✅ All services ready"
 
       - name: 🔥 Run Smoke Tests
         run: npx playwright test smoke.spec.ts --project=chromium
         env:
           FRONTEND_URL: http://localhost:5174
-          BACKEND_URL: http://localhost:3001
+          BACKEND_URL: https://stefano-eliksir-backend.onrender.com
 
       - name: 📊 Upload test results
         if: always()

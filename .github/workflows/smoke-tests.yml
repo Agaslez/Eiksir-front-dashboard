@@ -1,0 +1,86 @@
+name: Smoke Tests - Pre-Deployment
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Ręczne uruchomienie
+
+jobs:
+  smoke-tests:
+    name: 🔥 Critical System Health Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🎭 Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: 🚀 Start Frontend (dev server)
+        run: |
+          npm run dev &
+          sleep 10
+          echo "Frontend started on http://localhost:5174"
+        working-directory: ./eliksir-frontend
+
+      - name: 🔧 Start Backend (dev server)
+        run: |
+          npm run dev &
+          sleep 5
+          echo "Backend started on http://localhost:3001"
+        working-directory: ./stefano-eliksir-backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: test-secret-key
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+
+      - name: ⏳ Wait for services to be ready
+        run: |
+          echo "Waiting for frontend..."
+          npx wait-on http://localhost:5174 --timeout 30000
+          echo "Waiting for backend..."
+          npx wait-on http://localhost:3001/health --timeout 30000 || npx wait-on http://localhost:3001/api/config --timeout 30000
+          echo "✅ All services ready"
+
+      - name: 🔥 Run Smoke Tests
+        run: npx playwright test smoke.spec.ts --project=chromium
+        env:
+          FRONTEND_URL: http://localhost:5174
+          BACKEND_URL: http://localhost:3001
+
+      - name: 📊 Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+      - name: ❌ Fail deployment on smoke test failure
+        if: failure()
+        run: |
+          echo "::error::🚨 SMOKE TESTS FAILED - DEPLOYMENT BLOCKED"
+          echo "::error::Critical system components are not healthy"
+          echo "::error::Fix the issues before deploying to production"
+          exit 1
+
+      - name: ✅ Success - Ready to deploy
+        if: success()
+        run: |
+          echo "::notice::✅ All smoke tests passed"
+          echo "::notice::System is healthy - deployment can proceed"

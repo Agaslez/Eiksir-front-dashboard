@@ -130,6 +130,34 @@ cd eliksir-frontend && npm run dev
 
 ## 🧪 Testing
 
+### **🔥 Smoke Tests (CRITICAL - Pre-Deployment):**
+```bash
+# Uruchom PRZED każdym deploymentem
+npm run smoke-test
+
+# Lub bezpośrednio:
+npx playwright test smoke.spec.ts --project=chromium
+
+# Windows PowerShell:
+.\scripts\smoke-test.ps1
+
+# Linux/Mac:
+./scripts/smoke-test.sh
+```
+
+**Co sprawdzają smoke testy:**
+- ✅ Frontend się ładuje i renderuje (200 OK)
+- ✅ Backend odpowiada na requesty
+- ✅ Kluczowe endpointy działają (config, gallery, content)
+- ✅ Frontend może pobierać dane z backendu
+- ✅ Kalkulator jest widoczny
+- ✅ Formularz kontaktowy działa
+- ✅ Brak krytycznych błędów w konsoli
+- ✅ Panel admina jest dostępny
+- ✅ System email skonfigurowany
+
+**🚨 WAŻNE:** Jeśli smoke testy failują - **ZATRZYMAJ DEPLOYMENT**!
+
 ### **Unit Tests (Jest):**
 ```bash
 cd eliksir-frontend
@@ -144,9 +172,11 @@ npm run test:e2e
 ```
 
 **Test Coverage:**
+- ✅ 10/10 smoke tests (critical system health)
 - ✅ 53/53 unit tests passing
 - ✅ All tests use mocks (no real DB connections)
-- ✅ E2E framework configured (271 lines of tests)
+- ✅ E2E framework configured (271+ lines of tests)
+- ✅ GitHub Actions integration (auto-run on push)
 
 ---
 

@@ -461,6 +461,20 @@ export default function SystemHealthDashboard() {
         }
       },
       status: 'checking'
+    },
+    {
+      name: 'SendGrid Email Service',
+      category: 'Backend',
+      endpoint: '/api/email/health',
+      check: async () => {
+        return await performHttpCheck(
+          'SendGrid Email Service',
+          `${API_URL}/api/email/health`,
+          undefined,
+          (data) => data && data.success && data.sendgrid && data.sendgrid.active
+        );
+      },
+      status: 'checking'
     }
   ]);
 

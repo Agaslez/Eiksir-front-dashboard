@@ -1,0 +1,1114 @@
+# Page snapshot
+
+```yaml
+- main [ref=e3]:
+  - generic [ref=e12]:
+    - paragraph [ref=e13]: Mobilny Bar Koktajlowy Premium
+    - heading "ELIKSIR" [level=1] [ref=e14]
+    - paragraph [ref=e16]:
+      - text: Tworzymy wyjątkowe doświadczenia koktajlowe na każdą okazję.
+      - generic [ref=e17]: Wesela, eventy korporacyjne, imprezy prywatne
+      - text: — obsłużymy z niezrównaną klasą i profesjonalizmem.
+    - generic [ref=e18]:
+      - link "Otrzymaj wycenę" [ref=e19] [cursor=pointer]:
+        - /url: "#kalkulator"
+      - link "Odkryj menu" [ref=e20] [cursor=pointer]:
+        - /url: "#menu"
+  - generic [ref=e25]:
+    - paragraph [ref=e26]: O nas
+    - heading "Kim jesteśmy?" [level=2] [ref=e27]
+    - paragraph [ref=e28]: Jesteśmy zespołem profesjonalnych barmanów z wieloletnim doświadczeniem w obsłudze wesel, eventów firmowych i imprez prywatnych. Specjalizujemy się w usłudze mobilnego baru koktajlowego premium, który realizujemy na terenie Bełchatowa, Kleszczowa, Łodzi oraz w całej Polsce. Dostosowujemy się do Twoich potrzeb – od kameralnych przyjęć po duże wesela i wydarzenia korporacyjne. Oferujemy nie tylko autorskie koktajle i klasykę barmańską, ale również pełną oprawę wizualną mobilnego baru, dopasowaną do charakteru wydarzenia. ELIKSIR to mobilny bar koktajlowy, który łączy profesjonalizm, estetykę i niezawodną obsługę – dzięki temu każda impreza staje się wyjątkowym doświadczeniem smakowym.
+  - generic [ref=e32]:
+    - img "firmowa1" [ref=e34]
+    - img "bar1" [ref=e36]
+    - img "wesele1" [ref=e38]
+    - img "Event 4" [ref=e40]
+    - img "firmowy2" [ref=e42]
+    - img "Event 5" [ref=e44]
+    - img "firma3" [ref=e46]
+    - img "Event 6" [ref=e48]
+    - img "barweselny1" [ref=e50]
+    - img "Event 7" [ref=e52]
+    - img "barman1" [ref=e54]
+    - img "Event 8" [ref=e56]
+    - img "menu1" [ref=e58]
+    - img "Event 9" [ref=e60]
+    - img "drinki1" [ref=e62]
+    - img "Event 10" [ref=e64]
+    - img "drinki2" [ref=e66]
+    - img "Event 11" [ref=e68]
+    - img "drinki3" [ref=e70]
+    - img "Event 12" [ref=e72]
+    - img "drinki4" [ref=e74]
+    - img "Event 13" [ref=e76]
+    - img "drinki5" [ref=e78]
+    - img "Event 14" [ref=e80]
+    - img "bar3" [ref=e82]
+    - img "Event 15" [ref=e84]
+    - img "wesele3" [ref=e86]
+    - img "drinki" [ref=e88]
+    - img "bar-menu" [ref=e90]
+    - img "menu-styl" [ref=e92]
+    - img "Gallery image" [ref=e94]
+    - img "Gallery image" [ref=e96]
+    - img "logo" [ref=e98]
+    - img "firmowa1" [ref=e100]
+    - img "bar1" [ref=e102]
+    - img "wesele1" [ref=e104]
+    - img "Event 4" [ref=e106]
+    - img "firmowy2" [ref=e108]
+    - img "Event 5" [ref=e110]
+    - img "firma3" [ref=e112]
+    - img "Event 6" [ref=e114]
+    - img "barweselny1" [ref=e116]
+    - img "Event 7" [ref=e118]
+    - img "barman1" [ref=e120]
+    - img "Event 8" [ref=e122]
+    - img "menu1" [ref=e124]
+    - img "Event 9" [ref=e126]
+    - img "drinki1" [ref=e128]
+    - img "Event 10" [ref=e130]
+    - img "drinki2" [ref=e132]
+    - img "Event 11" [ref=e134]
+    - img "drinki3" [ref=e136]
+    - img "Event 12" [ref=e138]
+    - img "drinki4" [ref=e140]
+    - img "Event 13" [ref=e142]
+    - img "drinki5" [ref=e144]
+    - img "Event 14" [ref=e146]
+    - img "bar3" [ref=e148]
+    - img "Event 15" [ref=e150]
+    - img "wesele3" [ref=e152]
+    - img "drinki" [ref=e154]
+    - img "bar-menu" [ref=e156]
+    - img "menu-styl" [ref=e158]
+    - img "Gallery image" [ref=e160]
+    - img "Gallery image" [ref=e162]
+    - img "logo" [ref=e164]
+  - generic [ref=e167]:
+    - generic [ref=e168]:
+      - generic [ref=e169]: 500+
+      - generic [ref=e170]: Obsłużonych imprez
+    - generic [ref=e171]:
+      - generic [ref=e172]: 50k+
+      - generic [ref=e173]: Zadowolonych gości
+    - generic [ref=e174]:
+      - generic [ref=e175]: 6+
+      - generic [ref=e176]: Lat doświadczenia
+    - generic [ref=e177]:
+      - generic [ref=e178]: 100%
+      - generic [ref=e179]: Satysfakcji
+  - generic [ref=e180]:
+    - generic [ref=e183]:
+      - paragraph [ref=e184]: Nasza karta
+      - heading "Menu Koktajli" [level=2] [ref=e185]
+    - generic [ref=e188]:
+      - generic [ref=e191]:
+        - heading "Koktajle Signature" [level=3] [ref=e192]
+        - paragraph [ref=e193]: Klasyka w perfekcyjnym wykonaniu
+        - generic [ref=e194]:
+          - generic [ref=e195]:
+            - heading "Mojito" [level=4] [ref=e197]
+            - paragraph [ref=e199]: rum, limonka, mięta, cukier trzcinowy, woda gazowana
+          - generic [ref=e200]:
+            - heading "Cuba Libre" [level=4] [ref=e202]
+            - paragraph [ref=e204]: rum, cola, limonka
+          - generic [ref=e205]:
+            - heading "Vodka Sour" [level=4] [ref=e207]
+            - paragraph [ref=e209]: wódka, sok z cytryny, syrop cukrowy
+          - generic [ref=e210]:
+            - heading "Sex on the Beach" [level=4] [ref=e212]
+            - paragraph [ref=e214]: wódka, likier brzoskwiniowy, sok pomarańczowy, żurawina
+          - generic [ref=e215]:
+            - heading "Aperol Spritz" [level=4] [ref=e217]
+            - paragraph [ref=e219]: Aperol, prosecco, woda gazowana, pomarańcza
+          - generic [ref=e220]:
+            - heading "Hugo Spritz" [level=4] [ref=e222]
+            - paragraph [ref=e224]: prosecco, syrop z kwiatów bzu, mięta, limonka, woda gazowana
+      - generic [ref=e227]:
+        - heading "Bezalkoholowe" [level=3] [ref=e228]
+        - paragraph [ref=e229]: Dla każdego gościa
+        - generic [ref=e230]:
+          - generic [ref=e231]:
+            - heading "Virgin Mojito" [level=4] [ref=e233]
+            - paragraph [ref=e235]: mięta, limonka, cukier trzcinowy, woda gazowana
+          - generic [ref=e236]:
+            - heading "Domowa Lemoniada" [level=4] [ref=e238]
+            - paragraph [ref=e240]: cytryna, pomarańcza, syrop/miód, woda
+          - generic [ref=e241]:
+            - heading "Owocowy Fizz" [level=4] [ref=e243]
+            - paragraph [ref=e245]: malina lub marakuja, lemoniada, świeże owoce
+      - generic [ref=e248]:
+        - heading "Shot Bar" [level=3] [ref=e249]
+        - paragraph [ref=e250]: Energia imprezy
+        - generic [ref=e251]:
+          - generic [ref=e252]:
+            - heading "Kamikaze" [level=4] [ref=e254]
+            - paragraph [ref=e256]: wódka, triple sec / blue curaçao, sok z limonki
+          - generic [ref=e257]:
+            - heading "Wściekły Pies" [level=4] [ref=e259]
+            - paragraph [ref=e261]: wódka, syrop malinowy / grenadina, kropla tabasco
+          - generic [ref=e262]:
+            - heading "Cytrynowy" [level=4] [ref=e264]
+            - paragraph [ref=e266]: wódka, sok z cytryny, syrop cukrowy / likier cytrynowy
+    - paragraph [ref=e268]: Menu dostosowujemy do Twoich preferencji i charakteru imprezy
+  - generic [ref=e269]:
+    - generic [ref=e271]:
+      - paragraph [ref=e272]: Nasze pakiety
+      - heading "Wybierz idealny pakiet" [level=2] [ref=e273]
+    - generic [ref=e276]:
+      - generic [ref=e278]:
+        - generic [ref=e279]:
+          - img [ref=e281]
+          - heading "BASIC" [level=3] [ref=e283]
+          - paragraph [ref=e284]: Podstawowy pakiet dla kameralnych imprez
+        - generic [ref=e285]:
+          - paragraph [ref=e286]: od
+          - paragraph [ref=e287]: 2900 zł
+        - generic [ref=e288]:
+          - paragraph [ref=e289]: "W pakiecie:"
+          - list [ref=e290]:
+            - listitem [ref=e291]:
+              - generic [ref=e292]: ✓
+              - text: 20-50 osób
+            - listitem [ref=e293]:
+              - generic [ref=e294]: ✓
+              - text: 5 godzin
+            - listitem [ref=e295]:
+              - generic [ref=e296]: ✓
+              - text: 3 koktajle/osobę
+            - listitem [ref=e297]:
+              - generic [ref=e298]: ✓
+              - text: 6 signature drinków
+        - generic [ref=e299]:
+          - paragraph [ref=e300]: "Idealny na:"
+          - generic [ref=e301]:
+            - generic [ref=e302]: Kameralne przyjęcia
+            - generic [ref=e303]: Mniejsze wesela
+            - generic [ref=e304]: Urodziny
+      - generic [ref=e305]:
+        - generic [ref=e306]: NAJPOPULARNIEJSZY
+        - generic [ref=e307]:
+          - generic [ref=e308]:
+            - img [ref=e310]
+            - heading "PREMIUM" [level=3] [ref=e312]
+            - paragraph [ref=e313]: Najpopularniejszy wybór na wesela
+          - generic [ref=e314]:
+            - paragraph [ref=e315]: od
+            - paragraph [ref=e316]: 3900 zł
+          - generic [ref=e317]:
+            - paragraph [ref=e318]: "W pakiecie:"
+            - list [ref=e319]:
+              - listitem [ref=e320]:
+                - generic [ref=e321]: ✓
+                - text: 50-80 osób
+              - listitem [ref=e322]:
+                - generic [ref=e323]: ✓
+                - text: 6 godzin
+              - listitem [ref=e324]:
+                - generic [ref=e325]: ✓
+                - text: 3.5 koktajle/osobę
+              - listitem [ref=e326]:
+                - generic [ref=e327]: ✓
+                - text: Shot bar
+          - generic [ref=e328]:
+            - paragraph [ref=e329]: "Idealny na:"
+            - generic [ref=e330]:
+              - generic [ref=e331]: Wesela
+              - generic [ref=e332]: Duże imprezy
+              - generic [ref=e333]: Eventy z pokazami
+      - generic [ref=e335]:
+        - generic [ref=e336]:
+          - img [ref=e338]
+          - heading "EXCLUSIVE" [level=3] [ref=e340]
+          - paragraph [ref=e341]: Ekskluzywny pakiet z efektem WOW
+        - generic [ref=e342]:
+          - paragraph [ref=e343]: od
+          - paragraph [ref=e344]: 5200 zł
+        - generic [ref=e345]:
+          - paragraph [ref=e346]: "W pakiecie:"
+          - list [ref=e347]:
+            - listitem [ref=e348]:
+              - generic [ref=e349]: ✓
+              - text: 80-120 osób
+            - listitem [ref=e350]:
+              - generic [ref=e351]: ✓
+              - text: 7 godzin
+            - listitem [ref=e352]:
+              - generic [ref=e353]: ✓
+              - text: 4 koktajle/osobę
+            - listitem [ref=e354]:
+              - generic [ref=e355]: ✓
+              - text: Personalizacja baru
+        - generic [ref=e356]:
+          - paragraph [ref=e357]: "Idealny na:"
+          - generic [ref=e358]:
+            - generic [ref=e359]: Luksusowe wesela
+            - generic [ref=e360]: Gale
+            - generic [ref=e361]: VIP eventy
+      - generic [ref=e363]:
+        - generic [ref=e364]:
+          - img [ref=e366]
+          - heading "Kids Party 0%" [level=3] [ref=e369]
+          - paragraph [ref=e370]: Bezalkoholowe przyjęcia dla dzieci
+        - generic [ref=e371]:
+          - paragraph [ref=e372]: od
+          - paragraph [ref=e373]: 1900 zł
+        - generic [ref=e374]:
+          - paragraph [ref=e375]: "W pakiecie:"
+          - list [ref=e376]:
+            - listitem [ref=e377]:
+              - generic [ref=e378]: ✓
+              - text: 15-40 dzieci
+            - listitem [ref=e379]:
+              - generic [ref=e380]: ✓
+              - text: 3 godziny
+            - listitem [ref=e381]:
+              - generic [ref=e382]: ✓
+              - text: Mocktaile
+            - listitem [ref=e383]:
+              - generic [ref=e384]: ✓
+              - text: Stacja lemoniad
+        - generic [ref=e385]:
+          - paragraph [ref=e386]: "Idealny na:"
+          - generic [ref=e387]:
+            - generic [ref=e388]: Urodziny dzieci
+            - generic [ref=e389]: Komunie
+            - generic [ref=e390]: Festyny szkolne
+      - generic [ref=e392]:
+        - generic [ref=e393]:
+          - img [ref=e395]
+          - heading "Family & Seniors" [level=3] [ref=e400]
+          - paragraph [ref=e401]: Łagodne miksy dla rodzin i seniorów
+        - generic [ref=e402]:
+          - paragraph [ref=e403]: od
+          - paragraph [ref=e404]: 2600 zł
+        - generic [ref=e405]:
+          - paragraph [ref=e406]: "W pakiecie:"
+          - list [ref=e407]:
+            - listitem [ref=e408]:
+              - generic [ref=e409]: ✓
+              - text: 25-60 osób
+            - listitem [ref=e410]:
+              - generic [ref=e411]: ✓
+              - text: 4 godziny
+            - listitem [ref=e412]:
+              - generic [ref=e413]: ✓
+              - text: 2.5 koktajle/osobę
+            - listitem [ref=e414]:
+              - generic [ref=e415]: ✓
+              - text: Więcej 0%
+        - generic [ref=e416]:
+          - paragraph [ref=e417]: "Idealny na:"
+          - generic [ref=e418]:
+            - generic [ref=e419]: Rocznice
+            - generic [ref=e420]: Komunie
+            - generic [ref=e421]: Imprezy rodzinne
+      - generic [ref=e423]:
+        - generic [ref=e424]:
+          - img [ref=e426]
+          - heading "Event firmowy" [level=3] [ref=e429]
+          - paragraph [ref=e430]: Profesjonalny serwis dla firm
+        - generic [ref=e431]:
+          - paragraph [ref=e432]: od
+          - paragraph [ref=e433]: 3900 zł
+        - generic [ref=e434]:
+          - paragraph [ref=e435]: "W pakiecie:"
+          - list [ref=e436]:
+            - listitem [ref=e437]:
+              - generic [ref=e438]: ✓
+              - text: 30-100 osób
+            - listitem [ref=e439]:
+              - generic [ref=e440]: ✓
+              - text: 4 godziny
+            - listitem [ref=e441]:
+              - generic [ref=e442]: ✓
+              - text: 2.5 koktajle/osobę
+            - listitem [ref=e443]:
+              - generic [ref=e444]: ✓
+              - text: Dopasowanie karty
+        - generic [ref=e445]:
+          - paragraph [ref=e446]: "Idealny na:"
+          - generic [ref=e447]:
+            - generic [ref=e448]: Eventy firmowe
+            - generic [ref=e449]: Targi
+            - generic [ref=e450]: Konferencje
+            - generic [ref=e451]: Gale
+    - generic [ref=e453]:
+      - paragraph [ref=e454]: Dodatki
+      - heading "Uzupełnij swój pakiet" [level=3] [ref=e455]
+    - generic [ref=e458]:
+      - generic [ref=e459]:
+        - heading "Fontanna czekolady" [level=4] [ref=e460]
+        - paragraph [ref=e461]: Belgijska czekolada z owocami
+        - paragraph [ref=e462]: od 600 zł
+      - generic [ref=e463]:
+        - heading "Stacja lemoniad" [level=4] [ref=e464]
+        - paragraph [ref=e465]: 3 smaki, dystrybutory 24L
+        - paragraph [ref=e466]: od 300 zł
+      - generic [ref=e467]:
+        - heading "KEG piwa" [level=4] [ref=e468]
+        - paragraph [ref=e469]: 30L z chłodzeniem i obsługą
+        - paragraph [ref=e470]: od 500 zł
+      - generic [ref=e471]:
+        - heading "Hockery 6 szt." [level=4] [ref=e472]
+        - paragraph [ref=e473]: Eleganckie stołki barowe
+        - paragraph [ref=e474]: 200 zł
+      - generic [ref=e475]:
+        - heading "Oświetlenie LED z personalizacją" [level=4] [ref=e476]
+        - paragraph [ref=e477]: Dekoracja świetlna z napisem (np. '30 lat', nazwa pary młodej, logo firmy)
+        - paragraph [ref=e478]: od 500 zł
+  - generic [ref=e480]:
+    - generic [ref=e481]:
+      - paragraph [ref=e482]: Szybka wycena & lista zakupów
+      - heading "Wybierz pakiet, liczbę gości i dodatki" [level=2] [ref=e483]
+      - paragraph [ref=e484]: Zobacz orientacyjną cenę oraz bezpieczną listę zakupów. Później dopracujemy parametry dokładnie pod Twoje stawki.
+    - generic [ref=e485]:
+      - generic [ref=e486]:
+        - generic [ref=e487]:
+          - paragraph [ref=e488]: Pakiet
+          - generic [ref=e489]:
+            - button "BASIC od 2900 zł" [ref=e490] [cursor=pointer]:
+              - generic [ref=e491]: BASIC
+              - generic [ref=e492]: od 2900 zł
+            - button "PREMIUM od 3900 zł" [ref=e493] [cursor=pointer]:
+              - generic [ref=e494]: PREMIUM
+              - generic [ref=e495]: od 3900 zł
+            - button "EXCLUSIVE od 5200 zł" [ref=e496] [cursor=pointer]:
+              - generic [ref=e497]: EXCLUSIVE
+              - generic [ref=e498]: od 5200 zł
+            - button "Kids Party 0% od 1900 zł" [ref=e499] [cursor=pointer]:
+              - generic [ref=e500]: Kids Party 0%
+              - generic [ref=e501]: od 1900 zł
+            - button "Family & Seniors od 2600 zł" [ref=e502] [cursor=pointer]:
+              - generic [ref=e503]: Family & Seniors
+              - generic [ref=e504]: od 2600 zł
+            - button "Event firmowy od 3900 zł" [ref=e505] [cursor=pointer]:
+              - generic [ref=e506]: Event firmowy
+              - generic [ref=e507]: od 3900 zł
+          - paragraph [ref=e508]:
+            - text: "Zakres rekomendowany dla wybranego pakietu:"
+            - generic [ref=e509]: 25–60 osób
+            - text: .
+        - generic [ref=e510]:
+          - generic [ref=e511]:
+            - paragraph [ref=e512]: Liczba gości
+            - generic [ref=e513]: 50 osób
+          - slider [ref=e514]: "50"
+          - generic [ref=e515]:
+            - generic [ref=e516]: "25"
+            - generic [ref=e517]: "42"
+            - generic [ref=e518]: "60"
+        - generic [ref=e519]:
+          - paragraph [ref=e520]: Godziny pracy baru
+          - paragraph [ref=e521]: 4 godz. (dla tego pakietu)
+        - generic [ref=e522]:
+          - paragraph [ref=e523]: Dodatki
+          - generic [ref=e524]:
+            - generic [ref=e525]:
+              - checkbox "Fontanna czekolady" [ref=e526]
+              - generic [ref=e527]: Fontanna czekolady
+            - generic [ref=e528]:
+              - checkbox "KEG piwa 30L (z obsługą – wymaga dodatkowego barmana)" [ref=e529]
+              - generic [ref=e530]: KEG piwa 30L (z obsługą – wymaga dodatkowego barmana)
+            - generic [ref=e531]:
+              - checkbox "Dystrybutor lemoniady 2×12L" [ref=e532]
+              - generic [ref=e533]: Dystrybutor lemoniady 2×12L
+            - generic [ref=e534]:
+              - checkbox "Hockery 6 szt. (eleganckie stołki barowe)" [ref=e535]
+              - generic [ref=e536]: Hockery 6 szt. (eleganckie stołki barowe)
+            - generic [ref=e537]:
+              - checkbox "Oświetlenie LED z personalizacją" [ref=e538]
+              - generic [ref=e539]: Oświetlenie LED z personalizacją
+      - generic [ref=e540]:
+        - heading "Podsumowanie wyceny" [level=3] [ref=e541]
+        - generic [ref=e542]:
+          - paragraph [ref=e543]: Szacunkowa cena pakietu + dodatki
+          - generic [ref=e544]:
+            - generic [ref=e545]: "3475"
+            - generic [ref=e546]: PLN brutto*
+          - paragraph [ref=e547]: "*Kwota orientacyjna – dokładną wycenę potwierdzimy po kontakcie i doprecyzowaniu szczegółów."
+        - generic [ref=e548]:
+          - generic [ref=e549]:
+            - text: ok.
+            - generic [ref=e550]: 70 zł
+            - text: / osobę
+          - generic [ref=e551]:
+            - text: ok.
+            - generic [ref=e552]: 869 zł
+            - text: / godzinę baru
+        - generic [ref=e553]:
+          - paragraph [ref=e554]: Szacowana liczba serwowanych pozycji
+          - paragraph [ref=e555]:
+            - text: "• Koktajle: ok."
+            - generic [ref=e556]: 125 porcji
+          - paragraph [ref=e557]:
+            - text: "• Shoty: ok."
+            - generic [ref=e558]: 15 porcji
+          - paragraph [ref=e559]: "Założenie kalkulacji: 2.5 koktajlu / osobę oraz 0.3 shota / osobę (dla tego pakietu)."
+        - generic [ref=e560]:
+          - generic [ref=e561]:
+            - paragraph [ref=e562]: Po stronie ELIKSIR (w cenie pakietu)
+            - list [ref=e563]:
+              - listitem [ref=e564]: • soki i miksery
+              - listitem [ref=e565]: • syropy / puree
+              - listitem [ref=e566]: • likiery barmańskie (triple sec / blue curaçao / aperol)
+              - listitem [ref=e567]: • owoce i zioła
+              - listitem [ref=e568]: • lód kostkowany i kruszony
+              - listitem [ref=e569]: • dodatki barowe + logistyka + sprzęt
+          - generic [ref=e570]:
+            - paragraph [ref=e571]: Po stronie Gości – alkohol mocny (orientacyjnie)
+            - generic [ref=e572]:
+              - paragraph [ref=e573]:
+                - text: "• Wódka / rum / gin:"
+                - generic [ref=e574]: ok. 5× 0,7 L
+              - paragraph [ref=e575]:
+                - text: "• Likier (brzoskwinia / inne):"
+                - generic [ref=e576]: ok. 2× 0,7 L
+              - paragraph [ref=e577]:
+                - text: "• Aperol:"
+                - generic [ref=e578]: ok. 2× 0,7 L
+              - paragraph [ref=e579]:
+                - text: "• Prosecco:"
+                - generic [ref=e580]: ok. 5× 0,75 L
+            - paragraph [ref=e581]:
+              - text: ⚠️ Ilości są orientacyjne i dotyczą spożycia przy barze.
+              - text: Nie obejmują alkoholu serwowanego na stołach.
+          - generic [ref=e582]:
+            - paragraph [ref=e583]: 💡 OPEN BAR / ALL-IN
+            - paragraph [ref=e584]: ELIKSIR może zająć się zakupem, logistyką i zabezpieczeniem alkoholu. Opcja dostępna za dopłatą i po indywidualnych ustaleniach.
+          - generic [ref=e585]:
+            - paragraph [ref=e586]: • Barman obsługuje wyłącznie strefę baru (brak obsługi stołów).
+            - paragraph [ref=e587]: • Szkło zbierane – brak serwisu kelnerskiego.
+            - paragraph [ref=e588]: • Alkohol premium (np. whisky/tequila) – wycena indywidualna.
+            - paragraph [ref=e589]: "• Przedłużenie: +400–500 zł / godz. / barman (wg ustaleń)."
+            - paragraph [ref=e590]: • Powyżej 80 gości może być wymagany dodatkowy barman (wg ustaleń).
+          - paragraph [ref=e591]: Po wysłaniu formularza kontaktowego możemy przesłać Ci tę listę w formie PDF – gotową do wydruku lub wysłania do hurtowni.
+  - generic [ref=e592]:
+    - generic [ref=e594]:
+      - paragraph [ref=e595]: Nasze realizacje
+      - heading "Galeria Eliksir Bar" [level=2] [ref=e596]
+      - paragraph [ref=e597]: Zobacz nasze najpiękniejsze realizacje. Każda impreza to wyjątkowa historia, a my jesteśmy dumni, że możemy być jej częścią.
+    - generic [ref=e598]:
+      - generic [ref=e599]:
+        - button "Wszystkie" [ref=e600] [cursor=pointer]
+        - button "Wesela" [ref=e601] [cursor=pointer]
+        - button "Eventy firmowe" [ref=e602] [cursor=pointer]
+        - button "Imprezy prywatne" [ref=e603] [cursor=pointer]
+        - button "Odśwież" [ref=e604] [cursor=pointer]:
+          - img [ref=e605]
+          - text: Odśwież
+      - generic [ref=e610]:
+        - generic [ref=e611] [cursor=pointer]:
+          - img "firmowa1" [ref=e613]
+          - generic [ref=e615]:
+            - generic [ref=e616]:
+              - generic [ref=e617]: Event Firmowy
+              - button [ref=e618]:
+                - img [ref=e619]
+            - heading "firmowa1" [level=3] [ref=e621]
+            - paragraph [ref=e622]: firmowa1
+          - generic [ref=e623]:
+            - button "Udostępnij" [ref=e624]:
+              - img [ref=e625]
+            - button "Powiększ" [ref=e631]:
+              - img [ref=e632]
+        - generic [ref=e637] [cursor=pointer]:
+          - img "bar1" [ref=e639]
+          - generic [ref=e641]:
+            - button [ref=e644]:
+              - img [ref=e645]
+            - heading "bar1" [level=3] [ref=e647]
+            - paragraph [ref=e648]: bar1
+          - generic [ref=e649]:
+            - button "Udostępnij" [ref=e650]:
+              - img [ref=e651]
+            - button "Powiększ" [ref=e657]:
+              - img [ref=e658]
+        - generic [ref=e663] [cursor=pointer]:
+          - img "wesele1" [ref=e665]
+          - generic [ref=e667]:
+            - generic [ref=e668]:
+              - generic [ref=e669]: Wesele
+              - button [ref=e670]:
+                - img [ref=e671]
+            - heading "wesele1" [level=3] [ref=e673]
+            - paragraph [ref=e674]: wesele1
+          - generic [ref=e675]:
+            - button "Udostępnij" [ref=e676]:
+              - img [ref=e677]
+            - button "Powiększ" [ref=e683]:
+              - img [ref=e684]
+        - generic [ref=e689] [cursor=pointer]:
+          - img "Event 4" [ref=e691]
+          - generic [ref=e693]:
+            - generic [ref=e694]:
+              - generic [ref=e695]: Wesele
+              - button [ref=e696]:
+                - img [ref=e697]
+            - heading "Event 4" [level=3] [ref=e699]
+            - paragraph [ref=e700]: Bar
+          - generic [ref=e701]:
+            - button "Udostępnij" [ref=e702]:
+              - img [ref=e703]
+            - button "Powiększ" [ref=e709]:
+              - img [ref=e710]
+        - generic [ref=e715] [cursor=pointer]:
+          - img "firmowy2" [ref=e717]
+          - generic [ref=e719]:
+            - generic [ref=e720]:
+              - generic [ref=e721]: Event Firmowy
+              - button [ref=e722]:
+                - img [ref=e723]
+            - heading "firmowy2" [level=3] [ref=e725]
+            - paragraph [ref=e726]: firmowy2
+          - generic [ref=e727]:
+            - button "Udostępnij" [ref=e728]:
+              - img [ref=e729]
+            - button "Powiększ" [ref=e735]:
+              - img [ref=e736]
+        - generic [ref=e741] [cursor=pointer]:
+          - img "Event 5" [ref=e743]
+          - generic [ref=e745]:
+            - generic [ref=e746]:
+              - generic [ref=e747]: Wesele
+              - button [ref=e748]:
+                - img [ref=e749]
+            - heading "Event 5" [level=3] [ref=e751]
+            - paragraph [ref=e752]: Bar
+          - generic [ref=e753]:
+            - button "Udostępnij" [ref=e754]:
+              - img [ref=e755]
+            - button "Powiększ" [ref=e761]:
+              - img [ref=e762]
+        - generic [ref=e767] [cursor=pointer]:
+          - img "firma3" [ref=e769]
+          - generic [ref=e771]:
+            - generic [ref=e772]:
+              - generic [ref=e773]: Event Firmowy
+              - button [ref=e774]:
+                - img [ref=e775]
+            - heading "firma3" [level=3] [ref=e777]
+            - paragraph [ref=e778]: firma3
+          - generic [ref=e779]:
+            - button "Udostępnij" [ref=e780]:
+              - img [ref=e781]
+            - button "Powiększ" [ref=e787]:
+              - img [ref=e788]
+        - generic [ref=e793] [cursor=pointer]:
+          - img "Event 6" [ref=e795]
+          - generic [ref=e797]:
+            - generic [ref=e798]:
+              - generic [ref=e799]: Event Firmowy
+              - button [ref=e800]:
+                - img [ref=e801]
+            - heading "Event 6" [level=3] [ref=e803]
+            - paragraph [ref=e804]: Bar
+          - generic [ref=e805]:
+            - button "Udostępnij" [ref=e806]:
+              - img [ref=e807]
+            - button "Powiększ" [ref=e813]:
+              - img [ref=e814]
+        - generic [ref=e819] [cursor=pointer]:
+          - img "barweselny1" [ref=e821]
+          - generic [ref=e823]:
+            - generic [ref=e824]:
+              - generic [ref=e825]: Wesele
+              - button [ref=e826]:
+                - img [ref=e827]
+            - heading "barweselny1" [level=3] [ref=e829]
+            - paragraph [ref=e830]: barweselny1
+          - generic [ref=e831]:
+            - button "Udostępnij" [ref=e832]:
+              - img [ref=e833]
+            - button "Powiększ" [ref=e839]:
+              - img [ref=e840]
+        - generic [ref=e845] [cursor=pointer]:
+          - img "Event 7" [ref=e847]
+          - generic [ref=e849]:
+            - generic [ref=e850]:
+              - generic [ref=e851]: Event Firmowy
+              - button [ref=e852]:
+                - img [ref=e853]
+            - heading "Event 7" [level=3] [ref=e855]
+            - paragraph [ref=e856]: Bar
+          - generic [ref=e857]:
+            - button "Udostępnij" [ref=e858]:
+              - img [ref=e859]
+            - button "Powiększ" [ref=e865]:
+              - img [ref=e866]
+        - generic [ref=e871] [cursor=pointer]:
+          - img "barman1" [ref=e873]
+          - generic [ref=e875]:
+            - button [ref=e878]:
+              - img [ref=e879]
+            - heading "barman1" [level=3] [ref=e881]
+            - paragraph [ref=e882]: barman1
+          - generic [ref=e883]:
+            - button "Udostępnij" [ref=e884]:
+              - img [ref=e885]
+            - button "Powiększ" [ref=e891]:
+              - img [ref=e892]
+        - generic [ref=e897] [cursor=pointer]:
+          - img "Event 8" [ref=e899]
+          - generic [ref=e901]:
+            - generic [ref=e902]:
+              - generic [ref=e903]: Event Firmowy
+              - button [ref=e904]:
+                - img [ref=e905]
+            - heading "Event 8" [level=3] [ref=e907]
+            - paragraph [ref=e908]: Bar
+          - generic [ref=e909]:
+            - button "Udostępnij" [ref=e910]:
+              - img [ref=e911]
+            - button "Powiększ" [ref=e917]:
+              - img [ref=e918]
+        - generic [ref=e923] [cursor=pointer]:
+          - img "menu1" [ref=e925]
+          - generic [ref=e927]:
+            - button [ref=e930]:
+              - img [ref=e931]
+            - heading "menu1" [level=3] [ref=e933]
+            - paragraph [ref=e934]: menu1
+          - generic [ref=e935]:
+            - button "Udostępnij" [ref=e936]:
+              - img [ref=e937]
+            - button "Powiększ" [ref=e943]:
+              - img [ref=e944]
+        - generic [ref=e949] [cursor=pointer]:
+          - img "Event 9" [ref=e951]
+          - generic [ref=e953]:
+            - generic [ref=e954]:
+              - generic [ref=e955]: Event Firmowy
+              - button [ref=e956]:
+                - img [ref=e957]
+            - heading "Event 9" [level=3] [ref=e959]
+            - paragraph [ref=e960]: Bar
+          - generic [ref=e961]:
+            - button "Udostępnij" [ref=e962]:
+              - img [ref=e963]
+            - button "Powiększ" [ref=e969]:
+              - img [ref=e970]
+        - generic [ref=e975] [cursor=pointer]:
+          - img "drinki1" [ref=e977]
+          - generic [ref=e979]:
+            - button [ref=e982]:
+              - img [ref=e983]
+            - heading "drinki1" [level=3] [ref=e985]
+            - paragraph [ref=e986]: drinki1
+          - generic [ref=e987]:
+            - button "Udostępnij" [ref=e988]:
+              - img [ref=e989]
+            - button "Powiększ" [ref=e995]:
+              - img [ref=e996]
+        - generic [ref=e1001] [cursor=pointer]:
+          - img "Event 10" [ref=e1003]
+          - generic [ref=e1005]:
+            - generic [ref=e1006]:
+              - generic [ref=e1007]: Event Firmowy
+              - button [ref=e1008]:
+                - img [ref=e1009]
+            - heading "Event 10" [level=3] [ref=e1011]
+            - paragraph [ref=e1012]: Bar
+          - generic [ref=e1013]:
+            - button "Udostępnij" [ref=e1014]:
+              - img [ref=e1015]
+            - button "Powiększ" [ref=e1021]:
+              - img [ref=e1022]
+        - generic [ref=e1027] [cursor=pointer]:
+          - img "drinki2" [ref=e1029]
+          - generic [ref=e1031]:
+            - button [ref=e1034]:
+              - img [ref=e1035]
+            - heading "drinki2" [level=3] [ref=e1037]
+            - paragraph [ref=e1038]: drinki2
+          - generic [ref=e1039]:
+            - button "Udostępnij" [ref=e1040]:
+              - img [ref=e1041]
+            - button "Powiększ" [ref=e1047]:
+              - img [ref=e1048]
+        - generic [ref=e1053] [cursor=pointer]:
+          - img "Event 11" [ref=e1055]
+          - generic [ref=e1057]:
+            - button [ref=e1060]:
+              - img [ref=e1061]
+            - heading "Event 11" [level=3] [ref=e1063]
+            - paragraph [ref=e1064]: Bar
+          - generic [ref=e1065]:
+            - button "Udostępnij" [ref=e1066]:
+              - img [ref=e1067]
+            - button "Powiększ" [ref=e1073]:
+              - img [ref=e1074]
+        - generic [ref=e1079] [cursor=pointer]:
+          - img "drinki3" [ref=e1081]
+          - generic [ref=e1083]:
+            - button [ref=e1086]:
+              - img [ref=e1087]
+            - heading "drinki3" [level=3] [ref=e1089]
+            - paragraph [ref=e1090]: drinki3
+          - generic [ref=e1091]:
+            - button "Udostępnij" [ref=e1092]:
+              - img [ref=e1093]
+            - button "Powiększ" [ref=e1099]:
+              - img [ref=e1100]
+        - generic [ref=e1105] [cursor=pointer]:
+          - img "Event 12" [ref=e1107]
+          - generic [ref=e1109]:
+            - button [ref=e1112]:
+              - img [ref=e1113]
+            - heading "Event 12" [level=3] [ref=e1115]
+            - paragraph [ref=e1116]: Bar
+          - generic [ref=e1117]:
+            - button "Udostępnij" [ref=e1118]:
+              - img [ref=e1119]
+            - button "Powiększ" [ref=e1125]:
+              - img [ref=e1126]
+        - generic [ref=e1131] [cursor=pointer]:
+          - img "drinki4" [ref=e1133]
+          - generic [ref=e1135]:
+            - button [ref=e1138]:
+              - img [ref=e1139]
+            - heading "drinki4" [level=3] [ref=e1141]
+            - paragraph [ref=e1142]: drinki4
+          - generic [ref=e1143]:
+            - button "Udostępnij" [ref=e1144]:
+              - img [ref=e1145]
+            - button "Powiększ" [ref=e1151]:
+              - img [ref=e1152]
+        - generic [ref=e1157] [cursor=pointer]:
+          - img "Event 13" [ref=e1159]
+          - generic [ref=e1161]:
+            - button [ref=e1164]:
+              - img [ref=e1165]
+            - heading "Event 13" [level=3] [ref=e1167]
+            - paragraph [ref=e1168]: Bar
+          - generic [ref=e1169]:
+            - button "Udostępnij" [ref=e1170]:
+              - img [ref=e1171]
+            - button "Powiększ" [ref=e1177]:
+              - img [ref=e1178]
+        - generic [ref=e1183] [cursor=pointer]:
+          - img "drinki5" [ref=e1185]
+          - generic [ref=e1187]:
+            - button [ref=e1190]:
+              - img [ref=e1191]
+            - heading "drinki5" [level=3] [ref=e1193]
+            - paragraph [ref=e1194]: drinki5
+          - generic [ref=e1195]:
+            - button "Udostępnij" [ref=e1196]:
+              - img [ref=e1197]
+            - button "Powiększ" [ref=e1203]:
+              - img [ref=e1204]
+        - generic [ref=e1209] [cursor=pointer]:
+          - img "Event 14" [ref=e1211]
+          - generic [ref=e1213]:
+            - button [ref=e1216]:
+              - img [ref=e1217]
+            - heading "Event 14" [level=3] [ref=e1219]
+            - paragraph [ref=e1220]: Bar
+          - generic [ref=e1221]:
+            - button "Udostępnij" [ref=e1222]:
+              - img [ref=e1223]
+            - button "Powiększ" [ref=e1229]:
+              - img [ref=e1230]
+        - generic [ref=e1235] [cursor=pointer]:
+          - img "bar3" [ref=e1237]
+          - generic [ref=e1239]:
+            - button [ref=e1242]:
+              - img [ref=e1243]
+            - heading "bar3" [level=3] [ref=e1245]
+            - paragraph [ref=e1246]: bar3
+          - generic [ref=e1247]:
+            - button "Udostępnij" [ref=e1248]:
+              - img [ref=e1249]
+            - button "Powiększ" [ref=e1255]:
+              - img [ref=e1256]
+        - generic [ref=e1261] [cursor=pointer]:
+          - img "Event 15" [ref=e1263]
+          - generic [ref=e1265]:
+            - button [ref=e1268]:
+              - img [ref=e1269]
+            - heading "Event 15" [level=3] [ref=e1271]
+            - paragraph [ref=e1272]: Bar
+          - generic [ref=e1273]:
+            - button "Udostępnij" [ref=e1274]:
+              - img [ref=e1275]
+            - button "Powiększ" [ref=e1281]:
+              - img [ref=e1282]
+        - generic [ref=e1287] [cursor=pointer]:
+          - img "wesele3" [ref=e1289]
+          - generic [ref=e1291]:
+            - generic [ref=e1292]:
+              - generic [ref=e1293]: Wesele
+              - button [ref=e1294]:
+                - img [ref=e1295]
+            - heading "wesele3" [level=3] [ref=e1297]
+            - paragraph [ref=e1298]: wesele3
+          - generic [ref=e1299]:
+            - button "Udostępnij" [ref=e1300]:
+              - img [ref=e1301]
+            - button "Powiększ" [ref=e1307]:
+              - img [ref=e1308]
+        - generic [ref=e1313] [cursor=pointer]:
+          - img "drinki" [ref=e1315]
+          - generic [ref=e1317]:
+            - button [ref=e1320]:
+              - img [ref=e1321]
+            - heading "drinki" [level=3] [ref=e1323]
+            - paragraph [ref=e1324]: drinki
+          - generic [ref=e1325]:
+            - button "Udostępnij" [ref=e1326]:
+              - img [ref=e1327]
+            - button "Powiększ" [ref=e1333]:
+              - img [ref=e1334]
+        - generic [ref=e1339] [cursor=pointer]:
+          - img "bar-menu" [ref=e1341]
+          - generic [ref=e1343]:
+            - button [ref=e1346]:
+              - img [ref=e1347]
+            - heading "bar-menu" [level=3] [ref=e1349]
+            - paragraph [ref=e1350]: bar-menu
+          - generic [ref=e1351]:
+            - button "Udostępnij" [ref=e1352]:
+              - img [ref=e1353]
+            - button "Powiększ" [ref=e1359]:
+              - img [ref=e1360]
+        - generic [ref=e1365] [cursor=pointer]:
+          - img "menu-styl" [ref=e1367]
+          - generic [ref=e1369]:
+            - generic [ref=e1370]:
+              - generic [ref=e1371]: Event Firmowy
+              - button [ref=e1372]:
+                - img [ref=e1373]
+            - heading "menu-styl" [level=3] [ref=e1375]
+            - paragraph [ref=e1376]: menu-styl
+          - generic [ref=e1377]:
+            - button "Udostępnij" [ref=e1378]:
+              - img [ref=e1379]
+            - button "Powiększ" [ref=e1385]:
+              - img [ref=e1386]
+        - generic [ref=e1391] [cursor=pointer]:
+          - generic [ref=e1394]:
+            - generic [ref=e1395]:
+              - generic [ref=e1396]: Ogólne
+              - button [ref=e1397]:
+                - img [ref=e1398]
+            - heading [level=3]
+            - paragraph
+          - generic [ref=e1400]:
+            - button "Udostępnij" [ref=e1401]:
+              - img [ref=e1402]
+            - button "Powiększ" [ref=e1408]:
+              - img [ref=e1409]
+        - generic [ref=e1414] [cursor=pointer]:
+          - generic [ref=e1417]:
+            - generic [ref=e1418]:
+              - generic [ref=e1419]: Ogólne
+              - button [ref=e1420]:
+                - img [ref=e1421]
+            - heading [level=3]
+            - paragraph
+          - generic [ref=e1423]:
+            - button "Udostępnij" [ref=e1424]:
+              - img [ref=e1425]
+            - button "Powiększ" [ref=e1431]:
+              - img [ref=e1432]
+        - generic [ref=e1437] [cursor=pointer]:
+          - img "logo" [ref=e1439]
+          - generic [ref=e1441]:
+            - generic [ref=e1442]:
+              - generic [ref=e1443]: Ogólne
+              - button [ref=e1444]:
+                - img [ref=e1445]
+            - heading "logo" [level=3] [ref=e1447]
+            - paragraph [ref=e1448]: logo
+          - generic [ref=e1449]:
+            - button "Udostępnij" [ref=e1450]:
+              - img [ref=e1451]
+            - button "Powiększ" [ref=e1457]:
+              - img [ref=e1458]
+      - generic [ref=e1465]:
+        - generic [ref=e1466]:
+          - generic [ref=e1467]: 33+
+          - generic [ref=e1468]: Realizacji
+        - generic [ref=e1469]:
+          - generic [ref=e1470]: 100%
+          - generic [ref=e1471]: Zadowolonych klientów
+        - generic [ref=e1472]:
+          - generic [ref=e1473]: 24/7
+          - generic [ref=e1474]: Dostępność
+  - generic [ref=e1475]:
+    - generic [ref=e1477]:
+      - paragraph [ref=e1478]: Opinie
+      - heading "Co mówią klienci" [level=2] [ref=e1479]
+    - generic [ref=e1482]:
+      - generic [ref=e1483]:
+        - generic [ref=e1484]: "\""
+        - paragraph [ref=e1485]: ELIKSIR uświetnił nasze wesele! Goście do dziś wspominają niesamowite koktajle i profesjonalną obsługę. Polecamy z całego serca!
+        - generic [ref=e1486]:
+          - paragraph [ref=e1487]: Anna i Piotr
+          - paragraph [ref=e1488]: Wesele, Łódź
+      - generic [ref=e1489]:
+        - generic [ref=e1490]: "\""
+        - paragraph [ref=e1491]: Współpraca na najwyższym poziomie. Bar LED zrobił niesamowite wrażenie, a barman świetnie bawił gości pokazami flair.
+        - generic [ref=e1492]:
+          - paragraph [ref=e1493]: Marta K.
+          - paragraph [ref=e1494]: Urodziny 30
+      - generic [ref=e1495]:
+        - generic [ref=e1496]: "\""
+        - paragraph [ref=e1497]: Profesjonalizm i elastyczność - dokładnie to czego szukaliśmy dla naszego eventu firmowego. Na pewno wrócimy!
+        - generic [ref=e1498]:
+          - paragraph [ref=e1499]: Tomasz W.
+          - paragraph [ref=e1500]: Event korporacyjny
+  - generic [ref=e1503]:
+    - generic [ref=e1504]:
+      - paragraph [ref=e1505]: Kontakt
+      - heading "Zamów wycenę" [level=2] [ref=e1506]
+      - paragraph [ref=e1507]: Wyślij nam kilka podstawowych informacji. Odezwiemy się z dopasowaną wyceną i potwierdzeniem dostępności terminu.
+    - generic [ref=e1508]:
+      - generic [ref=e1509]:
+        - heading "Porozmawiajmy o Twojej imprezie" [level=3] [ref=e1510]
+        - paragraph [ref=e1511]: Najlepiej, gdy w wiadomości podasz typ wydarzenia, lokalizację, przybliżoną liczbę gości i godziny trwania imprezy. To pozwoli nam szybko przygotować konkretną propozycję.
+        - generic [ref=e1512]:
+          - link "Telefon +48 781 024 701" [ref=e1513] [cursor=pointer]:
+            - /url: tel:+48781024701
+            - img [ref=e1515]
+            - generic [ref=e1517]:
+              - paragraph [ref=e1518]: Telefon
+              - paragraph [ref=e1519]: +48 781 024 701
+          - link "Email kontakt@eliksir-bar.pl" [ref=e1520] [cursor=pointer]:
+            - /url: mailto:kontakt@eliksir-bar.pl
+            - img [ref=e1522]
+            - generic [ref=e1524]:
+              - paragraph [ref=e1525]: Email
+              - paragraph [ref=e1526]: kontakt@eliksir-bar.pl
+          - generic [ref=e1527]:
+            - img [ref=e1529]
+            - generic [ref=e1532]:
+              - paragraph [ref=e1533]: Lokalizacja bazowa
+              - paragraph [ref=e1534]: Kleszczów / Bełchatów (dojazd na całą Polskę)
+          - generic [ref=e1535]:
+            - paragraph [ref=e1536]: Dane z kalkulatora zostaną dołączone do maila.
+            - paragraph [ref=e1537]:
+              - text: "Pakiet:"
+              - strong [ref=e1538]: Family & Seniors
+              - text: "· Goście:"
+              - strong [ref=e1539]: "50"
+              - text: "· Cena:"
+              - strong [ref=e1540]: 3475 PLN
+      - generic [ref=e1543]:
+        - generic [ref=e1544]:
+          - generic [ref=e1545]: Imię i nazwisko
+          - textbox [ref=e1546]
+        - generic [ref=e1547]:
+          - generic [ref=e1548]:
+            - generic [ref=e1549]: Email
+            - textbox [ref=e1550]
+          - generic [ref=e1551]:
+            - generic [ref=e1552]: Telefon
+            - textbox "+48 123 456 789" [ref=e1553]
+        - generic [ref=e1554]:
+          - generic [ref=e1555]:
+            - generic [ref=e1556]: Data imprezy
+            - textbox [ref=e1557]
+          - generic [ref=e1558]:
+            - generic [ref=e1559]: Liczba gości
+            - spinbutton [ref=e1560]
+        - generic [ref=e1561]:
+          - generic [ref=e1562]: Wiadomość
+          - textbox "Np. wesele 120 osób, plener, chcemy bar z pokazem flair i pakietem premium..." [ref=e1563]
+        - generic [ref=e1565] [cursor=pointer]:
+          - checkbox "Wyrażam zgodę na przetwarzanie moich danych osobowych przez ELIKSIR Bar Mobilny w celu przygotowania oferty i kontaktu w sprawie wydarzenia. Zgodnie z art. 6 ust. 1 lit. a RODO. Administratorem danych jest ELIKSIR Bar Mobilny. Dane będą przetwarzane do czasu wycofania zgody. Przysługuje mi prawo dostępu, sprostowania, usunięcia danych, ograniczenia przetwarzania, wniesienia sprzeciwu oraz wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych." [ref=e1566]
+          - generic [ref=e1567]: Wyrażam zgodę na przetwarzanie moich danych osobowych przez ELIKSIR Bar Mobilny w celu przygotowania oferty i kontaktu w sprawie wydarzenia. Zgodnie z art. 6 ust. 1 lit. a RODO. Administratorem danych jest ELIKSIR Bar Mobilny. Dane będą przetwarzane do czasu wycofania zgody. Przysługuje mi prawo dostępu, sprostowania, usunięcia danych, ograniczenia przetwarzania, wniesienia sprzeciwu oraz wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych.
+        - button "Zaznacz zgodę aby wysłać" [disabled] [ref=e1568]
+  - generic [ref=e1570]:
+    - generic [ref=e1571]:
+      - generic [ref=e1572]:
+        - generic [ref=e1574]: ELIKSIR
+        - paragraph [ref=e1575]: Eliksir Bar to mobilny bar koktajlowy, który tworzy wyjątkowe doświadczenia na każdą okazję. Profesjonalizm, kreatywność i niezrównana klasa w każdym drinku.
+        - generic [ref=e1576]:
+          - link "Facebook" [ref=e1577] [cursor=pointer]:
+            - /url: https://www.facebook.com/profile.php?id=61585498184401
+            - img [ref=e1578]
+          - link "Instagram" [ref=e1580] [cursor=pointer]:
+            - /url: https://www.instagram.com/eliksir.mobilny.bar/
+            - img [ref=e1581]
+      - generic [ref=e1584]:
+        - heading "Menu" [level=4] [ref=e1585]
+        - list [ref=e1586]:
+          - listitem [ref=e1587]:
+            - link "Strona Główna" [ref=e1588] [cursor=pointer]:
+              - /url: "#hero"
+              - text: Strona Główna
+          - listitem [ref=e1590]:
+            - link "Oferta" [ref=e1591] [cursor=pointer]:
+              - /url: "#oferta"
+              - text: Oferta
+          - listitem [ref=e1593]:
+            - link "Kalkulator" [ref=e1594] [cursor=pointer]:
+              - /url: "#kalkulator"
+              - text: Kalkulator
+          - listitem [ref=e1596]:
+            - link "Galeria" [ref=e1597] [cursor=pointer]:
+              - /url: "#galeria"
+              - text: Galeria
+      - generic [ref=e1599]:
+        - heading "Usługi" [level=4] [ref=e1600]
+        - list [ref=e1601]:
+          - listitem [ref=e1602]:
+            - link "Wesela" [ref=e1603] [cursor=pointer]:
+              - /url: "#wesela"
+              - text: Wesela
+          - listitem [ref=e1605]:
+            - link "Eventy Firmowe" [ref=e1606] [cursor=pointer]:
+              - /url: "#eventy"
+              - text: Eventy Firmowe
+          - listitem [ref=e1608]:
+            - link "Imprezy Prywatne" [ref=e1609] [cursor=pointer]:
+              - /url: "#imprezy"
+              - text: Imprezy Prywatne
+          - listitem [ref=e1611]:
+            - link "Koktajle na Zamówienie" [ref=e1612] [cursor=pointer]:
+              - /url: "#koktajle"
+              - text: Koktajle na Zamówienie
+      - generic [ref=e1614]:
+        - heading "Kontakt" [level=4] [ref=e1615]
+        - generic [ref=e1616]:
+          - link "+48 781 024 701" [ref=e1617] [cursor=pointer]:
+            - /url: tel:+48781024701
+            - img [ref=e1618]
+            - generic [ref=e1620]: +48 781 024 701
+          - link "kontakt@eliksir-bar.pl" [ref=e1621] [cursor=pointer]:
+            - /url: mailto:kontakt@eliksir-bar.pl
+            - img [ref=e1622]
+            - generic [ref=e1625]: kontakt@eliksir-bar.pl
+        - generic [ref=e1626]:
+          - heading "Lokalizacja" [level=5] [ref=e1627]
+          - generic [ref=e1628]:
+            - paragraph [ref=e1629]:
+              - text: "Lokalizacja bazowa:"
+              - text: Kleszczów / Bełchatów
+            - paragraph [ref=e1630]:
+              - text: "Działamy mobilnie:"
+              - text: Łódź, woj. łódzkie i cała Polska
+          - link "Zobacz na mapie →" [ref=e1631] [cursor=pointer]:
+            - /url: https://www.google.com/maps/place/Bełchatów
+            - img [ref=e1632]
+            - generic [ref=e1635]: Zobacz na mapie →
+        - generic [ref=e1636]:
+          - paragraph [ref=e1637]: Zapisz się do newslettera
+          - generic [ref=e1638]:
+            - textbox "Twój email" [ref=e1639]
+            - button "OK" [ref=e1640] [cursor=pointer]
+    - generic [ref=e1641]:
+      - generic [ref=e1642]:
+        - paragraph [ref=e1643]: © 2026 Eliksir Bar Mobilny. Wszelkie prawa zastrzeżone.
+        - generic [ref=e1644]:
+          - link "Regulamin" [ref=e1645] [cursor=pointer]:
+            - /url: "#regulamin"
+          - link "Polityka prywatności" [ref=e1646] [cursor=pointer]:
+            - /url: "#polityka"
+          - link "Panel Admin" [ref=e1647] [cursor=pointer]:
+            - /url: /admin/login
+      - paragraph [ref=e1649]: Stworzone z ❤️ dla miłośników wyjątkowych koktajli
+```

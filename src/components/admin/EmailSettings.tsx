@@ -236,14 +236,33 @@ export default function EmailSettings() {
   };
 
   const handleDeleteLogs = async () => {
-    if (!confirm('❌ Czy na pewno usunąć całą historię email?')) return;
+    if (!confirm('❌ Czy na pewno usunąć całą historię email? (nie można cofnąć)')) return;
     
     try {
-      // Backend endpoint needed
-      toast({
-        title: "⚠️ Funkcja w przygotowaniu",
-        description: "Usuwanie logów zostanie dodane wkrótce",
+      const response = await fetch(`${API_URL}/api/email/logs`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('eliksir_jwt_token')}`,
+        },
       });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast({
+          title: "✅ Logi usunięte",
+          description: "Historia wiadomości została wyczyszczona",
+        });
+        setLogs([]);
+        setNewLogsCount(0);
+        setLastLogId(null);
+      } else {
+        toast({
+          title: "❌ Błąd",
+          description: data.error,
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       log.error('Error deleting logs:', error);
       toast({
@@ -382,7 +401,7 @@ export default function EmailSettings() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex space-x-4">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={handleTest}
             disabled={testing || !settings.smtpUser}
@@ -399,6 +418,15 @@ export default function EmailSettings() {
             <Save size={20} />
             <span>{saving ? 'Zapisywanie...' : 'Zapisz Ustawienia'}</span>
           </button>
+          <a
+            href="https://poczta.home.pl/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-4 py-2 rounded-eliksir transition-colors flex items-center space-x-2"
+          >
+            <Mail size={20} />
+            <span>Otwórz pocztę home.pl</span>
+          </a>
         </div>
       </div>
 

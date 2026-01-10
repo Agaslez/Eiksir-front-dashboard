@@ -189,15 +189,27 @@ function Calculator({ onCalculate }: CalculatorProps) {
   // Memoizacja snapshot dla stabilności referencji (MUSI BYĆ PRZED EARLY RETURN!)
   const calculatorSnapshot: CalculatorSnapshot = useMemo(() => {
     if (loading || !config) {
-      // Default snapshot gdy ładowanie
+      // Default snapshot gdy ładowanie - NOWA struktura
       return {
-        offerName: OFFERS[selectedOfferId].name,
+        packageName: OFFERS[selectedOfferId].name,
+        packagePrice: 0,
         guests,
-        totalAfterDiscount: 0,
+        extraGuestsCharge: 0,
+        addons: {
+          fountain: { selected: false, cost: 0 },
+          keg: { selected: false, cost: 0, kegs: 0 },
+          extraBarman: { selected: false, cost: 0 },
+          lemonade: { selected: false, cost: 0 },
+          hockery: { selected: false, cost: 0 },
+          ledLighting: { selected: false, cost: 0 },
+        },
+        addonsTotal: 0,
+        subtotal: 0,
+        discount: 0,
+        totalPrice: 0,
         pricePerGuest: 0,
         estimatedCocktails: 0,
         estimatedShots: 0,
-        addons,
       };
     }
 

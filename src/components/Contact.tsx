@@ -274,10 +274,10 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
                     Dane z kalkulatora zostaną dołączone do maila.
                   </p>
                   <p className="leading-relaxed">
-                    Pakiet: <strong>{calculatorSnapshot.offerName}</strong> ·{' '}
+                    Pakiet: <strong>{calculatorSnapshot.packageName}</strong> ·{' '}
                     Goście: <strong>{calculatorSnapshot.guests}</strong> · Cena:{' '}
                     <strong>
-                      {calculatorSnapshot.totalAfterDiscount.toLocaleString(
+                      {calculatorSnapshot.totalPrice.toLocaleString(
                         'pl-PL'
                       )}{' '}
                       PLN

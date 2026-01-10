@@ -1,7 +1,75 @@
 # 🏗️ ELIKSIR BAR - RAPORT ARCHITEKTURY SYSTEMU
-**Data**: 9 stycznia 2026  
-**Status**: ✅ STABILNY - GHOST Phase 9: 60% Complete  
+**Data**: 10 stycznia 2026 (UPDATED)  
+**Status**: ✅ STABILNY - Email Module Phase 1 Complete + GHOST Phase 9: 60%  
 **Ocena**: 7.5/10 → Potencjał na 9/10 po priorytetowych poprawkach
+
+---
+
+## ⚠️ CRITICAL: WŁAŚCIWE FOLDERY PROJEKTU
+
+**ZAWSZE UŻYWAJ TYLKO TYCH FOLDERÓW:**
+
+### ✅ FRONTEND (WŁAŚCIWY)
+```
+📁 eliksir-frontend/
+   └── src/
+       ├── components/
+       │   ├── Contact.tsx          ✅ NAPRAWIONY (API call zamiast mailto:)
+       │   ├── Calculator.tsx
+       │   └── admin/
+       │       └── EmailSettings.tsx ✅ NOWY (Email Dashboard)
+       ├── pages/
+       └── lib/
+```
+- **Deploy**: Vercel → https://eiksir-front-dashboard.vercel.app
+- **Ostatni commit**: `e9e6cff` - fix: Contact form - send via API instead of mailto link
+- **Status**: ✅ AKTYWNY, wszystkie zmiany muszą być tutaj
+
+### ✅ BACKEND (WŁAŚCIWY)
+```
+📁 stefano-eliksir-backend/
+   └── server/
+       ├── routes/
+       │   ├── email.ts             ✅ NOWY (Email API)
+       │   ├── content.ts
+       │   └── auth.ts
+       ├── db/
+       │   └── schema.ts            ✅ ZAKTUALIZOWANY (email tables)
+       └── migrations/
+           └── 0013_email_system.sql ✅ NOWY (email module)
+```
+- **Deploy**: Render → https://eliksir-backend-front-dashboard.onrender.com
+- **Ostatni commit**: `c13949a` - fix: IMAP host detection for home.pl servers
+- **Status**: ✅ AKTYWNY, wszystkie zmiany muszą być tutaj
+
+### ❌ ROOT src/ (ARCHIWALNY - NIE UŻYWAĆ!)
+```
+📁 src/ (ROOT)
+   └── components/
+       └── Contact.tsx              ❌ STARY KOD (miał mailto: link)
+```
+- **Status**: ❌ **ARCHIWUM** - Ten folder to stary projekt, może być usunięty
+- **Problem**: Zawierał starą wersję Contact.tsx z `window.location.href = mailtoLink`
+- **Rozwiązanie**: Zarchiwizowany, wszystkie zmiany tylko w `eliksir-frontend/`
+
+### 📋 ZASADA ZŁOTA
+
+**Jeśli planujesz edycję:**
+1. ✅ Sprawdź czy plik jest w `eliksir-frontend/` lub `stefano-eliksir-backend/`
+2. ❌ NIE edytuj niczego w ROOT `src/` - to archiwum!
+3. ✅ W razie wątpliwości: `git log --oneline` pokaże aktywne commity
+
+**Różnica między projektami:**
+```bash
+# ✅ WŁAŚCIWY (aktywne commity)
+cd eliksir-frontend && git log --oneline -5
+e9e6cff - fix: Contact form - send via API
+2db9a56 - fix: Port NaN error
+069a611 - docs: Email Module Documentation
+
+# ❌ ARCHIWUM (brak commitów w 2026)
+cd .. && ls src/  # Ten folder nie jest w git repo eliksir-frontend
+```
 
 ---
 
@@ -19,9 +87,24 @@
 - **Auth System**: ✅ Login naprawiony (firstName/lastName w /me endpoint)
 - **Error Handling**: ✅ Circuit breaker + rate limiting (infinity loop prevented)
 
-### ✅ RECENT FIXES (2026-01-09)
+### ✅ RECENT FIXES (2026-01-10)
 
-**Gallery & Dashboard:**
+**Email Module Phase 1 Complete:**
+- ✅ Contact form: mailto: → API call (backend sends emails)
+- ✅ Email Dashboard: SMTP config + test + logs + inbox sync
+- ✅ Backend routes: 6 new endpoints (/api/email/*)
+- ✅ Database migration: email_settings, email_logs, inbox_messages
+- ✅ IMAP integration: inbox sync (headers only, lazy load body)
+- ✅ Fixed: Port NaN error (default 587)
+- ✅ Fixed: IMAP host detection for home.pl servers
+- ✅ Commits: Frontend `e9e6cff`, Backend `c13949a`
+
+**Project Structure Clarification:**
+- ✅ Documented: `eliksir-frontend/` = WŁAŚCIWY projekt
+- ✅ Documented: `stefano-eliksir-backend/` = WŁAŚCIWY projekt
+- ⚠️ ROOT `src/` = ARCHIWALNY (nie używać!)
+
+**Gallery & Dashboard (2026-01-09):**
 - ✅ Fixed upload endpoint (404 → working)
 - ✅ Fixed delete endpoint (404 → working)
 - ✅ Added reorder UI (ArrowUp/ArrowDown buttons)
@@ -56,14 +139,16 @@
 
 ### 🎯 IMMEDIATE ACTION ITEMS
 
-**Today (2026-01-09):**
-- [x] ✅ Fix rate limiting infinity loop (circuit breaker added)
-- [x] ✅ Fix gallery dashboard CRUD (upload/delete/reorder)
-- [x] ✅ Fix login system (firstName/lastName)
-- [ ] Test reorder feature end-to-end
-- [ ] Remove test images from gallery (optional)
+**Today (2026-01-10):**
+- [x] ✅ Email Module Phase 1 + IMAP headers complete
+- [x] ✅ Fix Contact form mailto: bug (both projects)
+- [x] ✅ Fix IMAP host detection for home.pl
+- [x] ✅ Document project structure (właściwe foldery)
+- [ ] Test email module end-to-end (user should configure SMTP)
+- [ ] Archive ROOT src/ folder (optional cleanup)
 
 **This Week:**
+- [ ] Email Module Phase 2: Auto-replies + templates
 - [ ] Resume Phase 9 PR #4 (Scheduler Update)
 - [ ] PR #5 (Frontend UI) z mock data (parallel development)
 - [ ] Backend unit tests: QualityGateOrchestrator (8/8 ✅), Analyzers (20 tests)
@@ -1447,15 +1532,47 @@ Version Control: Git + GitHub
 
 ## 📁 STRUKTURA PROJEKTU <a name="struktura"></a>
 
+**⚠️ WAŻNE: Właściwe lokalizacje projektu**
+
+### ✅ AKTYWNE PROJEKTY (używaj tylko tych folderów)
+
+```
+📁 eliksir-frontend/                     # ✅ WŁAŚCIWY FRONTEND
+   ├── src/
+   │   ├── components/
+   │   │   ├── Contact.tsx              ✅ NAPRAWIONY (API call)
+   │   │   ├── Calculator.tsx
+   │   │   └── admin/
+   │   │       └── EmailSettings.tsx    ✅ NOWY (Email Dashboard)
+   │   └── pages/
+   └── Deployment: Vercel → eiksir-front-dashboard.vercel.app
+
+📁 stefano-eliksir-backend/              # ✅ WŁAŚCIWY BACKEND
+   └── server/
+       ├── routes/
+       │   └── email.ts                 ✅ NOWY (Email API - 6 endpoints)
+       ├── db/
+       │   └── schema.ts                ✅ ZAKTUALIZOWANY (email tables)
+       └── migrations/
+           └── 0013_email_system.sql    ✅ NOWY (3 tables)
+   └── Deployment: Render → eliksir-backend-front-dashboard.onrender.com
+
+❌ src/ (ROOT)                           # ❌ ARCHIWUM - NIE UŻYWAĆ!
+   └── components/
+       └── Contact.tsx                  ❌ STARA WERSJA (mailto: link)
+```
+
+### 📂 Szczegółowa Struktura
+
 ```
 eliksir-website/
 │
-├── eliksir-frontend/                    # Frontend React
+├── eliksir-frontend/                    # ✅ Frontend React (AKTYWNY)
 │   ├── src/
 │   │   ├── components/                  # Komponenty UI
 │   │   │   ├── About.tsx               ✅ O nas
 │   │   │   ├── Calculator.tsx          ✅ Kalkulator cenowy
-│   │   │   ├── Contact.tsx             ✅ Formularz kontaktu
+│   │   │   ├── Contact.tsx             ✅ Formularz kontaktu (NAPRAWIONY)
 │   │   │   ├── CTA.tsx                 ✅ Call-to-action
 │   │   │   ├── FAQ.tsx                 ✅ Pytania i odpowiedzi
 │   │   │   ├── Gallery.tsx             ✅ Galeria grid
@@ -1463,6 +1580,10 @@ eliksir-website/
 │   │   │   ├── HorizontalGallery.tsx   ✅ Galeria panorama
 │   │   │   ├── PackageDetails.tsx      ✅ Szczegóły pakietów
 │   │   │   ├── Testimonials.tsx        ✅ Opinie klientów
+│   │   │   ├── admin/                  # Admin Dashboard
+│   │   │   │   ├── EmailSettings.tsx   ✅ NOWY - Email config
+│   │   │   │   ├── GalleryManager.tsx  ✅ Upload/delete images
+│   │   │   │   └── Dashboard.tsx       ✅ Admin panel
 │   │   │   └── layout/
 │   │   │       ├── Container.tsx       ✅ Layout wrapper
 │   │   │       ├── Footer.tsx          ✅ Stopka
@@ -1495,7 +1616,7 @@ eliksir-website/
 │   │
 │   └── package.json
 │
-├── stefano-eliksir-backend/             # Backend Express
+├── stefano-eliksir-backend/             # ✅ Backend Express (AKTYWNY)
 │   ├── server/
 │   │   ├── index.ts                    ✅ Główny plik serwera
 │   │   │
@@ -1505,7 +1626,7 @@ eliksir-website/
 │   │   │   ├── auth.ts                 ✅ Logowanie/rejestracja
 │   │   │   ├── calculator.ts           ✅ Konfiguracja kalkulatora
 │   │   │   ├── content.ts              ✅ Zarządzanie treścią
-│   │   │   ├── email.ts                ✅ Wysyłka maili (Resend)
+│   │   │   ├── email.ts                ✅ NOWY - Email API (Phase 1)
 │   │   │   ├── ai.ts                   ✅ OpenAI integration
 │   │   │   ├── config.ts               ✅ Ustawienia systemu
 │   │   │   ├── echo.ts                 ✅ Debug endpoint

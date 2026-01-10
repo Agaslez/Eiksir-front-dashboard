@@ -42,121 +42,130 @@ function AppContent() {
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <Routes>
-      {/* Public routes */}
-      <Route path="/" element={<Home />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/quiz" element={<Quiz />} />
-      <Route path="/gallery" element={<Gallery />} />
+        {/* Public routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/quiz" element={<Quiz />} />
+        <Route path="/gallery" element={<Gallery />} />
 
-      {/* Admin routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/unauthorized" element={<AdminUnauthorized />} />
+        {/* Admin routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/unauthorized" element={<AdminUnauthorized />} />
 
-          {/* Protected admin routes with nested routing */}
+        {/* Protected admin routes with nested routing */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardHome />} />
           <Route
-            path="/admin"
+            path="reservations"
             element={
               <ProtectedRoute requiredRole="admin">
-                <AdminDashboard />
+                <ReservationsManager />
               </ProtectedRoute>
             }
-          >
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<DashboardHome />} />
-            <Route
-              path="reservations"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <ReservationsManager />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="content"
-              element={
-                <ProtectedRoute requiredRole="editor">
-                  <ContentEditor />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="shopping-lists"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <ShoppingLists />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="gallery"
-              element={
-                <ProtectedRoute requiredRole="editor">
-                  <GalleryManager />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="customers"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <Customers />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="analytics"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <Analytics />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="settings"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <Settings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="email"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <EmailSettings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="calculator"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <CalculatorSettings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="health"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <SystemHealth />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="ghost"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <GhostDashboard />
-                </ProtectedRoute>
-              }
-            />
-          </Route>
+          />
+          <Route
+            path="content"
+            element={
+              <ProtectedRoute requiredRole="editor">
+                <ContentEditor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="shopping-lists"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <ShoppingLists />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="gallery"
+            element={
+              <ProtectedRoute requiredRole="editor">
+                <GalleryManager />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="customers"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Customers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="analytics"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Analytics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="email"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <EmailSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="calculator"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <CalculatorSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="health"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <SystemHealth />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="ghost"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <GhostDashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
 
-          {/* Catch all route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        </AppContent>
+        {/* Catch all route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
     </AuthProvider>
   );
 }

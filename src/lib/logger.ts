@@ -357,7 +357,17 @@ export const initLogger = (backendUrl: string): Logger => {
 
 export const getLogger = (): Logger => {
   if (!instance) {
-    throw new Error('[Logger] Not initialized - call initLogger first');
+    // Fallback to console if not initialized (shouldn't happen in prod)
+    // ARCHITECT_APPROVED: Safe fallback for logger before initialization - 2026-01-10 - Stefan
+    console.warn('[Logger] Not initialized - using console fallback');
+    // Return mock logger that uses console
+    return {
+      debug: (msg: string, ctx?: LogContext) => console.debug(msg, ctx),
+      info: (msg: string, ctx?: LogContext) => console.info(msg, ctx),
+      warn: (msg: string, ctx?: LogContext) => console.warn(msg, ctx),
+      error: (msg: string, ctx?: LogContext) => console.error(msg, ctx),
+      fatal: (msg: string, ctx?: LogContext) => console.error('[FATAL]', msg, ctx),
+    } as any;
   }
   return instance;
 };

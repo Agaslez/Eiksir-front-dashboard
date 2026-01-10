@@ -1,6 +1,5 @@
 import { Mail, RefreshCw, Save, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Logger } from '../../lib/logger';
 import { ELIKSIR_STYLES } from '../../lib/styles';
 
 interface EmailSettings {
@@ -83,7 +82,8 @@ export default function EmailSettings() {
         setSettings(data.settings);
       }
     } catch (error) {
-      console.error('Error loading settings:', error);
+      // ARCHITECT_APPROVED: Error logging for settings load failure - 2026-01-10 - Stefan
+      logger.error('Error loading settings:', error);
     } finally {
       setLoading(false);
     }
@@ -101,7 +101,8 @@ export default function EmailSettings() {
         setLogs(data.logs);
       }
     } catch (error) {
-      console.error('Error loading logs:', error);
+      // ARCHITECT_APPROVED: Error logging for logs load failure - 2026-01-10 - Stefan
+      logger.error('Error loading logs:', error);
     }
   };
 
@@ -117,7 +118,8 @@ export default function EmailSettings() {
         setInbox(data.messages);
       }
     } catch (error) {
-      console.error('Error loading inbox:', error);
+      // ARCHITECT_APPROVED: Error logging for inbox load failure - 2026-01-10 - Stefan
+      logger.error('Error loading inbox:', error);
     }
   };
 
@@ -139,7 +141,7 @@ export default function EmailSettings() {
     setTesting(true);
     try {
       // ARCHITECT_APPROVED: Debug logging for email test essential for troubleshooting SMTP issues - 2026-01-10 - Stefan
-      Logger.info('[EmailSettings] Testing email configuration...');
+      logger.info('[EmailSettings] Testing email configuration...');
       
       const response = await fetch(`${API_URL}/api/email/test`, {
         method: 'POST',
@@ -153,7 +155,7 @@ export default function EmailSettings() {
       
       if (data.success) {
         // ARCHITECT_APPROVED: Success logging for email test confirmation - 2026-01-10 - Stefan
-        Logger.info('[EmailSettings] ✅ Test successful:', data);
+        logger.info('[EmailSettings] ✅ Test successful:', data);
         alert(
           '✅ Email testowy wysłany pomyślnie!\n\n' +
           `Sprawdz skrzynkę: ${settings.smtpUser}\n` +
@@ -162,7 +164,7 @@ export default function EmailSettings() {
         loadLogs(); // Refresh logs
       } else {
         // ARCHITECT_APPROVED: Error logging for failed email test - 2026-01-10 - Stefan
-        Logger.error('[EmailSettings] ❌ Test failed:', data);
+        logger.error('[EmailSettings] ❌ Test failed:', data);
         alert(
           '❌ Błąd wysyłania email:\n\n' + 
           data.error +
@@ -171,7 +173,7 @@ export default function EmailSettings() {
       }
     } catch (error) {
       // ARCHITECT_APPROVED: Error logging for test connection failure - 2026-01-10 - Stefan
-      Logger.error('[EmailSettings] ❌ Test error:', error);
+      logger.error('[EmailSettings] ❌ Test error:', error);
       alert('❌ Błąd połączenia z backendem. Sprawdź logi w konsoli.');
     } finally {
       setTesting(false);
@@ -195,7 +197,7 @@ export default function EmailSettings() {
     setSaving(true);
     try {
       // ARCHITECT_APPROVED: Debug logging for email settings save - 2026-01-10 - Stefan
-      Logger.info('[EmailSettings] Saving configuration...');
+      logger.info('[EmailSettings] Saving configuration...');
       
       const response = await fetch(`${API_URL}/api/email/settings`, {
         method: 'PUT',
@@ -210,16 +212,18 @@ export default function EmailSettings() {
       
       if (data.success) {
         // ARCHITECT_APPROVED: Success confirmation for settings save - 2026-01-10 - Stefan
-        Logger.info('[EmailSettings] ✅ Settings saved');
+        logger.info('[EmailSettings] ✅ Settings saved');
         alert('✅ Ustawienia zapisane pomyślnie!\n\nMożesz teraz przetestować połączenie.');
         setPasswordChanged(false);
         await loadSettings(); // Reload to get fresh data
       } else {
-        console.error('[EmailSettings] ❌ Save failed:', data);
+        // ARCHITECT_APPROVED: Error logging for save failure - 2026-01-10 - Stefan
+        logger.error('[EmailSettings] ❌ Save failed:', data);
         alert('❌ Błąd zapisu: ' + data.error);
       }
     } catch (error) {
-      console.error('[EmailSettings] ❌ Save error:', error);
+      // ARCHITECT_APPROVED: Error logging for save error - 2026-01-10 - Stefan
+      logger.error('[EmailSettings] ❌ Save error:', error);
       alert('❌ Błąd podczas zapisywania. Sprawdź połączenie.');
     } finally {
       setSaving(false);
@@ -244,7 +248,8 @@ export default function EmailSettings() {
         alert('❌ Błąd: ' + data.error);
       }
     } catch (error) {
-      console.error('Error syncing inbox:', error);
+      // ARCHITECT_APPROVED: Error logging for inbox sync failure - 2026-01-10 - Stefan
+      logger.error('Error syncing inbox:', error);
       alert('❌ Błąd podczas synchronizacji');
     } finally {
       setSyncing(false);
@@ -261,7 +266,8 @@ export default function EmailSettings() {
       });
       loadInbox(); // Refresh
     } catch (error) {
-      console.error('Error marking as read:', error);
+      // ARCHITECT_APPROVED: Error logging for mark as read failure - 2026-01-10 - Stefan
+      logger.error('Error marking as read:', error);
     }
   };
 

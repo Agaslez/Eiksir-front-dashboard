@@ -52,19 +52,25 @@ interface CalculatorConfig {
 
 // Dodajemy eksportowany typ
 export type CalculatorSnapshot = {
-  offerName: string;
+  packageName: string;
+  packagePrice: number;
   guests: number;
-  totalAfterDiscount: number;
+  extraGuestsCharge: number;
+  addons: {
+    fountain: { selected: boolean; cost: number };
+    keg: { selected: boolean; cost: number; kegs?: number };
+    extraBarman: { selected: boolean; cost: number };
+    lemonade: { selected: boolean; cost: number };
+    hockery: { selected: boolean; cost: number };
+    ledLighting: { selected: boolean; cost: number };
+  };
+  addonsTotal: number;
+  subtotal: number;
+  discount: number;
+  totalPrice: number;
   pricePerGuest: number;
   estimatedCocktails: number;
   estimatedShots: number;
-  addons: {
-    fountain: boolean;
-    keg: boolean;
-    lemonade: boolean;
-    hockery: boolean;
-    ledLighting: boolean;
-  };
 };
 
 type CalculatorProps = {
@@ -245,20 +251,35 @@ function Calculator({ onCalculate }: CalculatorProps) {
     
     const totalBeforeDiscount = basePackagePrice + extraGuestsCharge + addonsPrice;
     const promoDiscount = config.promoDiscount;
-    const totalAfterDiscount = Math.round(totalBeforeDiscount * (1 - promoDiscount));
+    const discountAmount = Math.round(totalBeforeDiscount * promoDiscount);
+    const totalAfterDiscount = totalBeforeDiscount - discountAmount;
 
     const pricePerGuest = Math.round(totalAfterDiscount / guests);
     const estimatedCocktails = guests * 3;
     const estimatedShots = Math.round(guests * 0.5);
 
+    const kegKegs = kegSelected ? Math.max(1, Math.ceil(guests / (config.addons.keg?.guestsPerKeg || 30))) : 0;
+
     return {
-      offerName: offer.name,
+      packageName: offer.name,
+      packagePrice: basePackagePrice,
       guests,
-      totalAfterDiscount,
+      extraGuestsCharge,
+      addons: {
+        fountain: { selected: addons.fountain, cost: fountainCost },
+        keg: { selected: kegSelected, cost: kegCost, kegs: kegKegs },
+        extraBarman: { selected: kegSelected, cost: extraBarmanCost },
+        lemonade: { selected: addons.lemonade, cost: lemonadeCost },
+        hockery: { selected: addons.hockery, cost: hockeryCost },
+        ledLighting: { selected: addons.ledLighting, cost: ledLightingCost },
+      },
+      addonsTotal: addonsPrice,
+      subtotal: totalBeforeDiscount,
+      discount: discountAmount,
+      totalPrice: totalAfterDiscount,
       pricePerGuest,
       estimatedCocktails,
       estimatedShots,
-      addons,
     };
   }, [selectedOfferId, guests, addons, loading, config]);
 

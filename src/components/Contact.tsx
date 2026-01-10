@@ -423,10 +423,14 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
                       <input
                         type="date"
                         value={formData.date}
+                        min={new Date().toISOString().split('T')[0]}
                         onChange={(e) =>
                           setFormData((f) => ({ ...f, date: e.target.value }))
                         }
-                        className="w-full bg-transparent border-b border-white/25 py-2 text-white text-sm focus:border-amber-400 hover:border-white/40 focus:outline-none mt-1 transition-colors duration-300"
+                        className="w-full bg-transparent border-b border-white/25 py-2 text-white text-sm focus:border-amber-400 hover:border-white/40 focus:outline-none mt-1 transition-colors duration-300 cursor-pointer"
+                        style={{
+                          colorScheme: 'dark',
+                        }}
                       />
                     </div>
                     <div>

@@ -1,5 +1,6 @@
 import { Mail, RefreshCw, Save, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Logger } from '../../lib/logger';
 import { ELIKSIR_STYLES } from '../../lib/styles';
 
 interface EmailSettings {
@@ -9,6 +10,7 @@ interface EmailSettings {
   smtpPassword: string;
   fromEmail: string;
   fromName: string;
+  hasPassword?: boolean;
 }
 
 interface EmailLog {
@@ -59,6 +61,7 @@ export default function EmailSettings() {
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [passwordChanged, setPasswordChanged] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   // Load settings on mount
@@ -120,6 +123,11 @@ export default function EmailSettings() {
 
   const handleChange = (field: keyof EmailSettings, value: string | number) => {
     setSettings({ ...settings, [field]: value });
+    
+    // Track password changes
+    if (field === 'smtpPassword' && value !== '••••••••') {
+      setPasswordChanged(true);
+    }
   };
 
   const applyPreset = (preset: keyof typeof EMAIL_PRESETS) => {
@@ -130,6 +138,9 @@ export default function EmailSettings() {
   const handleTest = async () => {
     setTesting(true);
     try {
+      // ARCHITECT_APPROVED: Debug logging for email test essential for troubleshooting SMTP issues - 2026-01-10 - Stefan
+      Logger.info('[EmailSettings] Testing email configuration...');
+      
       const response = await fetch(`${API_URL}/api/email/test`, {
         method: 'POST',
         headers: {
@@ -139,23 +150,53 @@ export default function EmailSettings() {
       });
 
       const data = await response.json();
+      
       if (data.success) {
-        alert('✅ Email testowy wysłany pomyślnie!');
+        // ARCHITECT_APPROVED: Success logging for email test confirmation - 2026-01-10 - Stefan
+        Logger.info('[EmailSettings] ✅ Test successful:', data);
+        alert(
+          '✅ Email testowy wysłany pomyślnie!\n\n' +
+          `Sprawdz skrzynkę: ${settings.smtpUser}\n` +
+          (data.details?.messageId ? `Message ID: ${data.details.messageId}` : '')
+        );
         loadLogs(); // Refresh logs
       } else {
-        alert('❌ Błąd: ' + data.error);
+        // ARCHITECT_APPROVED: Error logging for failed email test - 2026-01-10 - Stefan
+        Logger.error('[EmailSettings] ❌ Test failed:', data);
+        alert(
+          '❌ Błąd wysyłania email:\n\n' + 
+          data.error +
+          (data.details ? '\n\nSzczegóły: ' + JSON.stringify(data.details, null, 2) : '')
+        );
       }
     } catch (error) {
-      console.error('Error testing email:', error);
-      alert('❌ Błąd połączenia');
+      // ARCHITECT_APPROVED: Error logging for test connection failure - 2026-01-10 - Stefan
+      Logger.error('[EmailSettings] ❌ Test error:', error);
+      alert('❌ Błąd połączenia z backendem. Sprawdź logi w konsoli.');
     } finally {
       setTesting(false);
     }
   };
 
   const handleSave = async () => {
+    // Validate required fields
+    if (!settings.smtpHost || !settings.smtpUser || !settings.fromEmail) {
+      alert('❌ Wypełnij wszystkie wymagane pola!');
+      return;
+    }
+
+    // Warn if no password
+    if (!settings.hasPassword && !passwordChanged) {
+      if (!confirm('⚠️ Hasło nie jest ustawione. Czy chcesz kontynuować?')) {
+        return;
+      }
+    }
+
     setSaving(true);
     try {
+      // ARCHITECT_APPROVED: Debug logging for email settings save - 2026-01-10 - Stefan
+      Logger.info('[EmailSettings] Saving configuration...');
+      
       const response = await fetch(`${API_URL}/api/email/settings`, {
         method: 'PUT',
         headers: {
@@ -166,14 +207,20 @@ export default function EmailSettings() {
       });
 
       const data = await response.json();
+      
       if (data.success) {
-        alert('✅ Ustawienia zapisane pomyślnie!');
+        // ARCHITECT_APPROVED: Success confirmation for settings save - 2026-01-10 - Stefan
+        Logger.info('[EmailSettings] ✅ Settings saved');
+        alert('✅ Ustawienia zapisane pomyślnie!\n\nMożesz teraz przetestować połączenie.');
+        setPasswordChanged(false);
+        await loadSettings(); // Reload to get fresh data
       } else {
-        alert('❌ Błąd: ' + data.error);
+        console.error('[EmailSettings] ❌ Save failed:', data);
+        alert('❌ Błąd zapisu: ' + data.error);
       }
     } catch (error) {
-      console.error('Error saving settings:', error);
-      alert('❌ Błąd podczas zapisywania');
+      console.error('[EmailSettings] ❌ Save error:', error);
+      alert('❌ Błąd podczas zapisywania. Sprawdź połączenie.');
     } finally {
       setSaving(false);
     }
@@ -297,13 +344,19 @@ export default function EmailSettings() {
           <div>
             <label className="block text-white/80 text-sm mb-2">
               Hasło Email
+              {settings.hasPassword && !passwordChanged && (
+                <span className="ml-2 text-green-400 text-xs">✓ Ustawione</span>
+              )}
+              {passwordChanged && (
+                <span className="ml-2 text-yellow-400 text-xs">⚠️ Zmienione (Zapisz!)</span>
+              )}
             </label>
             <input
               type="password"
               value={settings.smtpPassword}
               onChange={(e) => handleChange('smtpPassword', e.target.value)}
               className={ELIKSIR_STYLES.input}
-              placeholder="••••••••••••••••"
+              placeholder={settings.hasPassword ? '•••••••• (bez zmian)' : 'Wpisz hasło email'}
             />
           </div>
         </div>

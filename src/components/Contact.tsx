@@ -502,9 +502,11 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
                     className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-semibold py-3.5 text-xs md:text-sm uppercase tracking-[0.2em] mt-4 hover:from-amber-300 hover:to-yellow-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
-                    disabled={!agreedToTerms}
+                    disabled={!agreedToTerms || isSubmitting}
                   >
-                    {agreedToTerms
+                    {isSubmitting
+                      ? 'Wysyłanie...'
+                      : agreedToTerms
                       ? 'Wyślij zapytanie'
                       : 'Zaznacz zgodę aby wysłać'}
                   </motion.button>

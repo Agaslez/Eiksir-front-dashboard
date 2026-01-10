@@ -9,6 +9,7 @@ import './App.css';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
+import { usePageTracking } from './hooks/usePageTracking';
 
 // Lazy load components
 const Home = lazy(() => import('./pages/Home'));
@@ -33,21 +34,21 @@ const CalculatorSettings = lazy(() => import('./components/admin/CalculatorSetti
 const SystemHealth = lazy(() => import('./pages/admin/SystemHealth'));
 const GhostDashboard = lazy(() => import('./pages/admin/GhostDashboard'));
 
+// AppContent component to use hooks inside Router context
+function AppContent() {
+  // SEO/Analytics: Track page views and time on page
+  usePageTracking();
 
-
-function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/quiz" element={<Quiz />} />
-          <Route path="/gallery" element={<Gallery />} />
+    <Suspense fallback={<LoadingSpinner />}>
+      <Routes>
+      {/* Public routes */}
+      <Route path="/" element={<Home />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/quiz" element={<Quiz />} />
+      <Route path="/gallery" element={<Gallery />} />
 
-          {/* Admin routes */}
+      {/* Admin routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/unauthorized" element={<AdminUnauthorized />} />
 
@@ -155,8 +156,7 @@ function App() {
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        </Suspense>
-      </Router>
+        </AppContent>
     </AuthProvider>
   );
 }

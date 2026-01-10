@@ -28,13 +28,13 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
 
   // Funkcje walidacyjne
   const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
   };
 
   const validatePhone = (phone: string): boolean => {
     if (!phone) return true; // telefon opcjonalny
-    const phoneRegex = /^[+]?[\d\s\-\(\)]{9,}$/;
+    const phoneRegex = /^\d{9}$/;
     return phoneRegex.test(phone.replace(/\s/g, ''));
   };
 
@@ -52,7 +52,7 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
     }
 
     if (formData.phone && !validatePhone(formData.phone)) {
-      newErrors.phone = 'Podaj poprawny numer telefonu';
+      newErrors.phone = 'Numer telefonu musi mieć dokładnie 9 cyfr';
     }
 
     if (formData.guests) {
@@ -113,9 +113,8 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
 
       // Sukces!
       setIsSubmitted(true);
-      alert('✅ Wiadomość wysłana! Odezwiemy się wkrótce.');
 
-      // Reset form after 3 seconds
+      // Reset form after 5 seconds (keep confirmation visible longer)
       setTimeout(() => {
         setIsSubmitted(false);
         setFormData({
@@ -128,7 +127,7 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
         });
         setAgreedToTerms(false);
         setErrors({});
-      }, 3000);
+      }, 5000);
 
     } catch (error) {
       console.error('Error sending contact form:', error);
@@ -399,7 +398,9 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
                           if (errors.phone)
                             setErrors((prev) => ({ ...prev, phone: '' }));
                         }}
-                        placeholder="+48 123 456 789"
+                        placeholder="123456789 (9 cyfr)"
+                        maxLength={9}
+                        pattern="\d{9}"
                         className={`w-full bg-transparent border-b py-2 text-white text-sm focus:outline-none mt-1 ${
                           errors.phone
                             ? 'border-red-500'

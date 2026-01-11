@@ -1,4 +1,4 @@
-import { Activity, BarChart3, Calculator, Home, Image, LogOut, Mail, Sparkles, User } from 'lucide-react';
+import { Activity, BarChart3, Calculator, Home, Image, LogOut, Mail, Search, Sparkles, User } from 'lucide-react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { useAuth } from '../../context/AuthContext';
@@ -86,6 +86,18 @@ export default function Dashboard() {
                 >
                   <Mail size={18} />
                   <span>Email</span>
+                </button>
+
+                <button
+                  onClick={() => navigate('/admin/seo')}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-eliksir transition-all ${
+                    isActive('/admin/seo') 
+                      ? 'bg-eliksir-gold text-black font-medium' 
+                      : 'text-white/70 hover:text-eliksir-gold hover:bg-white/5'
+                  }`}
+                >
+                  <Search size={18} />
+                  <span>SEO</span>
                 </button>
                 
                 <button

@@ -31,6 +31,7 @@ const Analytics = lazy(() => import('./pages/admin/Analytics'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
 const EmailSettings = lazy(() => import('./components/admin/EmailSettings'));
 const CalculatorSettings = lazy(() => import('./components/admin/CalculatorSettings'));
+const SEOSettings = lazy(() => import('./components/admin/SEOSettings'));
 const SystemHealth = lazy(() => import('./pages/admin/SystemHealth'));
 const GhostDashboard = lazy(() => import('./pages/admin/GhostDashboard'));
 
@@ -132,6 +133,14 @@ function AppContent() {
             element={
               <ProtectedRoute requiredRole="admin">
                 <CalculatorSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="seo"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <SEOSettings />
               </ProtectedRoute>
             }
           />

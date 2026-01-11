@@ -1,4 +1,4 @@
-import { API_URL } from '@/lib/config';
+import { BACKEND_URL } from '@/lib/config';
 import { useEffect, useState } from 'react';
 
 interface SEOData {
@@ -22,7 +22,7 @@ export default function SEOSettings() {
   const fetchSEOSettings = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${API_URL}/api/settings/seo`);
+      const response = await fetch(`${BACKEND_URL}/api/settings/seo`);
       const data = await response.json();
 
       if (data.success) {
@@ -59,7 +59,7 @@ export default function SEOSettings() {
       }
 
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/settings/seo`, {
+      const response = await fetch(`${BACKEND_URL}/api/settings/seo`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

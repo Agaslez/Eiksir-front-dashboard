@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
+    "prebuild": "node scripts/sync-seo-keywords.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "test": "jest",

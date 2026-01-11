@@ -9,6 +9,7 @@ interface SEOData {
 
 export default function SEOSettings() {
   const [seoData, setSeoData] = useState<SEOData | null>(null);
+  const [liveKeywords, setLiveKeywords] = useState<string[] | null>(null);
   const [keywordsText, setKeywordsText] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -17,7 +18,28 @@ export default function SEOSettings() {
 
   useEffect(() => {
     fetchSEOSettings();
+    fetchLiveKeywords();
   }, []);
+
+  const fetchLiveKeywords = async () => {
+    try {
+      // Pobierz index.html ze strony produkcyjnej
+      const response = await fetch('https://eliksir-bar.pl/', {
+        cache: 'no-cache'
+      });
+      const html = await response.text();
+      
+      // Parsuj keywords z meta tagu
+      const match = html.match(/<meta name="keywords" content="([^"]+)"/);
+      if (match && match[1]) {
+        const keywords = match[1].split(',').map(kw => kw.trim());
+        setLiveKeywords(keywords);
+      }
+    } catch (error) {
+      console.error('Failed to fetch live keywords:', error);
+      // Nie pokazuj błędu użytkownikowi - to opcjonalna funkcja
+    }
+  };
 
   const fetchSEOSettings = async () => {
     try {
@@ -29,6 +51,9 @@ export default function SEOSettings() {
         setSeoData(data);
         setKeywordsText(data.keywords.join(', '));
       }
+      
+      // Odśwież też live keywords
+      fetchLiveKeywords();
     } catch (error) {
       console.error('Failed to fetch SEO settings:', error);
       setMessage({ type: 'error', text: 'Nie udało się pobrać ustawień SEO' });
@@ -140,10 +165,51 @@ export default function SEOSettings() {
           </div>
 
           <div className="bg-[#2a2a2a] rounded-lg p-4 border border-white/10">
-            <div className="text-white/60 text-sm mb-1">Status</div>
-            <div className="text-sm font-medium text-green-400">✅ Zsynchronizowane</div>
-            <div className="text-white/40 text-xs mt-1">index.html + API</div>
+            <div className="text-white/60 text-sm mb-1">Status synchronizacji</div>
+            {liveKeywords === null ? (
+              <>
+                <div className="text-sm font-medium text-white/60">⏳ Sprawdzam...</div>
+                <div className="text-white/40 text-xs mt-1">Pobieranie ze strony</div>
+              </>
+            ) : liveKeywords.length === seoData.keywords.length && 
+               liveKeywords.every(kw => seoData.keywords.includes(kw)) ? (
+              <>
+                <div className="text-sm font-medium text-green-400">✅ Zsynchronizowane</div>
+                <div className="text-white/40 text-xs mt-1">Strona = Dashboard</div>
+              </>
+            ) : (
+              <>
+                <div className="text-sm font-medium text-yellow-400">⚠️ Wymaga deploy</div>
+                <div className="text-white/40 text-xs mt-1">Zapisz → push → redeploy</div>
+              </>
+            )}
           </div>
+        </div>
+      )}
+
+      {/* Live Keywords Comparison */}
+      {liveKeywords && seoData && (
+        <div className="bg-[#2a2a2a] rounded-lg p-6 border border-white/10">
+          <h3 className="text-white font-semibold mb-4">🔍 Porównanie: Dashboard vs Strona Live</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div className="text-white/60 text-sm mb-2">📝 W Dashboard (baza danych):</div>
+              <div className="bg-[#1a1a1a] rounded-lg p-3 text-white/80 text-sm max-h-32 overflow-y-auto">
+                {seoData.keywords.length} keywords
+              </div>
+            </div>
+            <div>
+              <div className="text-white/60 text-sm mb-2">🌐 Na stronie (eliksir-bar.pl):</div>
+              <div className="bg-[#1a1a1a] rounded-lg p-3 text-white/80 text-sm max-h-32 overflow-y-auto">
+                {liveKeywords.length} keywords
+              </div>
+            </div>
+          </div>
+          {liveKeywords.length !== seoData.keywords.length && (
+            <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-yellow-400 text-sm">
+              ⚠️ Keywords w dashboardzie różnią się od strony. Po zapisaniu zrób commit + push aby zsynchronizować.
+            </div>
+          )}
         </div>
       )}
 
@@ -179,6 +245,7 @@ export default function SEOSettings() {
             window.open(generatePreviewUrl(), '_blank');
           }}
           className="px-6 py-3 bg-[#2a2a2a] text-white font-medium rounded-lg hover:bg-[#3a3a3a] border border-white/10 transition-colors"
+          title="Otwórz Google i sprawdź pozycjonowanie dla tych keywords"
         >
           👀 Podgląd w Google
         </button>
@@ -186,6 +253,7 @@ export default function SEOSettings() {
         <button
           onClick={fetchSEOSettings}
           className="px-6 py-3 bg-[#2a2a2a] text-white font-medium rounded-lg hover:bg-[#3a3a3a] border border-white/10 transition-colors"
+          title="Odśwież dane z bazy i ze strony live"
         >
           🔄 Odśwież
         </button>

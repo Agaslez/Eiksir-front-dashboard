@@ -27,7 +27,8 @@ async function globalSetup(config: FullConfig) {
     try {
       console.log(`Attempt ${6 - retries}/5...`);
       
-      const response = await page.request.get(`${BACKEND_URL}/api/health`, {
+      // Try /health endpoint first
+      const response = await page.request.get(`${BACKEND_URL}/health`, {
         timeout: 90000, // 90s timeout per attempt (Render cold start can be slow)
       });
       
@@ -46,7 +47,24 @@ async function globalSetup(config: FullConfig) {
       
     } catch (error) {
       lastError = error as Error;
-      console.log(`❌ Error: ${lastError.message}`);
+      console.log(`❌ /health failed: ${lastError.message}`);
+      
+      // Fallback: try /api/config endpoint
+      try {
+        console.log(`⚠️ Trying fallback endpoint /api/config...`);
+        const fallbackResponse = await page.request.get(`${BACKEND_URL}/api/config`, {
+          timeout: 90000,
+        });
+        
+        if (fallbackResponse.status() < 500) {
+          console.log('✅ Backend is ready (via /api/config)');
+          console.log(`Status: ${fallbackResponse.status()}`);
+          await browser.close();
+          return;
+        }
+      } catch (fallbackError) {
+        console.log(`❌ Fallback also failed: ${(fallbackError as Error).message}`);
+      }
     }
     
     retries--;
@@ -63,8 +81,9 @@ async function globalSetup(config: FullConfig) {
   
   // Throw error to fail entire test suite if backend is down
   throw new Error(
-    `Backend not available at ${BACKEND_URL}/api/health. ` +
-    `Check if backend is running locally or update BACKEND_URL env variable.`
+    `Backend not available at ${BACKEND_URL}/health or ${BACKEND_URL}/api/config. ` +
+    `Check if backend is running or update BACKEND_URL env variable. ` +
+    `Current BACKEND_URL: ${BACKEND_URL}`
   );
 }
 

@@ -1,5 +1,5 @@
 export const config = {
-  apiUrl: 'https://stefano-eliksir-backend.onrender.com',
+  apiUrl: 'https://eliksir-backend-front-dashboard.onrender.com',
   cloudinaryCloudName: 'dxanil4gc',
   gaId: 'G-93QYC5BVDR',
 };

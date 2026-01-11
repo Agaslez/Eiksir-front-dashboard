@@ -5,7 +5,7 @@ import '@testing-library/jest-dom';
 // Requires CLOUDINARY_* env variables
 
 describe('Cloudinary Integration Tests', () => {
-  const API_URL = process.env.VITE_API_URL || 'https://stefano-eliksir-backend.onrender.com';
+  const API_URL = process.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
   const CLOUDINARY_CLOUD_NAME = 'dxanil4gc';
   const JWT_TOKEN = process.env.TEST_JWT_TOKEN || 'test-token';
 

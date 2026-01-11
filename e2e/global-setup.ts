@@ -27,31 +27,30 @@ async function globalSetup(config: FullConfig) {
     try {
       console.log(`Attempt ${6 - retries}/5...`);
       
-      // Try /health endpoint first
-      const response = await page.request.get(`${BACKEND_URL}/health`, {
+      // Try /api/health endpoint first (most reliable)
+      const response = await page.request.get(`${BACKEND_URL}/api/health`, {
         timeout: 90000, // 90s timeout per attempt (Render cold start can be slow)
       });
       
       if (response.status() === 200 || response.status() === 503) {
-        const body = await response.json();
+        const body = await response.json().catch(() => ({ status: 'unknown' }));
         console.log('✅ Backend is ready');
-        console.log(`Status: ${body.status}`);
-        console.log(`Health checks: ${body.summary?.totalChecks || 0}`);
+        console.log(`Status: ${body.status || response.status()}`);
         
         await browser.close();
         return;
       }
       
-      console.log(`⚠️  Unexpected status: ${response.status()}`);
-      lastError = new Error(`Status ${response.status()}`);
+      console.log(`⚠️  /api/health returned: ${response.status()}`);
+      lastError = new Error(`/api/health: Status ${response.status()}`);
       
     } catch (error) {
       lastError = error as Error;
-      console.log(`❌ /health failed: ${lastError.message}`);
+      console.log(`❌ /api/health failed: ${lastError.message}`);
       
-      // Fallback: try /api/config endpoint
+      // Fallback 1: try /api/config endpoint
       try {
-        console.log(`⚠️ Trying fallback endpoint /api/config...`);
+        console.log(`⚠️ Trying fallback: /api/config...`);
         const fallbackResponse = await page.request.get(`${BACKEND_URL}/api/config`, {
           timeout: 90000,
         });
@@ -63,7 +62,24 @@ async function globalSetup(config: FullConfig) {
           return;
         }
       } catch (fallbackError) {
-        console.log(`❌ Fallback also failed: ${(fallbackError as Error).message}`);
+        console.log(`❌ /api/config failed: ${(fallbackError as Error).message}`);
+        
+        // Fallback 2: try root health endpoint
+        try {
+          console.log(`⚠️ Trying fallback: /health...`);
+          const rootHealthResponse = await page.request.get(`${BACKEND_URL}/health`, {
+            timeout: 90000,
+          });
+          
+          if (rootHealthResponse.status() < 500) {
+            console.log('✅ Backend is ready (via /health)');
+            console.log(`Status: ${rootHealthResponse.status()}`);
+            await browser.close();
+            return;
+          }
+        } catch (rootHealthError) {
+          console.log(`❌ /health failed: ${(rootHealthError as Error).message}`);
+        }
       }
     }
     

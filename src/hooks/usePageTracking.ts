@@ -54,6 +54,7 @@ export function usePageTracking() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
+          credentials: 'omit', // Don't send credentials for tracking
         });
         
         hasTrackedRef.current = true;

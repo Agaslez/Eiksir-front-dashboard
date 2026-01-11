@@ -176,16 +176,15 @@ export default function DashboardHome() {
           </div>
         </div>
         
-        {dailyStats?.daily && dailyStats.daily.length > 0 ? (
+        {dailyStats?.daily && dailyStats.daily.length >= 2 ? (
           <div className="space-y-4">
             <div className="relative h-64 bg-eliksir-dark/50 rounded-lg p-4">
               {/* Y-axis labels */}
               <div className="absolute left-0 top-4 bottom-4 w-16 flex flex-col justify-between text-right pr-3 text-white/40 text-xs font-mono">
                 {[...Array(5)].map((_, i) => {
-                  const maxVal = Math.max(
-                    Math.max(...dailyStats.daily.map(d => d.views)),
-                    Math.max(...dailyStats.daily.map(d => d.uniqueVisitors))
-                  );
+                  const maxViews = Math.max(...dailyStats.daily.map(d => d.views || 0), 1);
+                  const maxUsers = Math.max(...dailyStats.daily.map(d => d.uniqueVisitors || 0), 1);
+                  const maxVal = Math.max(maxViews, maxUsers, 1);
                   const val = Math.round(maxVal * (1 - i / 4));
                   return <span key={i}>{val}</span>;
                 })}
@@ -207,12 +206,11 @@ export default function DashboardHome() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     points={dailyStats.daily.map((day, i) => {
-                      const x = (i / (dailyStats.daily.length - 1)) * 100;
-                      const maxVal = Math.max(
-                        Math.max(...dailyStats.daily.map(d => d.views)),
-                        Math.max(...dailyStats.daily.map(d => d.uniqueVisitors))
-                      );
-                      const y = 100 - (day.uniqueVisitors / maxVal) * 95;
+                      const x = dailyStats.daily.length > 1 ? (i / (dailyStats.daily.length - 1)) * 100 : 50;
+                      const maxViews = Math.max(...dailyStats.daily.map(d => d.views || 0), 1);
+                      const maxUsers = Math.max(...dailyStats.daily.map(d => d.uniqueVisitors || 0), 1);
+                      const maxVal = Math.max(maxViews, maxUsers, 1);
+                      const y = 100 - ((day.uniqueVisitors || 0) / maxVal) * 95;
                       return `${x},${y}`;
                     }).join(' ')}
                   />
@@ -225,25 +223,23 @@ export default function DashboardHome() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     points={dailyStats.daily.map((day, i) => {
-                      const x = (i / (dailyStats.daily.length - 1)) * 100;
-                      const maxVal = Math.max(
-                        Math.max(...dailyStats.daily.map(d => d.views)),
-                        Math.max(...dailyStats.daily.map(d => d.uniqueVisitors))
-                      );
-                      const y = 100 - (day.views / maxVal) * 95;
+                      const x = dailyStats.daily.length > 1 ? (i / (dailyStats.daily.length - 1)) * 100 : 50;
+                      const maxViews = Math.max(...dailyStats.daily.map(d => d.views || 0), 1);
+                      const maxUsers = Math.max(...dailyStats.daily.map(d => d.uniqueVisitors || 0), 1);
+                      const maxVal = Math.max(maxViews, maxUsers, 1);
+                      const y = 100 - ((day.views || 0) / maxVal) * 95;
                       return `${x},${y}`;
                     }).join(' ')}
                   />
                   
                   {/* Data points */}
                   {dailyStats.daily.map((day, i) => {
-                    const x = (i / (dailyStats.daily.length - 1)) * 100;
-                    const maxVal = Math.max(
-                      Math.max(...dailyStats.daily.map(d => d.views)),
-                      Math.max(...dailyStats.daily.map(d => d.uniqueVisitors))
-                    );
-                    const yViews = 100 - (day.views / maxVal) * 95;
-                    const yUsers = 100 - (day.uniqueVisitors / maxVal) * 95;
+                    const x = dailyStats.daily.length > 1 ? (i / (dailyStats.daily.length - 1)) * 100 : 50;
+                    const maxViews = Math.max(...dailyStats.daily.map(d => d.views || 0), 1);
+                    const maxUsers = Math.max(...dailyStats.daily.map(d => d.uniqueVisitors || 0), 1);
+                    const maxVal = Math.max(maxViews, maxUsers, 1);
+                    const yViews = 100 - ((day.views || 0) / maxVal) * 95;
+                    const yUsers = 100 - ((day.uniqueVisitors || 0) / maxVal) * 95;
                     return (
                       <g key={i}>
                         <circle cx={x} cy={yViews} r="1.5" fill="#DAA520" className="hover:r-2 transition-all" />
@@ -310,7 +306,9 @@ export default function DashboardHome() {
           </div>
         ) : (
           <div className="h-64 flex items-center justify-center">
-            <p className="text-white/40">Zbieranie danych...</p>
+            <p className="text-white/40">
+              {dailyStats?.daily?.length === 1 ? 'Za mało danych (minimum 2 dni)' : 'Zbieranie danych...'}
+            </p>
           </div>
         )}
       </div>

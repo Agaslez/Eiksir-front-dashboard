@@ -86,9 +86,9 @@ test.describe('🔥 SMOKE TESTS - Critical System Health', () => {
     console.log(`🔍 Testing backend at: ${BACKEND_URL}`);
     
     try {
-      // Próba połączenia z backendem
+      // Próba połączenia z backendem (Render cold start może trwać do 60s)
       const response = await request.get(`${BACKEND_URL}/health`, {
-        timeout: 10000
+        timeout: 90000 // 90s for Render free tier cold start
       });
 
       expect(response.status(), 'Backend health endpoint must respond').toBeLessThan(500);
@@ -98,7 +98,7 @@ test.describe('🔥 SMOKE TESTS - Critical System Health', () => {
       console.log('⚠️ /health endpoint not found, trying /api/config...');
       
       const response = await request.get(`${BACKEND_URL}/api/config`, {
-        timeout: 10000
+        timeout: 90000 // 90s for Render free tier cold start
       });
 
       expect(response.status(), 'Backend must be reachable').toBeLessThan(500);
@@ -118,11 +118,14 @@ test.describe('🔥 SMOKE TESTS - Critical System Health', () => {
     ];
 
     const results: Array<{ endpoint: string; status: number; passed: boolean }> = [];
+    
+    // Timeout dla każdego endpointa (backend już jest warmed up z poprzedniego testu)
+    const timeout = 30000; // 30s should be enough after cold start
 
     for (const endpoint of criticalEndpoints) {
       try {
         const response = await request.get(`${BACKEND_URL}${endpoint.path}`, {
-          timeout: 10000
+          timeout: timeout
         });
 
         const passed = response.status() < 500; // 200-499 są OK (może być 401, 404 ale nie 500)

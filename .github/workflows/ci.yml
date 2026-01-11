@@ -49,7 +49,10 @@ jobs:
           fi
         continue-on-error: true
       
-      - name: 💬 Comment on PR (if violations found)
+      - name: � Validate Backend URLs
+        run: npm run validate-urls
+      
+      - name: �💬 Comment on PR (if violations found)
         if: failure() && github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:

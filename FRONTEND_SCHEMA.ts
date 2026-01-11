@@ -2,6 +2,19 @@
  * SINGLE SOURCE OF TRUTH - Frontend Structure
  * Agent MUST follow this schema. Any deviation = BLOCKED.
  * Last updated: 2026-01-11
+ * 
+ * ⚠️ CRITICAL LOCATIONS WHERE BACKEND URL MUST BE CONSISTENT:
+ * 1. src/lib/config.ts - BACKEND_URL constant
+ * 2. .babelrc.js - VITE_API_URL in babel-plugin-transform-vite-meta-env
+ * 3. .env.production - VITE_API_URL variable
+ * 4. .env.example - VITE_API_URL documentation
+ * 5. vercel.json - CSP connect-src policy
+ * 6. jest.setup.ts - Test environment VITE_API_URL
+ * 7. e2e/api-consistency.spec.ts - E2E test BACKEND_URL
+ * 8. All test files in src/__tests__/ - API_URL constants
+ * 
+ * ✅ CORRECT URL: https://eliksir-backend-front-dashboard.onrender.com
+ * ❌ WRONG URL: https://stefano-eliksir-backend.onrender.com (DO NOT USE!)
  */
 
 // ============================================

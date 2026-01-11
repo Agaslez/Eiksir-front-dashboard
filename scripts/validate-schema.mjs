@@ -12,12 +12,14 @@
  * console.log('debug'); // ARCHITECT_APPROVED: Critical prod debugging - 2026-01-01 - Stefano
  */
 
+import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const workspaceRoot = path.resolve(__dirname, '..');
 
 // ============================================
 // ARCHITECT APPROVAL SYSTEM
@@ -301,6 +303,23 @@ if (approvals.length > 0) {
 if (warnings.length > 0) {
   console.log('\n⚠️  WARNINGS:');
   warnings.forEach(w => console.log(`   ${w}`));
+}
+
+// Validate backend URLs
+console.log('\n🔍 Validating backend URLs...');
+try {
+  const result = execSync('node scripts/validate-backend-urls.cjs', { 
+    cwd: workspaceRoot,
+    encoding: 'utf-8',
+    stdio: 'pipe'
+  });
+  console.log(result);
+  console.log('   ✅ Backend URLs validated');
+} catch (error) {
+  console.error('❌ URL Validation Failed:', error.message);
+  if (error.stdout) console.error('stdout:', error.stdout);
+  if (error.stderr) console.error('stderr:', error.stderr);
+  errors.push(`Backend URL validation failed: ${error.message}`);
 }
 
 if (errors.length > 0) {

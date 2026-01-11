@@ -16,7 +16,7 @@ import { expect, test } from '@playwright/test';
  */
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
-const BACKEND_URL = process.env.BACKEND_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
+const BACKEND_URL = process.env.BACKEND_URL || 'https://stefano-eliksir-backend.onrender.com';
 
 // NOTE: Backend verification moved to e2e/global-setup.ts
 // No need for test.beforeAll - backend is already verified

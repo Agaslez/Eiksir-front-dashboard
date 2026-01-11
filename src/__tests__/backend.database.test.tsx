@@ -5,7 +5,7 @@
 // Requires DATABASE_URL env variable
 
 describe('Backend Database Tests', () => {
-  const API_URL = process.env.VITE_API_URL || 'https://eliksir-backend-front-dashboard.onrender.com';
+  const API_URL = process.env.VITE_API_URL || 'https://stefano-eliksir-backend.onrender.com';
   const JWT_TOKEN = process.env.TEST_JWT_TOKEN || 'test-token';
 
   describe('Calculator Config Database Operations', () => {

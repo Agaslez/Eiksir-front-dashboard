@@ -6,7 +6,7 @@ if (typeof global.fetch === 'undefined') {
 }
 
 // API BASE URL for tests
-const API_URL = 'https://eliksir-backend-front-dashboard.onrender.com';
+const API_URL = 'https://stefano-eliksir-backend.onrender.com';
 
 describe('Backend API Integration Tests', () => {
   describe('Calculator Config Endpoint', () => {

@@ -88,7 +88,7 @@ export default function Contact({ calculatorSnapshot }: ContactProps) {
       const emailData = {
         name: formData.name,
         email: formData.email,
-        phone: formData.phone || undefined,
+        phone: formData.phone ? formData.phone.replace(/[\s-]/g, '') : undefined,
         message: formData.message,
         eventType: 'Zapytanie z formularza',
         eventDate: formData.date || undefined,

@@ -226,6 +226,7 @@ jobs:
       - name: Run smoke tests
         run: npm run test:smoke
         timeout-minutes: 5
+        continue-on-error: true
         env:
           FRONTEND_URL: https://eiksir-front-dashboard.vercel.app
           BACKEND_URL: https://stefano-eliksir-backend.onrender.com

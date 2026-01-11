@@ -1,7 +1,7 @@
 // API configuration
 // This file can be mocked in tests
 
-export const BACKEND_URL = import.meta.env.VITE_API_URL || "https://eliksir-backend-front-dashboard.onrender.com";
+export const BACKEND_URL = import.meta.env.VITE_API_URL || "https://stefano-eliksir-backend.onrender.com";
 
 export const API = {
   health: `${BACKEND_URL}/api/health`,

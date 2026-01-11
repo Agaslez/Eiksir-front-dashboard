@@ -15,9 +15,9 @@ export const PROJECT_URLS = {
     github: 'https://github.com/Agaslez/Eiksir-front-dashboard',
   },
   backend: {
-    production: 'https://stefano-eliksir-backend.onrender.com',
-    render: 'https://stefano-eliksir-backend.onrender.com',
-    github: 'https://github.com/Agaslez/stefano-eliksir-backend',
+    production: 'https://eliksir-backend-front-dashboard.onrender.com',  // ✅ CANONICAL - DO NOT CHANGE
+    render: 'https://eliksir-backend-front-dashboard.onrender.com',
+    github: 'https://github.com/Agaslez/Eliksir-backend-front-dashboard',
   },
   // Development
   local: {
@@ -113,11 +113,11 @@ export const FRONTEND_SCHEMA = {
     /FIXME_URGENT/gi,
     
     // ❌ WRONG BACKEND URLS (common mistakes)
-    /eliksir-backend-front-dashboard\.onrender\.com/gi,  // ❌ OLD URL - DO NOT USE
-    /https:\/\/eliksir-backend-front-dashboard/gi,       // ❌ OLD URL - DO NOT USE
+    /stefano-eliksir-backend\.onrender\.com/gi,  // ❌ WRONG URL - DO NOT USE
+    /https:\/\/stefano-eliksir-backend/gi,       // ❌ WRONG URL - DO NOT USE
     
     // Hardcoded URLs (use config.ts instead)
-    /https:\/\/stefano-eliksir-backend\.onrender\.com(?!.*from.*config)/gi,  // ⚠️ Must be in config.ts only
+    /https:\/\/eliksir-backend-front-dashboard\.onrender\.com(?!.*from.*config)/gi,  // ⚠️ Must be in config.ts only
     /http:\/\/localhost:3001(?!.*from.*config)/gi,
     
     // Old API patterns

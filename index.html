@@ -11,9 +11,9 @@
     <meta name="title" content="ELIKSIR - Mobilny Bar Koktajlowy | Wesela, Eventy, Przyjęcia" />
     <meta
       name="description"
-      content="Profesjonalny mobilny bar koktajlowy ELIKSIR. Obsługa wesel, eventów firmowych i przyjęć prywatnych. Koktajle alkoholowe i bezalkoholowe. Cała Polska. ☎ 781 024 701"
+      content="Profesjonalny mobilny bar koktajlowy ELIKSIR - Bełchatów, Kleszczów, Łódź i cała Polska. Obsługa wesel, eventów firmowych i przyjęć prywatnych. Koktajle alkoholowe i bezalkoholowe. Barman z doświadczeniem. ☎ 781 024 701"
     />
-    <meta name="keywords" content="mobilny bar, bar koktajlowy, wesele, event firmowy, koktajle, barman, obsługa barmańska, drink bar, shot bar, Polska" />
+    <meta name="keywords" content="mobilny bar, bar koktajlowy, wesele, event firmowy, koktajle, barman, obsługa barmańska, drink bar, shot bar, Polska, Bełchatów, Kleszczów, Łódź, mobilny bar na wesele, barman na wesele, koktajle na wesele, drink bar wesele, shot bar wesele, obsługa wesel, catering alkoholowy, bar koktajlowy wesele, profesjonalny barman, alkohol na wesele, mobilny bar eventowy, bar na imprezę firmową, koktajle bezalkoholowe, drinki premium, wynajem baru, flair bartending" />
     <meta name="author" content="ELIKSIR Bar" />
     <link rel="canonical" href="https://eliksir-bar.pl/" />
     
@@ -109,7 +109,8 @@
       "address": {
         "@type": "PostalAddress",
         "addressCountry": "PL",
-        "addressRegion": "Cała Polska"
+        "addressRegion": "Łódzkie",
+        "addressLocality": "Bełchatów, Kleszczów"
       },
       "areaServed": {
         "@type": "Country",
@@ -253,8 +254,78 @@
             "@type": "Answer",
             "text": "Tak, wszystkie nasze pakiety zawierają zarówno koktajle alkoholowe jak i bezalkoholowe. Dbamy o to, aby każdy gość znalazł coś dla siebie."
           }
+        },
+        {
+          "@type": "Question",
+          "name": "Czy obsługujecie wesela w Bełchatowie i Kleszczowie?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Tak, jesteśmy zlokalizowani w rejonie Bełchatowa i Kleszczowa. Obsługujemy wesela, imprezy firmowe i przyjęcia w całym województwie łódzkim oraz na terenie całej Polski."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Jak długo trwa obsługa barmańska na weselu?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Standardowa obsługa barmańska trwa 6-8 godzin. Możliwa jest również obsługa przez całą noc wesela - szczegóły ustalamy indywidualnie."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Czy dostarczacie alkohol i szkło na wesele?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Tak, w naszych pakietach znajduje się pełna obsługa: alkohol premium, szkło, dekoracje, sprzęt barmański oraz profesjonalni barmani z certyfikatami."
+          }
         }
       ]
+    }
+    </script>
+    
+    <!-- Service Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "serviceType": "Mobilny Bar Koktajlowy",
+      "provider": {
+        "@id": "https://eliksir-bar.pl/#organization"
+      },
+      "areaServed": {
+        "@type": "State",
+        "name": "Łódzkie"
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Usługi barmańskie",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Mobilny bar na wesele",
+              "description": "Pełna obsługa barmańska na weselu z koktajlami premium"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Bar koktajlowy na event firmowy",
+              "description": "Profesjonalna obsługa eventów firmowych, konferencji i imprez integracyjnych"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Shot bar",
+              "description": "Dynamiczny shot bar z pokazami barmańskimi"
+            }
+          }
+        ]
+      }
     }
     </script>
   </body>

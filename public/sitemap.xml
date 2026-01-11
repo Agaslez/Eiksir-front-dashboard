@@ -5,9 +5,13 @@
   <!-- Homepage -->
   <url>
     <loc>https://eliksir-bar.pl/</loc>
-    <lastmod>2026-01-07</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-01-11</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://eliksir-bar.pl/og-image.jpg</image:loc>
+      <image:title>ELIKSIR Mobilny Bar Koktajlowy</image:title>
+    </image:image>
   </url>
   
   <!-- Main sections -->
@@ -27,9 +31,9 @@
   
   <url>
     <loc>https://eliksir-bar.pl/#kalkulator</loc>
-    <lastmod>2026-01-07</lastmod>
+    <lastmod>2026-01-11</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
   </url>
   
   <url>
